@@ -50,11 +50,7 @@ describe('Result', () => {
     });
 
     it('하나라도 실패가 있으면 첫 번째 실패를 반환한다', () => {
-      const results = [
-        Result.ok(1),
-        Result.fail('첫 번째 에러'),
-        Result.fail('두 번째 에러'),
-      ];
+      const results = [Result.ok(1), Result.fail('첫 번째 에러'), Result.fail('두 번째 에러')];
 
       const combined = Result.combine(results);
 

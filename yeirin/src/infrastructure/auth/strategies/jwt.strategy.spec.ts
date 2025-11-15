@@ -107,10 +107,7 @@ describe('JwtStrategy', () => {
   describe('configuration', () => {
     it('ConfigService에서 JWT_SECRET을 가져와야 함', () => {
       // Then
-      expect(configService.get).toHaveBeenCalledWith(
-        'JWT_SECRET',
-        'your-secret-key-change-this',
-      );
+      expect(configService.get).toHaveBeenCalledWith('JWT_SECRET', 'your-secret-key-change-this');
     });
 
     it('Authorization 헤더에서 Bearer 토큰을 추출해야 함', () => {

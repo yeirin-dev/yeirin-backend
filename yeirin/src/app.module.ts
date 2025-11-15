@@ -24,10 +24,12 @@ import { LoggingInterceptor } from './infrastructure/logging/logging.interceptor
       useFactory: (configService: ConfigService) => getTypeOrmConfig(configService),
     }),
     // Rate Limiting 설정 (기본: 10초당 10개 요청)
-    ThrottlerModule.forRoot([{
-      ttl: 10000, // 10초
-      limit: 10,  // 10개 요청
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000, // 10초
+        limit: 10, // 10개 요청
+      },
+    ]),
     AuthModule,
     MatchingModule,
     InstitutionModule,

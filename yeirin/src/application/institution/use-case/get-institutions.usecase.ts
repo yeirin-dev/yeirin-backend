@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InstitutionRepository } from '@domain/institution/repository/institution.repository';
-import { InstitutionListResponseDto, InstitutionResponseDto } from '../dto/institution-response.dto';
+import {
+  InstitutionListResponseDto,
+  InstitutionResponseDto,
+} from '../dto/institution-response.dto';
 
 /**
  * 바우처 기관 목록 조회 유스케이스
@@ -15,7 +18,8 @@ export class GetInstitutionsUseCase {
     const institutionDtos: InstitutionResponseDto[] = institutions.map((institution) => {
       const averageRating =
         institution.reviews && institution.reviews.length > 0
-          ? institution.reviews.reduce((sum, review) => sum + review.rating, 0) / institution.reviews.length
+          ? institution.reviews.reduce((sum, review) => sum + review.rating, 0) /
+            institution.reviews.length
           : 0;
 
       return {

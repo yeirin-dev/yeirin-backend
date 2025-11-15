@@ -5,10 +5,7 @@ import { InstitutionId } from '../value-object/institution-id';
 import { RecommendationScore } from '../value-object/recommendation-score';
 
 describe('MatchingRecommendation', () => {
-  const createSampleRecommendation = (
-    id: string,
-    score: number,
-  ): InstitutionRecommendation => {
+  const createSampleRecommendation = (id: string, score: number): InstitutionRecommendation => {
     return InstitutionRecommendation.create({
       institutionId: InstitutionId.create(id).value,
       score: RecommendationScore.create(score).value,

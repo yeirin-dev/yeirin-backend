@@ -42,7 +42,10 @@ export class CounselorProfileRepositoryImpl implements CounselorProfileRepositor
     return await this.counselorRepository.save(newProfile);
   }
 
-  async update(id: string, profile: Partial<CounselorProfileEntity>): Promise<CounselorProfileEntity> {
+  async update(
+    id: string,
+    profile: Partial<CounselorProfileEntity>,
+  ): Promise<CounselorProfileEntity> {
     await this.counselorRepository.update(id, profile);
     const updated = await this.findById(id);
     if (!updated) {

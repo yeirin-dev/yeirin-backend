@@ -42,9 +42,7 @@ export class BirthDate {
     const minDate = new Date();
     minDate.setFullYear(minDate.getFullYear() - 150);
     if (date.getTime() < minDate.getTime()) {
-      return Result.fail(
-        new DomainError('생년월일은 150년 이전일 수 없습니다'),
-      );
+      return Result.fail(new DomainError('생년월일은 150년 이전일 수 없습니다'));
     }
 
     return Result.ok(new BirthDate(new Date(date)));
