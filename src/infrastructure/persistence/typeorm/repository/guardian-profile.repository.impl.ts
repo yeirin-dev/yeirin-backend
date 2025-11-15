@@ -5,10 +5,10 @@ import { GuardianProfileEntity } from '../entity/guardian-profile.entity';
 import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 
 /**
- * GuardianProfile TypeORM Repository 구현체
+ * GuardianProfile Repository 구현체
  */
 @Injectable()
-export class TypeOrmGuardianProfileRepository implements GuardianProfileRepository {
+export class GuardianProfileRepositoryImpl implements GuardianProfileRepository {
   constructor(
     @InjectRepository(GuardianProfileEntity)
     private readonly repository: Repository<GuardianProfileEntity>,

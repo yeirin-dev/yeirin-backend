@@ -1,7 +1,7 @@
 import { Injectable, Inject, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { IUserRepository } from '@domain/user/repository/user.repository';
+import { UserRepository } from '@domain/user/repository/user.repository';
 import { Email } from '@domain/user/model/value-objects/email.vo';
 import { Password } from '@domain/user/model/value-objects/password.vo';
 import { RegisterDto } from './dto/register.dto';
@@ -23,8 +23,8 @@ import { RegisterCounselorUseCase } from './use-cases/register-counselor/registe
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject('IUserRepository')
-    private readonly userRepository: IUserRepository,
+    @Inject('UserRepository')
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly registerUserUseCase: RegisterUserUseCase,

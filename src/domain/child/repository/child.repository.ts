@@ -4,7 +4,7 @@ import { Child } from '../model/child';
  * Child Repository 인터페이스
  * Domain 계층에서 정의 (의존성 역전)
  */
-export interface IChildRepository {
+export interface ChildRepository {
   /**
    * 아동 저장 (생성 또는 업데이트)
    */

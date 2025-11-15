@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { IChildRepository } from '@domain/child/repository/child.repository';
+import { ChildRepository } from '@domain/child/repository/child.repository';
 import { ChildResponseDto } from '../../dto/child-response.dto';
 
 /**
@@ -8,8 +8,8 @@ import { ChildResponseDto } from '../../dto/child-response.dto';
 @Injectable()
 export class GetChildrenByGuardianUseCase {
   constructor(
-    @Inject('IChildRepository')
-    private readonly childRepository: IChildRepository,
+    @Inject('ChildRepository')
+    private readonly childRepository: ChildRepository,
   ) {}
 
   async execute(guardianId: string): Promise<ChildResponseDto[]> {

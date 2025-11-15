@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IChildRepository } from '@domain/child/repository/child.repository';
+import { ChildRepository } from '@domain/child/repository/child.repository';
 import { Child } from '@domain/child/model/child';
 import { ChildProfileEntity } from '../entity/child-profile.entity';
 import { ChildMapper } from '../mapper/child.mapper';
@@ -11,7 +11,7 @@ import { ChildMapper } from '../mapper/child.mapper';
  * TypeORM 사용
  */
 @Injectable()
-export class ChildRepository implements IChildRepository {
+export class ChildRepositoryImpl implements ChildRepository {
   constructor(
     @InjectRepository(ChildProfileEntity)
     private readonly childRepository: Repository<ChildProfileEntity>,

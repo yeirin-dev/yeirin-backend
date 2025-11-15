@@ -7,7 +7,7 @@ import { Password } from '@domain/user/model/value-objects/password.vo';
 import { UserRole } from '@domain/user/model/value-objects/user-role.vo';
 import { PhoneNumber } from '@domain/user/model/value-objects/phone-number.vo';
 import { RealName } from '@domain/user/model/value-objects/real-name.vo';
-import { IUserRepository } from '@domain/user/repository/user.repository';
+import { UserRepository } from '@domain/user/repository/user.repository';
 import { InstitutionRepository } from '@domain/institution/repository/institution.repository';
 import { VoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/voucher-institution.entity';
 
@@ -53,8 +53,8 @@ export interface RegisterInstitutionResult {
 @Injectable()
 export class RegisterInstitutionUseCase {
   constructor(
-    @Inject('IUserRepository')
-    private readonly userRepository: IUserRepository,
+    @Inject('UserRepository')
+    private readonly userRepository: UserRepository,
     @Inject('InstitutionRepository')
     private readonly institutionRepository: InstitutionRepository,
     private readonly dataSource: DataSource,

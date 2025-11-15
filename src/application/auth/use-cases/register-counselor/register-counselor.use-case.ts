@@ -7,7 +7,7 @@ import { Password } from '@domain/user/model/value-objects/password.vo';
 import { UserRole } from '@domain/user/model/value-objects/user-role.vo';
 import { PhoneNumber } from '@domain/user/model/value-objects/phone-number.vo';
 import { RealName } from '@domain/user/model/value-objects/real-name.vo';
-import { IUserRepository } from '@domain/user/repository/user.repository';
+import { UserRepository } from '@domain/user/repository/user.repository';
 import { CounselorProfileRepository } from '@domain/counselor/repository/counselor-profile.repository';
 import { CounselorProfileEntity } from '@infrastructure/persistence/typeorm/entity/counselor-profile.entity';
 
@@ -45,8 +45,8 @@ export interface RegisterCounselorResult {
 @Injectable()
 export class RegisterCounselorUseCase {
   constructor(
-    @Inject('IUserRepository')
-    private readonly userRepository: IUserRepository,
+    @Inject('UserRepository')
+    private readonly userRepository: UserRepository,
     @Inject('CounselorProfileRepository')
     private readonly counselorProfileRepository: CounselorProfileRepository,
     private readonly dataSource: DataSource,
