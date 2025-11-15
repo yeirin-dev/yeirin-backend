@@ -61,4 +61,9 @@ export class TypeOrmGuardianProfileRepository implements GuardianProfileReposito
       relations: ['user'],
     });
   }
+
+  async exists(id: string): Promise<boolean> {
+    const count = await this.repository.count({ where: { id } });
+    return count > 0;
+  }
 }
