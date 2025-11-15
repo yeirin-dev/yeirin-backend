@@ -1,10 +1,10 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { UserEntity } from '../persistence/typeorm/entity/user.entity';
-import { GuardianProfileEntity } from '../persistence/typeorm/entity/guardian-profile.entity';
-import { VoucherInstitutionEntity } from '../persistence/typeorm/entity/voucher-institution.entity';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { CounselorProfileEntity } from '../persistence/typeorm/entity/counselor-profile.entity';
+import { GuardianProfileEntity } from '../persistence/typeorm/entity/guardian-profile.entity';
 import { ReviewEntity } from '../persistence/typeorm/entity/review.entity';
+import { UserEntity } from '../persistence/typeorm/entity/user.entity';
+import { VoucherInstitutionEntity } from '../persistence/typeorm/entity/voucher-institution.entity';
 
 export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => {
   const isDevelopment = configService.get<string>('NODE_ENV') !== 'production';

@@ -1,16 +1,16 @@
-import {
-  IsEmail,
-  IsString,
-  MinLength,
-  MaxLength,
-  Matches,
-  IsInt,
-  IsArray,
-  IsOptional,
-  IsUUID,
-  Min,
-} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsArray,
+  IsEmail,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Matches,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 /**
  * 상담사 회원가입 DTO

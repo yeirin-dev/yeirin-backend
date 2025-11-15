@@ -1,6 +1,6 @@
-import { InstitutionRecommendation } from './institution-recommendation';
 import { InstitutionId } from '../value-object/institution-id';
 import { RecommendationScore } from '../value-object/recommendation-score';
+import { InstitutionRecommendation } from './institution-recommendation';
 
 describe('InstitutionRecommendation', () => {
   describe('create', () => {

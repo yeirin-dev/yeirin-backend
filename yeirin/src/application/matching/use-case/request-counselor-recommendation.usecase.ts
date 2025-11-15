@@ -2,11 +2,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import { RecommendationRepository } from '@domain/matching/repository/recommendation.repository';
 import { RECOMMENDATION_REPOSITORY } from '@domain/matching/repository/recommendation.repository.token';
 import { CounselRequestText } from '@domain/matching/value-object/counsel-request-text';
-import { RequestCounselorRecommendationDto } from '../dto/request-counselor-recommendation.dto';
 import {
   MatchingRecommendationResponseDto,
   RecommendationResultDto,
 } from '../dto/recommendation-result.dto';
+import { RequestCounselorRecommendationDto } from '../dto/request-counselor-recommendation.dto';
 
 /**
  * 상담기관 추천 요청 UseCase

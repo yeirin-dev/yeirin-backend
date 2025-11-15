@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CounselorProfileEntity } from '../entity/counselor-profile.entity';
 import { CounselorProfileRepository } from '@domain/counselor/repository/counselor-profile.repository';
+import { CounselorProfileEntity } from '../entity/counselor-profile.entity';
 
 @Injectable()
 export class CounselorProfileRepositoryImpl implements CounselorProfileRepository {

@@ -1,14 +1,14 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
+  Entity,
   OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
+import { CounselorProfileEntity } from './counselor-profile.entity';
 import { GuardianProfileEntity } from './guardian-profile.entity';
 import { VoucherInstitutionEntity } from './voucher-institution.entity';
-import { CounselorProfileEntity } from './counselor-profile.entity';
 
 /**
  * 사용자 Entity (Infrastructure Layer)

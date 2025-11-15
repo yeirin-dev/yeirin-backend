@@ -1,22 +1,22 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsEmail,
-  IsString,
-  MinLength,
-  MaxLength,
-  Matches,
   IsArray,
   IsBoolean,
   IsDateString,
-  IsInt,
-  Min,
-  IsOptional,
-  IsNotEmpty,
+  IsEmail,
   IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  Min,
+  MinLength,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { VoucherType } from '@infrastructure/persistence/typeorm/entity/enums/voucher-type.enum';
 import { ServiceType } from '@infrastructure/persistence/typeorm/entity/enums/service-type.enum';
 import { SpecialTreatment } from '@infrastructure/persistence/typeorm/entity/enums/special-treatment.enum';
+import { VoucherType } from '@infrastructure/persistence/typeorm/entity/enums/voucher-type.enum';
 
 /**
  * 기관 대표 회원가입 DTO

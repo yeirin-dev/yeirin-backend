@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GetReviewsUseCase } from './get-reviews.usecase';
 import { ReviewRepository } from '@domain/review/repository/review.repository';
 import { ReviewFixture } from '../../../../test/fixtures/review.fixture';
+import { GetReviewsUseCase } from './get-reviews.usecase';
 
 describe('GetReviewsUseCase', () => {
   let useCase: GetReviewsUseCase;

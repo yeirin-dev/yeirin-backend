@@ -1,15 +1,15 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsString,
-  MinLength,
-  MaxLength,
-  Matches,
   IsEnum,
-  IsOptional,
   IsInt,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
   Min,
+  MinLength,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * 보호자 회원가입 DTO

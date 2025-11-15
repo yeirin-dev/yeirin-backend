@@ -1,12 +1,12 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '@application/auth/auth.service';
-import { RegisterDto } from '@application/auth/dto/register.dto';
+import { AuthResponseDto } from '@application/auth/dto/auth-response.dto';
+import { LoginDto } from '@application/auth/dto/login.dto';
+import { RegisterCounselorDto } from '@application/auth/dto/register-counselor.dto';
 import { RegisterGuardianDto } from '@application/auth/dto/register-guardian.dto';
 import { RegisterInstitutionDto } from '@application/auth/dto/register-institution.dto';
-import { RegisterCounselorDto } from '@application/auth/dto/register-counselor.dto';
-import { LoginDto } from '@application/auth/dto/login.dto';
-import { AuthResponseDto } from '@application/auth/dto/auth-response.dto';
+import { RegisterDto } from '@application/auth/dto/register.dto';
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 
