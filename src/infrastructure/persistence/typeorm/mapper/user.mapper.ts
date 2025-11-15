@@ -1,9 +1,9 @@
 import { User } from '@domain/user/model/user';
 import { Email } from '@domain/user/model/value-objects/email.vo';
 import { Password } from '@domain/user/model/value-objects/password.vo';
-import { UserRole, UserRoleType } from '@domain/user/model/value-objects/user-role.vo';
 import { PhoneNumber } from '@domain/user/model/value-objects/phone-number.vo';
 import { RealName } from '@domain/user/model/value-objects/real-name.vo';
+import { UserRole, UserRoleType } from '@domain/user/model/value-objects/user-role.vo';
 import { UserEntity } from '../entity/user.entity';
 
 /**

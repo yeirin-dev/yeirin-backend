@@ -1,15 +1,15 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
+  Entity,
+  JoinColumn,
   ManyToOne,
   OneToOne,
-  JoinColumn,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { VoucherInstitutionEntity } from './voucher-institution.entity';
 import { UserEntity } from './user.entity';
+import { VoucherInstitutionEntity } from './voucher-institution.entity';
 
 /**
  * 심리 상담사 프로필 Entity

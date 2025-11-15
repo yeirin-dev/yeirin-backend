@@ -1,16 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsString,
-  IsNotEmpty,
   IsArray,
   IsBoolean,
   IsDateString,
-  MinLength,
-  MaxLength,
   IsInt,
-  Min,
+  IsNotEmpty,
   IsOptional,
+  IsString,
   IsUUID,
+  MaxLength,
+  Min,
+  MinLength,
 } from 'class-validator';
 
 /**

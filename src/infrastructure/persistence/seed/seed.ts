@@ -1,10 +1,10 @@
 import { DataSource } from 'typeorm';
-import { VoucherInstitutionEntity } from '../typeorm/entity/voucher-institution.entity';
 import { CounselorProfileEntity } from '../typeorm/entity/counselor-profile.entity';
-import { ReviewEntity } from '../typeorm/entity/review.entity';
-import { VoucherType } from '../typeorm/entity/enums/voucher-type.enum';
 import { ServiceType } from '../typeorm/entity/enums/service-type.enum';
 import { SpecialTreatment } from '../typeorm/entity/enums/special-treatment.enum';
+import { VoucherType } from '../typeorm/entity/enums/voucher-type.enum';
+import { ReviewEntity } from '../typeorm/entity/review.entity';
+import { VoucherInstitutionEntity } from '../typeorm/entity/voucher-institution.entity';
 
 const dataSource = new DataSource({
   type: 'postgres',

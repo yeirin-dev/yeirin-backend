@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InstitutionRepository } from '@domain/institution/repository/institution.repository';
-import { UpdateInstitutionDto } from '../dto/update-institution.dto';
 import { InstitutionResponseDto } from '../dto/institution-response.dto';
+import { UpdateInstitutionDto } from '../dto/update-institution.dto';
 
 /**
  * 바우처 기관 수정 유스케이스

@@ -1,19 +1,18 @@
-import { Injectable, Inject, UnauthorizedException, ConflictException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UserRepository } from '@domain/user/repository/user.repository';
+import { JwtService } from '@nestjs/jwt';
 import { Email } from '@domain/user/model/value-objects/email.vo';
-import { Password } from '@domain/user/model/value-objects/password.vo';
-import { RegisterDto } from './dto/register.dto';
+import { UserRepository } from '@domain/user/repository/user.repository';
+import { AuthResponseDto } from './dto/auth-response.dto';
+import { LoginDto } from './dto/login.dto';
+import { RegisterCounselorDto } from './dto/register-counselor.dto';
 import { RegisterGuardianDto } from './dto/register-guardian.dto';
 import { RegisterInstitutionDto } from './dto/register-institution.dto';
-import { RegisterCounselorDto } from './dto/register-counselor.dto';
-import { LoginDto } from './dto/login.dto';
-import { AuthResponseDto } from './dto/auth-response.dto';
-import { RegisterUserUseCase } from './use-cases/register-user/register-user.use-case';
+import { RegisterDto } from './dto/register.dto';
+import { RegisterCounselorUseCase } from './use-cases/register-counselor/register-counselor.use-case';
 import { RegisterGuardianUseCase } from './use-cases/register-guardian/register-guardian.use-case';
 import { RegisterInstitutionUseCase } from './use-cases/register-institution/register-institution.use-case';
-import { RegisterCounselorUseCase } from './use-cases/register-counselor/register-counselor.use-case';
+import { RegisterUserUseCase } from './use-cases/register-user/register-user.use-case';
 
 /**
  * Auth Service (Application Layer)

@@ -1,7 +1,7 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CounselorProfileRepository } from '@domain/counselor/repository/counselor-profile.repository';
-import { CreateCounselorProfileDto } from '../dto/create-counselor-profile.dto';
 import { CounselorProfileResponseDto } from '../dto/counselor-profile-response.dto';
+import { CreateCounselorProfileDto } from '../dto/create-counselor-profile.dto';
 
 /**
  * 상담사 프로필 생성 유스케이스

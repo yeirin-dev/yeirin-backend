@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Result, DomainError } from '@domain/common/result';
 import { AggregateRoot } from '@domain/common/domain-event';
-import { ChildName } from './value-objects/child-name.vo';
+import { DomainError, Result } from '@domain/common/result';
 import { BirthDate } from './value-objects/birth-date.vo';
+import { ChildName } from './value-objects/child-name.vo';
 import { Gender } from './value-objects/gender.vo';
 
 /**

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { RecommendationRepository } from '@domain/matching/repository/recommendation.repository';
-import { MatchingRecommendation } from '@domain/matching/entity/matching-recommendation';
 import { InstitutionRecommendation } from '@domain/matching/entity/institution-recommendation';
+import { MatchingRecommendation } from '@domain/matching/entity/matching-recommendation';
+import { RecommendationRepository } from '@domain/matching/repository/recommendation.repository';
 import { CounselRequestText } from '@domain/matching/value-object/counsel-request-text';
 import { InstitutionId } from '@domain/matching/value-object/institution-id';
 import { RecommendationScore } from '@domain/matching/value-object/recommendation-score';

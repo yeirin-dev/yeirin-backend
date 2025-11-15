@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ChildRepository } from '@domain/child/repository/child.repository';
 import { Child } from '@domain/child/model/child';
+import { ChildRepository } from '@domain/child/repository/child.repository';
 import { ChildProfileEntity } from '../entity/child-profile.entity';
 import { ChildMapper } from '../mapper/child.mapper';
 

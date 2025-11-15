@@ -1,13 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Result, DomainError } from '@domain/common/result';
 import { AggregateRoot } from '@domain/common/domain-event';
+import { DomainError, Result } from '@domain/common/result';
+import { EmailVerified } from '../events/email-verified.event';
+import { UserRegistered } from '../events/user-registered.event';
 import { Email } from './value-objects/email.vo';
 import { Password } from './value-objects/password.vo';
-import { UserRole } from './value-objects/user-role.vo';
 import { PhoneNumber } from './value-objects/phone-number.vo';
 import { RealName } from './value-objects/real-name.vo';
-import { UserRegistered } from '../events/user-registered.event';
-import { EmailVerified } from '../events/email-verified.event';
+import { UserRole } from './value-objects/user-role.vo';
 
 /**
  * User 생성 Props

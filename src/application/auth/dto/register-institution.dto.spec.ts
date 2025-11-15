@@ -1,8 +1,8 @@
 import { validate } from 'class-validator';
-import { RegisterInstitutionDto } from './register-institution.dto';
-import { VoucherType } from '@infrastructure/persistence/typeorm/entity/enums/voucher-type.enum';
 import { ServiceType } from '@infrastructure/persistence/typeorm/entity/enums/service-type.enum';
 import { SpecialTreatment } from '@infrastructure/persistence/typeorm/entity/enums/special-treatment.enum';
+import { VoucherType } from '@infrastructure/persistence/typeorm/entity/enums/voucher-type.enum';
+import { RegisterInstitutionDto } from './register-institution.dto';
 
 describe('RegisterInstitutionDto 유효성 검증', () => {
   let dto: RegisterInstitutionDto;

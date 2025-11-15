@@ -1,4 +1,4 @@
-import { Result, DomainError } from '@domain/common/result';
+import { DomainError, Result } from '@domain/common/result';
 
 /**
  * 사용자 역할 타입

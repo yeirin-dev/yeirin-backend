@@ -1,7 +1,6 @@
-import { RegisterUserUseCase, RegisterUserCommand } from './register-user.use-case';
-import { UserRepository } from '@domain/user/repository/user.repository';
-import { Email } from '@domain/user/model/value-objects/email.vo';
 import { User } from '@domain/user/model/user';
+import { UserRepository } from '@domain/user/repository/user.repository';
+import { RegisterUserCommand, RegisterUserUseCase } from './register-user.use-case';
 
 describe('RegisterUserUseCase', () => {
   let useCase: RegisterUserUseCase;

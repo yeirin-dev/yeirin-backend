@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CounselorProfileRepository } from '@domain/counselor/repository/counselor-profile.repository';
 import {
   CounselorProfileListResponseDto,

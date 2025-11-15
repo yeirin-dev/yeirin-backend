@@ -1,9 +1,9 @@
 import { User, UserProps } from './user';
 import { Email } from './value-objects/email.vo';
 import { Password } from './value-objects/password.vo';
-import { UserRole } from './value-objects/user-role.vo';
 import { PhoneNumber } from './value-objects/phone-number.vo';
 import { RealName } from './value-objects/real-name.vo';
+import { UserRole } from './value-objects/user-role.vo';
 
 describe('User Aggregate Root', () => {
   const createValidUserProps = async (): Promise<UserProps> => {
