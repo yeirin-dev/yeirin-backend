@@ -5,7 +5,10 @@ import { IsString, IsInt, IsArray, IsOptional, IsUUID, Min, MaxLength } from 'cl
  * 상담사 프로필 생성 DTO
  */
 export class CreateCounselorProfileDto {
-  @ApiProperty({ description: '상담사 User ID (COUNSELOR 역할)', example: '660e8400-e29b-41d4-a716-446655440000' })
+  @ApiProperty({
+    description: '상담사 User ID (COUNSELOR 역할)',
+    example: '660e8400-e29b-41d4-a716-446655440000',
+  })
   @IsUUID()
   userId: string;
 
@@ -34,7 +37,11 @@ export class CreateCounselorProfileDto {
   @IsOptional()
   specialties?: string[];
 
-  @ApiProperty({ description: '소개', example: '10년 경력의 청소년 상담 전문가입니다.', required: false })
+  @ApiProperty({
+    description: '소개',
+    example: '10년 경력의 청소년 상담 전문가입니다.',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   introduction?: string;

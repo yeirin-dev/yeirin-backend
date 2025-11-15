@@ -23,7 +23,10 @@ export interface CounselorProfileRepository {
    * 상담사 프로필 생성
    */
   create(
-    profile: Omit<CounselorProfileEntity, 'id' | 'createdAt' | 'updatedAt' | 'institution' | 'user'>,
+    profile: Omit<
+      CounselorProfileEntity,
+      'id' | 'createdAt' | 'updatedAt' | 'institution' | 'user'
+    >,
   ): Promise<CounselorProfileEntity>;
 
   /**

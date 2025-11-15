@@ -17,7 +17,10 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam } from '@nestjs/
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
 import { CreateReviewDto } from '@application/review/dto/create-review.dto';
 import { UpdateReviewDto } from '@application/review/dto/update-review.dto';
-import { ReviewResponseDto, ReviewListResponseDto } from '@application/review/dto/review-response.dto';
+import {
+  ReviewResponseDto,
+  ReviewListResponseDto,
+} from '@application/review/dto/review-response.dto';
 import { CreateReviewUseCase } from '@application/review/use-case/create-review.usecase';
 import { UpdateReviewUseCase } from '@application/review/use-case/update-review.usecase';
 import { GetReviewUseCase } from '@application/review/use-case/get-review.usecase';
@@ -72,7 +75,10 @@ export class ReviewController {
   @ApiParam({ name: 'id', description: '리뷰 ID' })
   @ApiResponse({ status: 200, description: '리뷰 수정 성공', type: ReviewResponseDto })
   @ApiResponse({ status: 404, description: '리뷰를 찾을 수 없음' })
-  async updateReview(@Param('id') id: string, @Body() dto: UpdateReviewDto): Promise<ReviewResponseDto> {
+  async updateReview(
+    @Param('id') id: string,
+    @Body() dto: UpdateReviewDto,
+  ): Promise<ReviewResponseDto> {
     return await this.updateReviewUseCase.execute(id, dto);
   }
 

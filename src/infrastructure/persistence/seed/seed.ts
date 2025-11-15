@@ -26,7 +26,9 @@ async function seed() {
   const reviewRepo = dataSource.getRepository(ReviewEntity);
 
   // 기존 데이터 삭제 (외래 키 제약 고려)
-  await dataSource.query('TRUNCATE TABLE reviews, counselor_profiles, voucher_institutions RESTART IDENTITY CASCADE');
+  await dataSource.query(
+    'TRUNCATE TABLE reviews, counselor_profiles, voucher_institutions RESTART IDENTITY CASCADE',
+  );
   console.log('🗑️  기존 데이터 삭제 완료');
 
   // 바우처 기관 더미 데이터
@@ -45,11 +47,7 @@ async function seed() {
       primaryTargetGroup: 'ADHD',
       secondaryTargetGroup: '정서불안',
       canProvideComprehensiveTest: true,
-      providedServices: [
-        ServiceType.COUNSELING,
-        ServiceType.PLAY_THERAPY,
-        ServiceType.ART_THERAPY,
-      ],
+      providedServices: [ServiceType.COUNSELING, ServiceType.PLAY_THERAPY, ServiceType.ART_THERAPY],
       specialTreatments: [SpecialTreatment.DEVELOPMENTAL_REHABILITATION],
       canProvideParentCounseling: true,
     },
@@ -110,12 +108,7 @@ async function seed() {
       maxCapacity: 40,
       introduction: '종합심리검사 가능, 다양한 치료 프로그램 운영',
       counselorCount: 7,
-      counselorCertifications: [
-        '임상심리사 1급',
-        '놀이치료사',
-        '미술치료사',
-        '언어재활사 2급',
-      ],
+      counselorCertifications: ['임상심리사 1급', '놀이치료사', '미술치료사', '언어재활사 2급'],
       primaryTargetGroup: '종합심리검사',
       secondaryTargetGroup: undefined,
       canProvideComprehensiveTest: true,
@@ -126,10 +119,7 @@ async function seed() {
         ServiceType.MUSIC_THERAPY,
         ServiceType.COGNITIVE_THERAPY,
       ],
-      specialTreatments: [
-        SpecialTreatment.LANGUAGE,
-        SpecialTreatment.DEVELOPMENTAL_REHABILITATION,
-      ],
+      specialTreatments: [SpecialTreatment.LANGUAGE, SpecialTreatment.DEVELOPMENTAL_REHABILITATION],
       canProvideParentCounseling: true,
     },
     {
@@ -215,8 +205,7 @@ async function seed() {
       experienceYears: 11,
       certifications: ['임상심리사 1급', '종합심리평가 전문'],
       specialties: ['종합심리검사', '지능검사', '정서검사'],
-      introduction:
-        '종합심리검사 전문. 정확한 진단을 통해 개별 맞춤형 치료 계획을 수립합니다.',
+      introduction: '종합심리검사 전문. 정확한 진단을 통해 개별 맞춤형 치료 계획을 수립합니다.',
     },
     {
       institutionId: savedInstitutions[3].id,
@@ -269,7 +258,8 @@ async function seed() {
       userId: undefined,
       authorNickname: '초등맘',
       rating: 4,
-      content: '전문성은 뛰어나지만 예약이 너무 밀려서 대기 시간이 길어요. 그래도 기다릴 가치는 있습니다.',
+      content:
+        '전문성은 뛰어나지만 예약이 너무 밀려서 대기 시간이 길어요. 그래도 기다릴 가치는 있습니다.',
       helpfulCount: 5,
     },
 
@@ -345,7 +335,8 @@ async function seed() {
       userId: undefined,
       authorNickname: '감각통합치료',
       rating: 5,
-      content: '소수정예라 선생님이 우리 아이에게 집중해주셔서 좋아요. 감각통합 전문성이 뛰어납니다.',
+      content:
+        '소수정예라 선생님이 우리 아이에게 집중해주셔서 좋아요. 감각통합 전문성이 뛰어납니다.',
       helpfulCount: 8,
     },
     {
@@ -353,8 +344,7 @@ async function seed() {
       userId: undefined,
       authorNickname: '자폐아동부모',
       rating: 4,
-      content:
-        '자폐 아이에게 도움이 많이 되고 있어요. 규모는 작지만 전문성과 정성은 최고입니다.',
+      content: '자폐 아이에게 도움이 많이 되고 있어요. 규모는 작지만 전문성과 정성은 최고입니다.',
       helpfulCount: 6,
     },
   ];

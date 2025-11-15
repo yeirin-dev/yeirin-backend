@@ -46,9 +46,7 @@ export class MatchingRecommendation {
       return Result.fail(`추천 결과는 최대 ${this.MAX_RECOMMENDATIONS}개까지 가능합니다`);
     }
 
-    return Result.ok(
-      new MatchingRecommendation(counselRequestText, recommendations, new Date()),
-    );
+    return Result.ok(new MatchingRecommendation(counselRequestText, recommendations, new Date()));
   }
 
   /**

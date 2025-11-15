@@ -12,7 +12,11 @@ export class UpdateReviewDto {
   @IsOptional()
   rating?: number;
 
-  @ApiProperty({ description: '리뷰 내용', example: '상담 진행이 매우 만족스러웠습니다.', required: false })
+  @ApiProperty({
+    description: '리뷰 내용',
+    example: '상담 진행이 매우 만족스러웠습니다.',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   content?: string;

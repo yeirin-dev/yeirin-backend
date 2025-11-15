@@ -53,8 +53,7 @@ export class MatchingRecommendationResponseDto {
    */
   @ApiProperty({
     description: '요청한 상담의뢰지 텍스트',
-    example:
-      '7세 아들이 ADHD 진단을 받았습니다. 학교에서 집중하지 못하고 친구들과 자주 다툽니다.',
+    example: '7세 아들이 ADHD 진단을 받았습니다. 학교에서 집중하지 못하고 친구들과 자주 다툽니다.',
   })
   counselRequestText: string;
 

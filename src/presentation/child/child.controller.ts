@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Param,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 import { RegisterChildUseCase } from '@application/child/use-cases/register-child/register-child.use-case';
@@ -37,9 +29,7 @@ export class ChildController {
   })
   @ApiResponse({ status: 400, description: '잘못된 요청' })
   @ApiResponse({ status: 404, description: '보호자를 찾을 수 없음' })
-  async registerChild(
-    @Body() dto: RegisterChildDto,
-  ): Promise<ChildResponseDto> {
+  async registerChild(@Body() dto: RegisterChildDto): Promise<ChildResponseDto> {
     return await this.registerChildUseCase.execute(dto);
   }
 

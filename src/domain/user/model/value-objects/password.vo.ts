@@ -48,22 +48,16 @@ export class Password {
 
     // 2. 길이 검증
     if (trimmed.length < this.MIN_LENGTH) {
-      return Result.fail(
-        new DomainError(`비밀번호는 ${this.MIN_LENGTH}자 이상이어야 합니다`),
-      );
+      return Result.fail(new DomainError(`비밀번호는 ${this.MIN_LENGTH}자 이상이어야 합니다`));
     }
 
     if (trimmed.length > this.MAX_LENGTH) {
-      return Result.fail(
-        new DomainError(`비밀번호는 ${this.MAX_LENGTH}자를 초과할 수 없습니다`),
-      );
+      return Result.fail(new DomainError(`비밀번호는 ${this.MAX_LENGTH}자를 초과할 수 없습니다`));
     }
 
     // 3. 복잡도 검증 (영문, 숫자, 특수문자)
     if (!this.REGEX.test(trimmed)) {
-      return Result.fail(
-        new DomainError('비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다'),
-      );
+      return Result.fail(new DomainError('비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다'));
     }
 
     // 4. 강도 검증 (선택적)

@@ -43,9 +43,7 @@ export class Email {
     if (options?.allowedDomains) {
       const domain = normalized.split('@')[1];
       if (!options.allowedDomains.includes(domain)) {
-        return Result.fail(
-          new DomainError(`허용되지 않은 도메인입니다: ${domain}`),
-        );
+        return Result.fail(new DomainError(`허용되지 않은 도메인입니다: ${domain}`));
       }
     }
 

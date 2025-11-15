@@ -12,17 +12,19 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   // 보안 헤더 설정 (Helmet)
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Swagger 사용을 위해 필요
-        imgSrc: ["'self'", 'data:', 'https:'],
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Swagger 사용을 위해 필요
+          imgSrc: ["'self'", 'data:', 'https:'],
+        },
       },
-    },
-    crossOriginEmbedderPolicy: false, // Swagger UI를 위해 비활성화
-  }));
+      crossOriginEmbedderPolicy: false, // Swagger UI를 위해 비활성화
+    }),
+  );
 
   // Global Validation Pipe 설정
   app.useGlobalPipes(

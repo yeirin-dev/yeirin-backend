@@ -24,8 +24,15 @@ describe('RegisterInstitutionDto 유효성 검증', () => {
     dto.introduction = 'ADHD 및 정서문제 전문 상담센터';
     dto.primaryTargetGroup = 'ADHD';
     dto.canProvideComprehensiveTest = true;
-    dto.providedServices = [ServiceType.COUNSELING, ServiceType.PLAY_THERAPY, ServiceType.ART_THERAPY];
-    dto.specialTreatments = [SpecialTreatment.LANGUAGE, SpecialTreatment.DEVELOPMENTAL_REHABILITATION];
+    dto.providedServices = [
+      ServiceType.COUNSELING,
+      ServiceType.PLAY_THERAPY,
+      ServiceType.ART_THERAPY,
+    ];
+    dto.specialTreatments = [
+      SpecialTreatment.LANGUAGE,
+      SpecialTreatment.DEVELOPMENTAL_REHABILITATION,
+    ];
     dto.canProvideParentCounseling = true;
   });
 

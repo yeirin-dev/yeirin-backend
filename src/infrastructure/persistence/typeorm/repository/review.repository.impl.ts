@@ -35,7 +35,9 @@ export class ReviewRepositoryImpl implements ReviewRepository {
     });
   }
 
-  async create(review: Omit<ReviewEntity, 'id' | 'createdAt' | 'updatedAt' | 'institution'>): Promise<ReviewEntity> {
+  async create(
+    review: Omit<ReviewEntity, 'id' | 'createdAt' | 'updatedAt' | 'institution'>,
+  ): Promise<ReviewEntity> {
     const newReview = this.reviewRepository.create(review);
     return await this.reviewRepository.save(newReview);
   }

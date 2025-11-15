@@ -51,10 +51,7 @@ describe('Review API (e2e)', () => {
         content: '잘못된 평점',
       };
 
-      return request(app.getHttpServer())
-        .post('/reviews')
-        .send(invalidDto)
-        .expect(400);
+      return request(app.getHttpServer()).post('/reviews').send(invalidDto).expect(400);
     });
 
     it('필수 필드 누락 시 실패한다', () => {
@@ -64,10 +61,7 @@ describe('Review API (e2e)', () => {
         rating: 5,
       };
 
-      return request(app.getHttpServer())
-        .post('/reviews')
-        .send(incompleteDto)
-        .expect(400);
+      return request(app.getHttpServer()).post('/reviews').send(incompleteDto).expect(400);
     });
   });
 
@@ -109,9 +103,7 @@ describe('Review API (e2e)', () => {
         content: '단건 조회 테스트용 리뷰',
       };
 
-      const response = await request(app.getHttpServer())
-        .post('/reviews')
-        .send(createDto);
+      const response = await request(app.getHttpServer()).post('/reviews').send(createDto);
 
       createdReviewId = response.body.id;
     });
@@ -129,9 +121,7 @@ describe('Review API (e2e)', () => {
 
     it('존재하지 않는 ID로 조회 시 404를 반환한다', () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000';
-      return request(app.getHttpServer())
-        .get(`/reviews/${nonExistentId}`)
-        .expect(404);
+      return request(app.getHttpServer()).get(`/reviews/${nonExistentId}`).expect(404);
     });
   });
 
@@ -147,9 +137,7 @@ describe('Review API (e2e)', () => {
         content: '수정 전 내용',
       };
 
-      const response = await request(app.getHttpServer())
-        .post('/reviews')
-        .send(createDto);
+      const response = await request(app.getHttpServer()).post('/reviews').send(createDto);
 
       createdReviewId = response.body.id;
     });
@@ -183,16 +171,13 @@ describe('Review API (e2e)', () => {
         content: '도움이 됨 테스트',
       };
 
-      const response = await request(app.getHttpServer())
-        .post('/reviews')
-        .send(createDto);
+      const response = await request(app.getHttpServer()).post('/reviews').send(createDto);
 
       createdReviewId = response.body.id;
     });
 
     it('도움이 됨 카운트를 증가시킨다', async () => {
-      const initialResponse = await request(app.getHttpServer())
-        .get(`/reviews/${createdReviewId}`);
+      const initialResponse = await request(app.getHttpServer()).get(`/reviews/${createdReviewId}`);
 
       const initialCount = initialResponse.body.helpfulCount;
 
@@ -205,13 +190,15 @@ describe('Review API (e2e)', () => {
     });
 
     it('여러 번 호출하면 매번 1씩 증가한다', async () => {
-      const response1 = await request(app.getHttpServer())
-        .patch(`/reviews/${createdReviewId}/helpful`);
+      const response1 = await request(app.getHttpServer()).patch(
+        `/reviews/${createdReviewId}/helpful`,
+      );
 
       const count1 = response1.body.helpfulCount;
 
-      const response2 = await request(app.getHttpServer())
-        .patch(`/reviews/${createdReviewId}/helpful`);
+      const response2 = await request(app.getHttpServer()).patch(
+        `/reviews/${createdReviewId}/helpful`,
+      );
 
       expect(response2.body.helpfulCount).toBe(count1 + 1);
     });
@@ -227,21 +214,15 @@ describe('Review API (e2e)', () => {
         content: '삭제될 리뷰',
       };
 
-      const createResponse = await request(app.getHttpServer())
-        .post('/reviews')
-        .send(createDto);
+      const createResponse = await request(app.getHttpServer()).post('/reviews').send(createDto);
 
       const reviewId = createResponse.body.id;
 
       // 삭제
-      await request(app.getHttpServer())
-        .delete(`/reviews/${reviewId}`)
-        .expect(204);
+      await request(app.getHttpServer()).delete(`/reviews/${reviewId}`).expect(204);
 
       // 삭제 확인
-      return request(app.getHttpServer())
-        .get(`/reviews/${reviewId}`)
-        .expect(404);
+      return request(app.getHttpServer()).get(`/reviews/${reviewId}`).expect(404);
     });
   });
 });
