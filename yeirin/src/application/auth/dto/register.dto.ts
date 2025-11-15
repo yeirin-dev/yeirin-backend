@@ -1,5 +1,5 @@
-import { IsEmail, IsString, MinLength, MaxLength, Matches, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsEnum, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { UserRoleType } from '@domain/user/model/value-objects/user-role.vo';
 
 /**

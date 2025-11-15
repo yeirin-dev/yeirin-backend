@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsInt, IsArray, IsOptional, IsUUID, Min, MaxLength } from 'class-validator';
+import { IsArray, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
 
 /**
  * 상담사 프로필 생성 DTO

@@ -1,5 +1,5 @@
-import { Result, DomainError } from '@domain/common/result';
 import * as bcrypt from 'bcrypt';
+import { DomainError, Result } from '@domain/common/result';
 
 /**
  * Password Value Object

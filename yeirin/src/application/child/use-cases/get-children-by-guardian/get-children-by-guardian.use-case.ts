@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { ChildResponseDto } from '../../dto/child-response.dto';
 

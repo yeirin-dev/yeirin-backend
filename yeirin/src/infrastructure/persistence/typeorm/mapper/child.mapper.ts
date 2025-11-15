@@ -1,6 +1,6 @@
 import { Child } from '@domain/child/model/child';
-import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { BirthDate } from '@domain/child/model/value-objects/birth-date.vo';
+import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { Gender, GenderType } from '@domain/child/model/value-objects/gender.vo';
 import { ChildProfileEntity } from '../entity/child-profile.entity';
 

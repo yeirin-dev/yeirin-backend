@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
-import { APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { MatchingModule } from './presentation/http/matching/matching.module';
-import { InstitutionModule } from './presentation/http/institution/institution.module';
-import { CounselorProfileModule } from './presentation/counselor/counselor-profile.module';
-import { ReviewModule } from './presentation/review/review.module';
-import { AuthModule } from './presentation/auth/auth.module';
-import { ChildModule } from './presentation/child/child.module';
-import { getTypeOrmConfig } from './infrastructure/config/typeorm.config';
-import { JwtAuthGuard } from './infrastructure/auth/guards/jwt-auth.guard';
-import { LoggingInterceptor } from './infrastructure/logging/logging.interceptor';
+import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
+import { getTypeOrmConfig } from '@infrastructure/config/typeorm.config';
+import { LoggingInterceptor } from '@infrastructure/logging/logging.interceptor';
+import { AuthModule } from '@presentation/auth/auth.module';
+import { ChildModule } from '@presentation/child/child.module';
+import { CounselorProfileModule } from '@presentation/counselor/counselor-profile.module';
+import { InstitutionModule } from '@presentation/http/institution/institution.module';
+import { MatchingModule } from '@presentation/http/matching/matching.module';
+import { ReviewModule } from '@presentation/review/review.module';
 
 @Module({
   imports: [

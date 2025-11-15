@@ -1,12 +1,12 @@
-import { Injectable, Inject, BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Child } from '@domain/child/model/child';
-import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { BirthDate } from '@domain/child/model/value-objects/birth-date.vo';
+import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { Gender } from '@domain/child/model/value-objects/gender.vo';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
-import { RegisterChildDto } from '../../dto/register-child.dto';
 import { ChildResponseDto } from '../../dto/child-response.dto';
+import { RegisterChildDto } from '../../dto/register-child.dto';
 
 /**
  * 아동 등록 Use Case

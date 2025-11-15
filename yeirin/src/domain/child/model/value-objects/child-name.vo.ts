@@ -1,4 +1,4 @@
-import { Result, DomainError } from '@domain/common/result';
+import { DomainError, Result } from '@domain/common/result';
 
 /**
  * 아동 이름 Value Object

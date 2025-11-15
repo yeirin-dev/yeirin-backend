@@ -1,20 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { ConflictException } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
-import { RegisterUserUseCase } from './use-cases/register-user/register-user.use-case';
-import { RegisterGuardianUseCase } from './use-cases/register-guardian/register-guardian.use-case';
-import { RegisterInstitutionUseCase } from './use-cases/register-institution/register-institution.use-case';
-import { RegisterCounselorUseCase } from './use-cases/register-counselor/register-counselor.use-case';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Result } from '@domain/common/result';
 import { User } from '@domain/user/model/user';
 import { Email } from '@domain/user/model/value-objects/email.vo';
 import { Password } from '@domain/user/model/value-objects/password.vo';
-import { RealName } from '@domain/user/model/value-objects/real-name.vo';
 import { PhoneNumber } from '@domain/user/model/value-objects/phone-number.vo';
+import { RealName } from '@domain/user/model/value-objects/real-name.vo';
 import { UserRole } from '@domain/user/model/value-objects/user-role.vo';
+import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/register.dto';
+import { RegisterCounselorUseCase } from './use-cases/register-counselor/register-counselor.use-case';
+import { RegisterGuardianUseCase } from './use-cases/register-guardian/register-guardian.use-case';
+import { RegisterInstitutionUseCase } from './use-cases/register-institution/register-institution.use-case';
+import { RegisterUserUseCase } from './use-cases/register-user/register-user.use-case';
 
 describe('AuthService', () => {
   let service: AuthService;

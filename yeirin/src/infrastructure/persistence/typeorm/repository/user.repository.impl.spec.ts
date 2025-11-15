@@ -1,15 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserRepositoryImpl } from './user.repository.impl';
-import { UserEntity } from '../entity/user.entity';
-import { UserMapper } from '../mapper/user.mapper';
 import { User } from '@domain/user/model/user';
 import { Email } from '@domain/user/model/value-objects/email.vo';
 import { Password } from '@domain/user/model/value-objects/password.vo';
-import { RealName } from '@domain/user/model/value-objects/real-name.vo';
 import { PhoneNumber } from '@domain/user/model/value-objects/phone-number.vo';
+import { RealName } from '@domain/user/model/value-objects/real-name.vo';
 import { UserRole } from '@domain/user/model/value-objects/user-role.vo';
+import { UserEntity } from '../entity/user.entity';
+import { UserRepositoryImpl } from './user.repository.impl';
 
 describe('UserRepositoryImpl', () => {
   let repository: UserRepositoryImpl;

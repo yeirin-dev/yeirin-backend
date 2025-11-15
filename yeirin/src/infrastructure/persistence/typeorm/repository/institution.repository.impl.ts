@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { VoucherInstitutionEntity } from '../entity/voucher-institution.entity';
 import { InstitutionRepository } from '@domain/institution/repository/institution.repository';
+import { VoucherInstitutionEntity } from '../entity/voucher-institution.entity';
 
 @Injectable()
 export class InstitutionRepositoryImpl implements InstitutionRepository {
