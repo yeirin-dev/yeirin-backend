@@ -137,7 +137,10 @@ describe('AuthService', () => {
       // Given
       const mockUser = createMockUser();
       jest.spyOn(registerUserUseCase, 'execute').mockResolvedValue(Result.ok(mockUser));
-      jest.spyOn(jwtService, 'sign').mockReturnValueOnce('access_token').mockReturnValueOnce('refresh_token');
+      jest
+        .spyOn(jwtService, 'sign')
+        .mockReturnValueOnce('access_token')
+        .mockReturnValueOnce('refresh_token');
       jest.spyOn(userRepository, 'save').mockResolvedValue(mockUser);
 
       // When

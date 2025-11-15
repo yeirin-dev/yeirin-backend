@@ -40,7 +40,7 @@ describe('GetReviewsUseCase', () => {
     it('페이지네이션이 적용된 리뷰 목록을 반환한다', async () => {
       // Given
       const reviews = Array.from({ length: 5 }, (_, i) =>
-        ReviewFixture.createReviewEntity({ id: `review-${i}` })
+        ReviewFixture.createReviewEntity({ id: `review-${i}` }),
       );
       mockReviewRepository.findAll.mockResolvedValue([reviews, 15]);
 
@@ -72,9 +72,7 @@ describe('GetReviewsUseCase', () => {
       const institution = ReviewFixture.createInstitutionEntity({
         centerName: '테스트 상담센터',
       });
-      const reviews = [
-        ReviewFixture.createReviewEntity({ institution }),
-      ];
+      const reviews = [ReviewFixture.createReviewEntity({ institution })];
       mockReviewRepository.findAll.mockResolvedValue([reviews, 1]);
 
       // When

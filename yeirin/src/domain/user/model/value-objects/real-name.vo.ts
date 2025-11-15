@@ -27,15 +27,11 @@ export class RealName {
 
     // 2. 길이 검증
     if (trimmed.length < this.MIN_LENGTH) {
-      return Result.fail(
-        new DomainError(`이름은 ${this.MIN_LENGTH}자 이상이어야 합니다`),
-      );
+      return Result.fail(new DomainError(`이름은 ${this.MIN_LENGTH}자 이상이어야 합니다`));
     }
 
     if (trimmed.length > this.MAX_LENGTH) {
-      return Result.fail(
-        new DomainError(`이름은 ${this.MAX_LENGTH}자를 초과할 수 없습니다`),
-      );
+      return Result.fail(new DomainError(`이름은 ${this.MAX_LENGTH}자를 초과할 수 없습니다`));
     }
 
     // 3. 형식 검증 (한글/영문만, 특수문자 불가)

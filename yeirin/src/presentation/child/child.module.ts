@@ -9,9 +9,7 @@ import { RegisterChildUseCase } from '@application/child/use-cases/register-chil
 import { GetChildrenByGuardianUseCase } from '@application/child/use-cases/get-children-by-guardian/get-children-by-guardian.use-case';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([ChildProfileEntity, GuardianProfileEntity]),
-  ],
+  imports: [TypeOrmModule.forFeature([ChildProfileEntity, GuardianProfileEntity])],
   controllers: [ChildController],
   providers: [
     // Repository 제공

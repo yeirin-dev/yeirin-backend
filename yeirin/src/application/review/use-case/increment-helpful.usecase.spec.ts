@@ -67,7 +67,7 @@ describe('IncrementHelpfulUseCase', () => {
       // When & Then
       await expect(useCase.execute(reviewId)).rejects.toThrow(NotFoundException);
       await expect(useCase.execute(reviewId)).rejects.toThrow(
-        `리뷰를 찾을 수 없습니다 (ID: ${reviewId})`
+        `리뷰를 찾을 수 없습니다 (ID: ${reviewId})`,
       );
     });
 

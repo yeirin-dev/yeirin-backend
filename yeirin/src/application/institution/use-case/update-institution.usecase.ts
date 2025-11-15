@@ -24,7 +24,8 @@ export class UpdateInstitutionUseCase {
     if (dto.address) updateData.address = dto.address;
     if (dto.establishedDate) updateData.establishedDate = new Date(dto.establishedDate);
     if (dto.operatingVouchers) updateData.operatingVouchers = dto.operatingVouchers;
-    if (dto.isQualityCertified !== undefined) updateData.isQualityCertified = dto.isQualityCertified;
+    if (dto.isQualityCertified !== undefined)
+      updateData.isQualityCertified = dto.isQualityCertified;
     if (dto.maxCapacity) updateData.maxCapacity = dto.maxCapacity;
     if (dto.introduction) updateData.introduction = dto.introduction;
     if (dto.primaryTargetGroup) updateData.primaryTargetGroup = dto.primaryTargetGroup;

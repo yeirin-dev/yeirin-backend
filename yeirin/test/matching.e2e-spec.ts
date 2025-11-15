@@ -95,9 +95,7 @@ describe('Matching Controller (e2e)', () => {
         .expect((res) => {
           const recommendations = res.body.recommendations;
           for (let i = 0; i < recommendations.length - 1; i++) {
-            expect(recommendations[i].score).toBeGreaterThanOrEqual(
-              recommendations[i + 1].score,
-            );
+            expect(recommendations[i].score).toBeGreaterThanOrEqual(recommendations[i + 1].score);
           }
         });
     });

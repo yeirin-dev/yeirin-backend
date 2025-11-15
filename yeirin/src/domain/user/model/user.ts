@@ -77,9 +77,7 @@ export class User extends AggregateRoot {
     const user = new User(props);
 
     // Domain Event 발행
-    user.addDomainEvent(
-      new UserRegistered(user._id, user._email.value, user._role.value),
-    );
+    user.addDomainEvent(new UserRegistered(user._id, user._email.value, user._role.value));
 
     return Result.ok(user);
   }

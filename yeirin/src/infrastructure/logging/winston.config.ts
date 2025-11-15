@@ -61,12 +61,8 @@ export const createWinstonLogger = () => {
     format: logFormat,
     transports,
     // 처리되지 않은 예외 로깅
-    exceptionHandlers: [
-      new winston.transports.File({ filename: 'logs/exceptions.log' }),
-    ],
+    exceptionHandlers: [new winston.transports.File({ filename: 'logs/exceptions.log' })],
     // 처리되지 않은 Promise 거부 로깅
-    rejectionHandlers: [
-      new winston.transports.File({ filename: 'logs/rejections.log' }),
-    ],
+    rejectionHandlers: [new winston.transports.File({ filename: 'logs/rejections.log' })],
   });
 };

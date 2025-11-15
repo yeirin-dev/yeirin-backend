@@ -111,15 +111,17 @@ export class Child extends AggregateRoot {
    * 비즈니스 규칙 검증:
    * - guardianId와 institutionId 중 정확히 하나만 존재해야 함
    */
-  public static create(props: ChildProps, id?: string, createdAt?: Date): Result<Child, DomainError> {
+  public static create(
+    props: ChildProps,
+    id?: string,
+    createdAt?: Date,
+  ): Result<Child, DomainError> {
     // 비즈니스 규칙: 보호자 또는 양육시설 중 하나는 반드시 존재
     const hasGuardian = props.guardianId !== null;
     const hasInstitution = props.institutionId !== null;
 
     if (!hasGuardian && !hasInstitution) {
-      return Result.fail(
-        new DomainError('아동은 보호자 또는 양육시설과 연결되어야 합니다'),
-      );
+      return Result.fail(new DomainError('아동은 보호자 또는 양육시설과 연결되어야 합니다'));
     }
 
     // 비즈니스 규칙: 둘 다 존재하면 안 됨

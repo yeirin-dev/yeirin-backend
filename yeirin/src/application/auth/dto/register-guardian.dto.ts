@@ -1,4 +1,14 @@
-import { IsEmail, IsString, MinLength, MaxLength, Matches, IsEnum, IsOptional, IsInt, Min } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  MaxLength,
+  Matches,
+  IsEnum,
+  IsOptional,
+  IsInt,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -54,7 +64,11 @@ export class RegisterGuardianDto {
   @Min(0, { message: '아동 수는 0 이상이어야 합니다' })
   numberOfChildren?: number;
 
-  @ApiProperty({ example: '서울시 강남구 테헤란로 123', description: '주소 (선택)', required: false })
+  @ApiProperty({
+    example: '서울시 강남구 테헤란로 123',
+    description: '주소 (선택)',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200, { message: '주소는 최대 200자까지 가능합니다' })

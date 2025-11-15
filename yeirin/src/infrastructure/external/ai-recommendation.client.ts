@@ -30,8 +30,7 @@ export class AIRecommendationClient {
 
   constructor(private readonly configService: ConfigService) {
     this.serviceUrl =
-      this.configService.get<string>('AI_RECOMMENDATION_SERVICE_URL') ||
-      'http://localhost:8001';
+      this.configService.get<string>('AI_RECOMMENDATION_SERVICE_URL') || 'http://localhost:8001';
 
     const timeout = this.configService.get<number>('AI_RECOMMENDATION_API_TIMEOUT') || 30000;
 
@@ -55,16 +54,11 @@ export class AIRecommendationClient {
     );
 
     try {
-      const response = await this.client.post<AIRecommendationResponse>(
-        '/api/v1/recommendations',
-        {
-          counsel_request_text: counselRequestText,
-        },
-      );
+      const response = await this.client.post<AIRecommendationResponse>('/api/v1/recommendations', {
+        counsel_request_text: counselRequestText,
+      });
 
-      this.logger.log(
-        `AI 추천 성공 - ${response.data.recommendations.length}개 기관 추천됨`,
-      );
+      this.logger.log(`AI 추천 성공 - ${response.data.recommendations.length}개 기관 추천됨`);
 
       return response.data;
     } catch (error) {
@@ -115,5 +109,4 @@ export class AIRecommendationClient {
       return false;
     }
   }
-
 }

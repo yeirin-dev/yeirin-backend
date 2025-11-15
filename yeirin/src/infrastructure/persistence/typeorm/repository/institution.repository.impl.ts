@@ -28,13 +28,19 @@ export class InstitutionRepositoryImpl implements InstitutionRepository {
   }
 
   async create(
-    institution: Omit<VoucherInstitutionEntity, 'id' | 'createdAt' | 'updatedAt' | 'counselorProfiles' | 'reviews'>,
+    institution: Omit<
+      VoucherInstitutionEntity,
+      'id' | 'createdAt' | 'updatedAt' | 'counselorProfiles' | 'reviews'
+    >,
   ): Promise<VoucherInstitutionEntity> {
     const newInstitution = this.institutionRepository.create(institution);
     return await this.institutionRepository.save(newInstitution);
   }
 
-  async update(id: string, institution: Partial<VoucherInstitutionEntity>): Promise<VoucherInstitutionEntity> {
+  async update(
+    id: string,
+    institution: Partial<VoucherInstitutionEntity>,
+  ): Promise<VoucherInstitutionEntity> {
     await this.institutionRepository.update(id, institution);
     const updated = await this.findById(id);
     if (!updated) {

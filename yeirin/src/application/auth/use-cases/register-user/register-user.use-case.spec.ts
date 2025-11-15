@@ -71,9 +71,7 @@ describe('RegisterUserUseCase', () => {
 
       // Then
       expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
-      expect(mockUserRepository.save).toHaveBeenCalledWith(
-        expect.any(User),
-      );
+      expect(mockUserRepository.save).toHaveBeenCalledWith(expect.any(User));
     });
   });
 
