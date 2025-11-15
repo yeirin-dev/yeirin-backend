@@ -8,6 +8,7 @@ import { InstitutionModule } from './presentation/http/institution/institution.m
 import { CounselorProfileModule } from './presentation/counselor/counselor-profile.module';
 import { ReviewModule } from './presentation/review/review.module';
 import { AuthModule } from './presentation/auth/auth.module';
+import { ChildModule } from './presentation/child/child.module';
 import { getTypeOrmConfig } from './infrastructure/config/typeorm.config';
 import { JwtAuthGuard } from './infrastructure/auth/guards/jwt-auth.guard';
 import { LoggingInterceptor } from './infrastructure/logging/logging.interceptor';
@@ -32,6 +33,7 @@ import { LoggingInterceptor } from './infrastructure/logging/logging.interceptor
     InstitutionModule,
     CounselorProfileModule,
     ReviewModule,
+    ChildModule,
   ],
   providers: [
     // 글로벌 JWT 가드 (모든 라우트에 적용, @Public()으로 제외 가능)
