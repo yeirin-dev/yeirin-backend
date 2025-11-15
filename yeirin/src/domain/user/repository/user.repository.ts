@@ -7,7 +7,7 @@ import { Email } from '../model/value-objects/email.vo';
  * - User Aggregate Root 사용 (Entity 아님!)
  * - Port & Adapter 패턴 (Hexagonal Architecture)
  */
-export interface IUserRepository {
+export interface UserRepository {
   /**
    * ID로 User 조회
    */

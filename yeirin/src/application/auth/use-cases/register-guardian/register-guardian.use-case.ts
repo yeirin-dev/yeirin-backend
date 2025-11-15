@@ -7,7 +7,7 @@ import { Password } from '@domain/user/model/value-objects/password.vo';
 import { UserRole } from '@domain/user/model/value-objects/user-role.vo';
 import { PhoneNumber } from '@domain/user/model/value-objects/phone-number.vo';
 import { RealName } from '@domain/user/model/value-objects/real-name.vo';
-import { IUserRepository } from '@domain/user/repository/user.repository';
+import { UserRepository } from '@domain/user/repository/user.repository';
 import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { GuardianProfileEntity } from '@infrastructure/persistence/typeorm/entity/guardian-profile.entity';
 
@@ -46,8 +46,8 @@ export interface RegisterGuardianResult {
 @Injectable()
 export class RegisterGuardianUseCase {
   constructor(
-    @Inject('IUserRepository')
-    private readonly userRepository: IUserRepository,
+    @Inject('UserRepository')
+    private readonly userRepository: UserRepository,
     @Inject('GuardianProfileRepository')
     private readonly guardianProfileRepository: GuardianProfileRepository,
     private readonly dataSource: DataSource,

@@ -66,6 +66,45 @@ it('서류가 모두 검증되면 상담사를 승인한다')
 // 이벤트: 과거형 (CounselorApproved)
 ```
 
+### 6. Repository 네이밍 컨벤션 (필수 준수)
+```typescript
+// ✅ Domain Layer (인터페이스)
+// - I prefix 사용 금지 (TypeScript/NestJS 표준)
+// - 도메인 이름 그대로 사용
+export interface UserRepository { }
+export interface ChildRepository { }
+export interface GuardianProfileRepository { }
+
+// ✅ Infrastructure Layer (구현체)
+// - Impl suffix 사용 (Google, Netflix, Uber 표준)
+// - 프레임워크 독립적 네이밍 (TypeOrm, Mongo 등 기술명 제외)
+export class UserRepositoryImpl implements UserRepository { }
+export class ChildRepositoryImpl implements ChildRepository { }
+export class GuardianProfileRepositoryImpl implements GuardianProfileRepository { }
+
+// ✅ NestJS Module Provider 등록
+providers: [
+  {
+    provide: 'UserRepository',  // 토큰은 인터페이스 이름과 동일
+    useClass: UserRepositoryImpl,
+  },
+]
+
+// ✅ Dependency Injection
+constructor(
+  @Inject('UserRepository')
+  private readonly userRepository: UserRepository,
+) {}
+```
+
+**네이밍 컨벤션 선택 근거:**
+- **업계 표준**: Google, Netflix, Uber 등 빅테크 기업 표준 (`Impl` suffix)
+- **TypeScript 철학**: `I` prefix는 Java/C# 레거시, TypeScript에서는 불필요
+- **프레임워크 독립성**: TypeOrm, Prisma, Mongo 등 구체적 기술명 제외
+- **유연성**: ORM 변경 시에도 클래스명 그대로 유지 가능
+- **DDD 원칙**: 도메인 인터페이스가 핵심, 구현체는 세부사항
+- **가독성**: import 경로로 도메인/인프라 계층 구분 명확
+
 ## 🏗️ 폴더 구조
 ```
 src/

@@ -8,7 +8,7 @@ import { GuardianProfileEntity } from '@infrastructure/persistence/typeorm/entit
 import { VoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/voucher-institution.entity';
 import { CounselorProfileEntity } from '@infrastructure/persistence/typeorm/entity/counselor-profile.entity';
 import { UserRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/user.repository.impl';
-import { TypeOrmGuardianProfileRepository } from '@infrastructure/persistence/typeorm/repository/typeorm-guardian-profile.repository';
+import { GuardianProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/guardian-profile.repository.impl';
 import { InstitutionRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/institution.repository.impl';
 import { CounselorProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counselor-profile.repository.impl';
 import { JwtStrategy } from '@infrastructure/auth/strategies/jwt.strategy';
@@ -55,12 +55,12 @@ import { AuthController } from './auth.controller';
     // Infrastructure - Repositories
     JwtStrategy,
     {
-      provide: 'IUserRepository',
+      provide: 'UserRepository',
       useClass: UserRepositoryImpl,
     },
     {
       provide: 'GuardianProfileRepository',
-      useClass: TypeOrmGuardianProfileRepository,
+      useClass: GuardianProfileRepositoryImpl,
     },
     {
       provide: 'InstitutionRepository',

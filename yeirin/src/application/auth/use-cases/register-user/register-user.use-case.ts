@@ -6,7 +6,7 @@ import { Password } from '@domain/user/model/value-objects/password.vo';
 import { UserRole, UserRoleType } from '@domain/user/model/value-objects/user-role.vo';
 import { PhoneNumber } from '@domain/user/model/value-objects/phone-number.vo';
 import { RealName } from '@domain/user/model/value-objects/real-name.vo';
-import { IUserRepository } from '@domain/user/repository/user.repository';
+import { UserRepository } from '@domain/user/repository/user.repository';
 
 /**
  * 회원가입 Command (Input DTO)
@@ -28,8 +28,8 @@ export interface RegisterUserCommand {
 @Injectable()
 export class RegisterUserUseCase {
   constructor(
-    @Inject('IUserRepository')
-    private readonly userRepository: IUserRepository,
+    @Inject('UserRepository')
+    private readonly userRepository: UserRepository,
   ) {}
 
   /**
