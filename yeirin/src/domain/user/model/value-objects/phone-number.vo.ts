@@ -27,9 +27,7 @@ export class PhoneNumber {
 
     // 3. 형식 검증
     if (!this.PHONE_REGEX.test(digitsOnly)) {
-      return Result.fail(
-        new DomainError('올바른 전화번호 형식이 아닙니다 (010-xxxx-xxxx)'),
-      );
+      return Result.fail(new DomainError('올바른 전화번호 형식이 아닙니다 (010-xxxx-xxxx)'));
     }
 
     // 4. 하이픈 형식으로 변환

@@ -18,7 +18,18 @@ export interface UserRepository {
   /**
    * 사용자 생성
    */
-  create(user: Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt' | 'refreshToken' | 'isEmailVerified' | 'isActive' | 'lastLoginAt'>): Promise<UserEntity>;
+  create(
+    user: Omit<
+      UserEntity,
+      | 'id'
+      | 'createdAt'
+      | 'updatedAt'
+      | 'refreshToken'
+      | 'isEmailVerified'
+      | 'isActive'
+      | 'lastLoginAt'
+    >,
+  ): Promise<UserEntity>;
 
   /**
    * 사용자 정보 업데이트

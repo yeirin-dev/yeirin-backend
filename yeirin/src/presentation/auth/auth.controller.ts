@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '@application/auth/auth.service';
 import { RegisterDto } from '@application/auth/dto/register.dto';
@@ -28,7 +20,8 @@ export class AuthController {
   @ApiOperation({
     summary: '[DEPRECATED] 회원가입 - 역할별 엔드포인트 사용 권장',
     deprecated: true,
-    description: '⚠️ 이 엔드포인트는 곧 제거될 예정입니다. 역할별 회원가입 엔드포인트를 사용하세요: /auth/register/guardian, /auth/register/institution, /auth/register/counselor'
+    description:
+      '⚠️ 이 엔드포인트는 곧 제거될 예정입니다. 역할별 회원가입 엔드포인트를 사용하세요: /auth/register/guardian, /auth/register/institution, /auth/register/counselor',
   })
   @ApiResponse({ status: 201, description: '회원가입 성공', type: AuthResponseDto })
   @ApiResponse({ status: 409, description: '이메일 중복' })

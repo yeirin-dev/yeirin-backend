@@ -19,7 +19,8 @@ export class GetInstitutionUseCase {
     // 평균 평점 계산
     const averageRating =
       institution.reviews && institution.reviews.length > 0
-        ? institution.reviews.reduce((sum, review) => sum + review.rating, 0) / institution.reviews.length
+        ? institution.reviews.reduce((sum, review) => sum + review.rating, 0) /
+          institution.reviews.length
         : 0;
 
     return {

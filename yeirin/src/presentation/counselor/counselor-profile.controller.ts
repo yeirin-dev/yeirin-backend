@@ -12,7 +12,14 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
 import { CreateCounselorProfileDto } from '@application/counselor/dto/create-counselor-profile.dto';
 import { UpdateCounselorProfileDto } from '@application/counselor/dto/update-counselor-profile.dto';
@@ -40,10 +47,16 @@ export class CounselorProfileController {
   @Post()
   @ApiBearerAuth()
   @ApiOperation({ summary: '상담사 프로필 생성 (인증 필요)' })
-  @ApiResponse({ status: 201, description: '상담사 프로필 생성 성공', type: CounselorProfileResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: '상담사 프로필 생성 성공',
+    type: CounselorProfileResponseDto,
+  })
   @ApiResponse({ status: 400, description: '잘못된 요청' })
   @ApiResponse({ status: 401, description: '인증 필요' })
-  async createCounselorProfile(@Body() dto: CreateCounselorProfileDto): Promise<CounselorProfileResponseDto> {
+  async createCounselorProfile(
+    @Body() dto: CreateCounselorProfileDto,
+  ): Promise<CounselorProfileResponseDto> {
     return await this.createCounselorProfileUseCase.execute(dto);
   }
 
@@ -52,7 +65,11 @@ export class CounselorProfileController {
   @ApiOperation({ summary: '상담사 프로필 목록 조회 (공개)' })
   @ApiQuery({ name: 'page', required: false, description: '페이지 번호', example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: '페이지당 개수', example: 10 })
-  @ApiResponse({ status: 200, description: '상담사 프로필 목록 조회 성공', type: CounselorProfileListResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: '상담사 프로필 목록 조회 성공',
+    type: CounselorProfileListResponseDto,
+  })
   async getCounselorProfiles(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
@@ -64,7 +81,11 @@ export class CounselorProfileController {
   @Get(':id')
   @ApiOperation({ summary: '상담사 프로필 단건 조회 (공개)' })
   @ApiParam({ name: 'id', description: '상담사 ID' })
-  @ApiResponse({ status: 200, description: '상담사 프로필 조회 성공', type: CounselorProfileResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: '상담사 프로필 조회 성공',
+    type: CounselorProfileResponseDto,
+  })
   @ApiResponse({ status: 404, description: '상담사 프로필을 찾을 수 없음' })
   async getCounselorProfile(@Param('id') id: string): Promise<CounselorProfileResponseDto> {
     return await this.getCounselorProfileUseCase.execute(id);
@@ -74,7 +95,11 @@ export class CounselorProfileController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '상담사 프로필 수정 (본인 또는 ADMIN)' })
   @ApiParam({ name: 'id', description: '상담사 ID' })
-  @ApiResponse({ status: 200, description: '상담사 프로필 수정 성공', type: CounselorProfileResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: '상담사 프로필 수정 성공',
+    type: CounselorProfileResponseDto,
+  })
   @ApiResponse({ status: 401, description: '인증 필요' })
   @ApiResponse({ status: 403, description: '권한 없음 (본인 또는 ADMIN만 가능)' })
   @ApiResponse({ status: 404, description: '상담사 프로필을 찾을 수 없음' })

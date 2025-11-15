@@ -35,7 +35,10 @@ export class GuardianProfileRepositoryImpl implements GuardianProfileRepository 
     return this.repository.save(entity);
   }
 
-  async update(id: string, profile: Partial<GuardianProfileEntity>): Promise<GuardianProfileEntity> {
+  async update(
+    id: string,
+    profile: Partial<GuardianProfileEntity>,
+  ): Promise<GuardianProfileEntity> {
     await this.repository.update(id, profile);
     const updated = await this.findById(id);
     if (!updated) {

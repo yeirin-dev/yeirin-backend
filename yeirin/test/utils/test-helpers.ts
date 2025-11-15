@@ -61,9 +61,7 @@ export class TestRequest {
   authenticated(token: string) {
     return {
       get: (path: string) =>
-        request(this.app.getHttpServer())
-          .get(path)
-          .set('Authorization', `Bearer ${token}`),
+        request(this.app.getHttpServer()).get(path).set('Authorization', `Bearer ${token}`),
 
       post: (path: string, body?: any) =>
         request(this.app.getHttpServer())
@@ -84,9 +82,7 @@ export class TestRequest {
           .send(body),
 
       delete: (path: string) =>
-        request(this.app.getHttpServer())
-          .delete(path)
-          .set('Authorization', `Bearer ${token}`),
+        request(this.app.getHttpServer()).delete(path).set('Authorization', `Bearer ${token}`),
     };
   }
 }

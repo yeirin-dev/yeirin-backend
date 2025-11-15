@@ -71,7 +71,7 @@ describe('ReviewRepositoryImpl', () => {
     it('페이지네이션이 적용된 리뷰 목록을 반환한다', async () => {
       // Given
       const reviews = Array.from({ length: 5 }, (_, i) =>
-        ReviewFixture.createReviewEntity({ id: `review-${i}` })
+        ReviewFixture.createReviewEntity({ id: `review-${i}` }),
       );
       mockTypeOrmRepository.findAndCount.mockResolvedValue([reviews, 5]);
 
@@ -111,7 +111,7 @@ describe('ReviewRepositoryImpl', () => {
       // Given
       const institutionId = 'test-institution-id';
       const reviews = ReviewFixture.createMultipleReviewData(3).map((data, i) =>
-        ReviewFixture.createReviewEntity({ ...data, id: `review-${i}`, institutionId })
+        ReviewFixture.createReviewEntity({ ...data, id: `review-${i}`, institutionId }),
       );
       mockTypeOrmRepository.find.mockResolvedValue(reviews);
 
@@ -178,10 +178,7 @@ describe('ReviewRepositoryImpl', () => {
       // Then
       expect(result.content).toBe('수정된 리뷰 내용');
       expect(result.rating).toBe(4);
-      expect(mockTypeOrmRepository.update).toHaveBeenCalledWith(
-        existingReview.id,
-        updateData
-      );
+      expect(mockTypeOrmRepository.update).toHaveBeenCalledWith(existingReview.id, updateData);
     });
 
     it('존재하지 않는 리뷰 수정 시 에러를 발생시킨다', async () => {
@@ -190,9 +187,9 @@ describe('ReviewRepositoryImpl', () => {
       mockTypeOrmRepository.findOne.mockResolvedValue(null);
 
       // When & Then
-      await expect(
-        reviewRepository.update('non-existent-id', { content: '수정' })
-      ).rejects.toThrow('리뷰를 찾을 수 없습니다');
+      await expect(reviewRepository.update('non-existent-id', { content: '수정' })).rejects.toThrow(
+        '리뷰를 찾을 수 없습니다',
+      );
     });
   });
 
@@ -228,7 +225,7 @@ describe('ReviewRepositoryImpl', () => {
       expect(mockTypeOrmRepository.find).toHaveBeenCalledWith(
         expect.objectContaining({
           relations: ['institution'],
-        })
+        }),
       );
     });
   });
@@ -258,9 +255,9 @@ describe('ReviewRepositoryImpl', () => {
       mockTypeOrmRepository.findOne.mockResolvedValue(null);
 
       // When & Then
-      await expect(
-        reviewRepository.incrementHelpfulCount('non-existent-id')
-      ).rejects.toThrow('리뷰를 찾을 수 없습니다');
+      await expect(reviewRepository.incrementHelpfulCount('non-existent-id')).rejects.toThrow(
+        '리뷰를 찾을 수 없습니다',
+      );
     });
   });
 });

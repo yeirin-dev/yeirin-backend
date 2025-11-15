@@ -108,7 +108,7 @@ describe('CreateReviewUseCase', () => {
       expect(mockReviewRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: null,
-        })
+        }),
       );
     });
 

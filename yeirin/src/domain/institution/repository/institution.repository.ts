@@ -18,13 +18,19 @@ export interface InstitutionRepository {
    * 기관 생성
    */
   create(
-    institution: Omit<VoucherInstitutionEntity, 'id' | 'createdAt' | 'updatedAt' | 'counselorProfiles' | 'reviews' | 'user'>,
+    institution: Omit<
+      VoucherInstitutionEntity,
+      'id' | 'createdAt' | 'updatedAt' | 'counselorProfiles' | 'reviews' | 'user'
+    >,
   ): Promise<VoucherInstitutionEntity>;
 
   /**
    * 기관 정보 수정
    */
-  update(id: string, institution: Partial<VoucherInstitutionEntity>): Promise<VoucherInstitutionEntity>;
+  update(
+    id: string,
+    institution: Partial<VoucherInstitutionEntity>,
+  ): Promise<VoucherInstitutionEntity>;
 
   /**
    * 기관 삭제 (soft delete)

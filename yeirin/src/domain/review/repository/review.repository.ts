@@ -22,7 +22,9 @@ export interface ReviewRepository {
   /**
    * 리뷰 생성
    */
-  create(review: Omit<ReviewEntity, 'id' | 'createdAt' | 'updatedAt' | 'institution'>): Promise<ReviewEntity>;
+  create(
+    review: Omit<ReviewEntity, 'id' | 'createdAt' | 'updatedAt' | 'institution'>,
+  ): Promise<ReviewEntity>;
 
   /**
    * 리뷰 수정

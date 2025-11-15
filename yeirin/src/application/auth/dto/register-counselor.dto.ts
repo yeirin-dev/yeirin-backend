@@ -1,4 +1,15 @@
-import { IsEmail, IsString, MinLength, MaxLength, Matches, IsInt, IsArray, IsOptional, IsUUID, Min } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  MaxLength,
+  Matches,
+  IsInt,
+  IsArray,
+  IsOptional,
+  IsUUID,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -59,7 +70,11 @@ export class RegisterCounselorDto {
   @IsOptional()
   specialties?: string[];
 
-  @ApiProperty({ description: '소개', example: '10년 경력의 청소년 상담 전문가입니다.', required: false })
+  @ApiProperty({
+    description: '소개',
+    example: '10년 경력의 청소년 상담 전문가입니다.',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   introduction?: string;
