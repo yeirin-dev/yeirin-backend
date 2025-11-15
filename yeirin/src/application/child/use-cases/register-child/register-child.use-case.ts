@@ -3,7 +3,7 @@ import { Child } from '@domain/child/model/child';
 import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { BirthDate } from '@domain/child/model/value-objects/birth-date.vo';
 import { Gender } from '@domain/child/model/value-objects/gender.vo';
-import { IChildRepository } from '@domain/child/repository/child.repository';
+import { ChildRepository } from '@domain/child/repository/child.repository';
 import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { RegisterChildDto } from '../../dto/register-child.dto';
 import { ChildResponseDto } from '../../dto/child-response.dto';
@@ -16,8 +16,8 @@ import { ChildResponseDto } from '../../dto/child-response.dto';
 @Injectable()
 export class RegisterChildUseCase {
   constructor(
-    @Inject('IChildRepository')
-    private readonly childRepository: IChildRepository,
+    @Inject('ChildRepository')
+    private readonly childRepository: ChildRepository,
     @Inject('GuardianProfileRepository')
     private readonly guardianRepository: GuardianProfileRepository,
   ) {}

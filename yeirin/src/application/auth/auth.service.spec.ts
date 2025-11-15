@@ -86,7 +86,7 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         {
-          provide: 'IUserRepository',
+          provide: 'UserRepository',
           useValue: mockUserRepository,
         },
         {
@@ -119,7 +119,7 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
     registerUserUseCase = module.get<RegisterUserUseCase>(RegisterUserUseCase);
     jwtService = module.get<JwtService>(JwtService);
-    userRepository = module.get('IUserRepository');
+    userRepository = module.get('UserRepository');
 
     jest.clearAllMocks();
   });

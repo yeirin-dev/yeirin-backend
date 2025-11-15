@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IUserRepository } from '@domain/user/repository/user.repository';
+import { UserRepository } from '@domain/user/repository/user.repository';
 import { User } from '@domain/user/model/user';
 import { Email } from '@domain/user/model/value-objects/email.vo';
 import { UserEntity } from '../entity/user.entity';
@@ -9,12 +9,12 @@ import { UserMapper } from '../mapper/user.mapper';
 
 /**
  * User Repository 구현체 (Infrastructure Layer)
- * - IUserRepository 인터페이스 구현
+ * - UserRepository 인터페이스 구현
  * - TypeORM 의존성 캡슐화
  * - Domain User ↔ UserEntity 매핑
  */
 @Injectable()
-export class UserRepositoryImpl implements IUserRepository {
+export class UserRepositoryImpl implements UserRepository {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,

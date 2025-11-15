@@ -1,11 +1,11 @@
 import { RegisterUserUseCase, RegisterUserCommand } from './register-user.use-case';
-import { IUserRepository } from '@domain/user/repository/user.repository';
+import { UserRepository } from '@domain/user/repository/user.repository';
 import { Email } from '@domain/user/model/value-objects/email.vo';
 import { User } from '@domain/user/model/user';
 
 describe('RegisterUserUseCase', () => {
   let useCase: RegisterUserUseCase;
-  let mockUserRepository: jest.Mocked<IUserRepository>;
+  let mockUserRepository: jest.Mocked<UserRepository>;
 
   beforeEach(() => {
     mockUserRepository = {
