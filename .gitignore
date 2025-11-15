@@ -1,20 +1,20 @@
+# Separate Git Repositories
+yeirin-ai/
+
 # Dependencies
 node_modules/
 yeirin/node_modules/
-yeirin-ai/node_modules/
 
 # Build outputs
 dist/
 build/
 yeirin/dist/
-yeirin-ai/dist/
 
 # Environment variables
 .env
 .env.local
 .env.*.local
 yeirin/.env
-yeirin-ai/.env
 
 # Logs
 logs/
