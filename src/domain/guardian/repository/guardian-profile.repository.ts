@@ -40,4 +40,9 @@ export interface GuardianProfileRepository {
    * 소속 기관명으로 검색
    */
   findByOrganization(organizationName: string): Promise<GuardianProfileEntity[]>;
+
+  /**
+   * 보호자 프로필 존재 여부 확인
+   */
+  exists(id: string): Promise<boolean>;
 }
