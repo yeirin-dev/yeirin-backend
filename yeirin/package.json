@@ -86,10 +86,24 @@
       "node_modules/(?!uuid)"
     ],
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.module.ts",
+      "!main.ts",
+      "!**/*.entity.ts",
+      "!**/seed.ts",
+      "!**/config/**",
+      "!**/*.dto.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "branches": 45,
+        "functions": 50,
+        "lines": 48,
+        "statements": 47
+      }
+    },
     "moduleNameMapper": {
       "^@domain/(.*)$": "<rootDir>/domain/$1",
       "^@application/(.*)$": "<rootDir>/application/$1",
