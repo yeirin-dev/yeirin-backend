@@ -1,6 +1,6 @@
 import { Child } from './child';
-import { ChildName } from './value-objects/child-name.vo';
 import { BirthDate } from './value-objects/birth-date.vo';
+import { ChildName } from './value-objects/child-name.vo';
 import { Gender, GenderType } from './value-objects/gender.vo';
 
 describe('Child Aggregate Root', () => {

@@ -1,8 +1,8 @@
-import { MatchingRecommendation } from './matching-recommendation';
-import { InstitutionRecommendation } from './institution-recommendation';
 import { CounselRequestText } from '../value-object/counsel-request-text';
 import { InstitutionId } from '../value-object/institution-id';
 import { RecommendationScore } from '../value-object/recommendation-score';
+import { InstitutionRecommendation } from './institution-recommendation';
+import { MatchingRecommendation } from './matching-recommendation';
 
 describe('MatchingRecommendation', () => {
   const createSampleRecommendation = (id: string, score: number): InstitutionRecommendation => {

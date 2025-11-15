@@ -1,6 +1,6 @@
-import { AIRecommendationRepositoryImpl } from './ai-recommendation.repository.impl';
-import { AIRecommendationClient } from './ai-recommendation.client';
 import { CounselRequestText } from '@domain/matching/value-object/counsel-request-text';
+import { AIRecommendationClient } from './ai-recommendation.client';
+import { AIRecommendationRepositoryImpl } from './ai-recommendation.repository.impl';
 
 describe('AIRecommendationRepositoryImpl', () => {
   let repository: AIRecommendationRepositoryImpl;

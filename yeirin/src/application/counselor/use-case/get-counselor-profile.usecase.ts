@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CounselorProfileRepository } from '@domain/counselor/repository/counselor-profile.repository';
 import { CounselorProfileResponseDto } from '../dto/counselor-profile-response.dto';
 

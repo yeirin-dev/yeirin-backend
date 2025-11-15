@@ -1,22 +1,22 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
-import { UserEntity } from '@infrastructure/persistence/typeorm/entity/user.entity';
-import { GuardianProfileEntity } from '@infrastructure/persistence/typeorm/entity/guardian-profile.entity';
-import { VoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/voucher-institution.entity';
-import { CounselorProfileEntity } from '@infrastructure/persistence/typeorm/entity/counselor-profile.entity';
-import { UserRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/user.repository.impl';
-import { GuardianProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/guardian-profile.repository.impl';
-import { InstitutionRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/institution.repository.impl';
-import { CounselorProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counselor-profile.repository.impl';
-import { JwtStrategy } from '@infrastructure/auth/strategies/jwt.strategy';
 import { AuthService } from '@application/auth/auth.service';
-import { RegisterUserUseCase } from '@application/auth/use-cases/register-user/register-user.use-case';
+import { RegisterCounselorUseCase } from '@application/auth/use-cases/register-counselor/register-counselor.use-case';
 import { RegisterGuardianUseCase } from '@application/auth/use-cases/register-guardian/register-guardian.use-case';
 import { RegisterInstitutionUseCase } from '@application/auth/use-cases/register-institution/register-institution.use-case';
-import { RegisterCounselorUseCase } from '@application/auth/use-cases/register-counselor/register-counselor.use-case';
+import { RegisterUserUseCase } from '@application/auth/use-cases/register-user/register-user.use-case';
+import { JwtStrategy } from '@infrastructure/auth/strategies/jwt.strategy';
+import { CounselorProfileEntity } from '@infrastructure/persistence/typeorm/entity/counselor-profile.entity';
+import { GuardianProfileEntity } from '@infrastructure/persistence/typeorm/entity/guardian-profile.entity';
+import { UserEntity } from '@infrastructure/persistence/typeorm/entity/user.entity';
+import { VoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/voucher-institution.entity';
+import { CounselorProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counselor-profile.repository.impl';
+import { GuardianProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/guardian-profile.repository.impl';
+import { InstitutionRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/institution.repository.impl';
+import { UserRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/user.repository.impl';
 import { AuthController } from './auth.controller';
 
 /**

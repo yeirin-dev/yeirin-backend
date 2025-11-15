@@ -1,14 +1,14 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { Result, DomainError } from '@domain/common/result';
+import { DomainError, Result } from '@domain/common/result';
+import { InstitutionRepository } from '@domain/institution/repository/institution.repository';
 import { User } from '@domain/user/model/user';
 import { Email } from '@domain/user/model/value-objects/email.vo';
 import { Password } from '@domain/user/model/value-objects/password.vo';
-import { UserRole } from '@domain/user/model/value-objects/user-role.vo';
 import { PhoneNumber } from '@domain/user/model/value-objects/phone-number.vo';
 import { RealName } from '@domain/user/model/value-objects/real-name.vo';
+import { UserRole } from '@domain/user/model/value-objects/user-role.vo';
 import { UserRepository } from '@domain/user/repository/user.repository';
-import { InstitutionRepository } from '@domain/institution/repository/institution.repository';
 import { VoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/voucher-institution.entity';
 
 /**

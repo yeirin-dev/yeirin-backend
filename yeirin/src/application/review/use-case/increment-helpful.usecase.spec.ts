@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { IncrementHelpfulUseCase } from './increment-helpful.usecase';
+import { Test, TestingModule } from '@nestjs/testing';
 import { ReviewRepository } from '@domain/review/repository/review.repository';
 import { ReviewFixture } from '../../../../test/fixtures/review.fixture';
+import { IncrementHelpfulUseCase } from './increment-helpful.usecase';
 
 describe('IncrementHelpfulUseCase', () => {
   let useCase: IncrementHelpfulUseCase;
