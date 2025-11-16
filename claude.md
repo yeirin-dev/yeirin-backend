@@ -123,10 +123,32 @@ src/
 
 ## 🎨 코드 스타일
 - 함수: 10줄 이내
-- 클래스: 100줄 이내  
+- 클래스: 100줄 이내
 - 한 파일 한 책임
 - 주석보다 의미있는 이름
 - 중복보다 잘못된 추상화가 나쁨
+
+### Import 경로 규칙
+```typescript
+// ✅ 절대경로 사용 (Path Alias)
+import { User } from '@domain/user/model/user';
+import { UserRepository } from '@domain/user/repository/user.repository';
+import { AuthService } from '@application/auth/auth.service';
+import { UserEntity } from '@infrastructure/persistence/typeorm/entity/user.entity';
+import { AuthController } from '@presentation/auth/auth.controller';
+
+// ❌ 상대경로 사용 금지
+import { User } from '../../../domain/user/model/user';
+import { User } from './domain/user/model/user';
+```
+
+**이유**:
+- 코드 가독성 향상 (경로 명확성)
+- 파일 이동 시 import 수정 불필요
+- IDE 자동완성 향상
+- 계층 구조 명확화 (DDD 레이어 시각적 구분)
+
+**자동 적용**: `yarn lint --fix` 실행 시 자동으로 절대경로로 변환
 
 ## 💡 AI 어시스턴트 작업 지침
 1. **항상 테스트 코드부터 제시**
