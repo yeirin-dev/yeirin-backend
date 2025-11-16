@@ -13,18 +13,11 @@ export class CreateReviewDto {
   institutionId: string;
 
   @ApiProperty({
-    description: '작성자 ID (회원인 경우)',
+    description: '작성자 ID (바우처 이용 보호자)',
     example: '660e8400-e29b-41d4-a716-446655440000',
-    required: false,
   })
   @IsUUID()
-  @IsOptional()
-  userId?: string;
-
-  @ApiProperty({ description: '작성자 닉네임', example: '익명사용자' })
-  @IsString()
-  @MaxLength(50)
-  authorNickname: string;
+  userId: string;
 
   @ApiProperty({ description: '별점 (1-5)', example: 5, minimum: 1, maximum: 5 })
   @IsInt()

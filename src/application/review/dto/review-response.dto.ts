@@ -16,9 +16,6 @@ export class ReviewResponseDto {
   @ApiProperty({ description: '작성자 ID' })
   userId: string;
 
-  @ApiProperty({ description: '작성자 닉네임' })
-  authorNickname: string;
-
   @ApiProperty({ description: '별점 (1-5)' })
   rating: number;
 
