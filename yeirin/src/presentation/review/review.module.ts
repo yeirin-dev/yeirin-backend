@@ -1,13 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CreateReviewUseCase } from '@application/review/use-case/create-review.usecase';
-import { DeleteReviewUseCase } from '@application/review/use-case/delete-review.usecase';
-import { GetReviewUseCase } from '@application/review/use-case/get-review.usecase';
-import { GetReviewsUseCase } from '@application/review/use-case/get-reviews.usecase';
-import { IncrementHelpfulUseCase } from '@application/review/use-case/increment-helpful.usecase';
-import { UpdateReviewUseCase } from '@application/review/use-case/update-review.usecase';
+import { CreateReviewUseCase } from '@application/review/use-case/create-review/create-review.use-case';
+import { DeleteReviewUseCase } from '@application/review/use-case/delete-review/delete-review.use-case';
+import { UpdateReviewUseCase } from '@application/review/use-case/update-review/update-review.use-case';
 import { ReviewEntity } from '@infrastructure/persistence/typeorm/entity/review.entity';
-import { ReviewRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/review.repository.impl';
+import { ReviewRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/review.repository';
 import { ReviewController } from './review.controller';
 
 @Module({
@@ -22,10 +19,7 @@ import { ReviewController } from './review.controller';
     // UseCases
     CreateReviewUseCase,
     UpdateReviewUseCase,
-    GetReviewUseCase,
-    GetReviewsUseCase,
     DeleteReviewUseCase,
-    IncrementHelpfulUseCase,
   ],
   exports: ['ReviewRepository'],
 })
