@@ -9,9 +9,11 @@ import { LoggingInterceptor } from '@infrastructure/logging/logging.interceptor'
 import { AuthModule } from '@presentation/auth/auth.module';
 import { ChildModule } from '@presentation/child/child.module';
 import { CounselorProfileModule } from '@presentation/counselor/counselor-profile.module';
-import { InstitutionModule } from '@presentation/http/institution/institution.module';
-import { MatchingModule } from '@presentation/http/matching/matching.module';
+import { CounselRequestModule } from '@presentation/counsel-request/counsel-request.module';
+import { InstitutionModule } from '@presentation/institution/institution.module';
+import { MatchingModule } from '@presentation/matching/matching.module';
 import { ReviewModule } from '@presentation/review/review.module';
+import { UploadModule } from '@presentation/upload/upload.module';
 
 @Module({
   imports: [
@@ -31,11 +33,13 @@ import { ReviewModule } from '@presentation/review/review.module';
       },
     ]),
     AuthModule,
-    MatchingModule,
-    InstitutionModule,
-    CounselorProfileModule,
-    ReviewModule,
     ChildModule,
+    CounselRequestModule,
+    CounselorProfileModule,
+    InstitutionModule,
+    MatchingModule,
+    ReviewModule,
+    UploadModule,
   ],
   providers: [
     // 글로벌 JWT 가드 (모든 라우트에 적용, @Public()으로 제외 가능)
