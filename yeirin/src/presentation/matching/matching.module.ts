@@ -9,12 +9,16 @@ import { MatchingController } from './matching.controller';
 /**
  * 매칭 모듈
  * 상담기관 추천 관련 기능 제공
+ *
+ * DDD 패턴:
+ * - RequestCounselorRecommendationUseCase를 Domain Service로 export
+ * - 다른 Bounded Context(counsel-request)에서 재사용 가능
  */
 @Module({
   imports: [ConfigModule],
   controllers: [MatchingController],
   providers: [
-    // UseCase
+    // UseCase (Domain Service)
     RequestCounselorRecommendationUseCase,
 
     // External Services
@@ -25,6 +29,10 @@ import { MatchingController } from './matching.controller';
       provide: RECOMMENDATION_REPOSITORY,
       useClass: AIRecommendationRepositoryImpl,
     },
+  ],
+  exports: [
+    // 다른 도메인에서 AI 추천 서비스를 사용할 수 있도록 export
+    RequestCounselorRecommendationUseCase,
   ],
 })
 export class MatchingModule {}

@@ -36,7 +36,12 @@ async function bootstrap() {
   );
 
   // CORS 설정
-  app.enableCors();
+  app.enableCors({
+    origin: ['http://localhost:3001', 'http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
 
   // Swagger 설정
   const config = new DocumentBuilder()
@@ -44,11 +49,13 @@ async function bootstrap() {
     .setDescription('Yeirin 상담기관 매칭 플랫폼 API 문서')
     .setVersion('0.1.0')
     .addBearerAuth()
-    .addTag('인증', '사용자 인증/인가 API')
-    .addTag('matching', '상담기관 매칭 API')
-    .addTag('institutions', '바우처 기관 관리 API')
-    .addTag('counselors', '상담사 관리 API')
-    .addTag('reviews', '리뷰 관리 API')
+    .addTag('인증', '사용자 인증/인가 및 회원가입 API')
+    .addTag('아동 관리', '보호자의 아동 등록 및 조회 API')
+    .addTag('상담의뢰지', '상담의뢰지 생성, 조회, 매칭 및 상태 관리 API')
+    .addTag('상담사 관리', '상담사 프로필 생성, 조회, 수정, 삭제 API')
+    .addTag('바우처 기관', '바우처 공급기관 관리 API')
+    .addTag('상담 매칭', 'AI 기반 상담기관 추천 API')
+    .addTag('리뷰', '바우처 기관 리뷰 작성 및 관리 API')
     .addServer('http://localhost:3000', 'Local Development')
     .build();
 

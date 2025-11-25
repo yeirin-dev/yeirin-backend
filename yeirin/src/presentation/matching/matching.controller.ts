@@ -7,7 +7,7 @@ import { RequestCounselorRecommendationUseCase } from '@application/matching/use
 /**
  * 상담 매칭 Controller
  */
-@ApiTags('matching')
+@ApiTags('상담 매칭')
 @Controller('api/v1/matching')
 export class MatchingController {
   constructor(
