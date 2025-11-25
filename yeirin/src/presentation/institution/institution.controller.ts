@@ -34,7 +34,7 @@ import { Public } from '@infrastructure/auth/decorators/public.decorator';
 /**
  * 바우처 기관 Controller
  */
-@ApiTags('institutions')
+@ApiTags('바우처 기관')
 @Controller('api/v1/institutions')
 export class InstitutionController {
   constructor(

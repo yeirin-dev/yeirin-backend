@@ -33,7 +33,7 @@ import { GetCounselorProfilesUseCase } from '@application/counselor/use-case/get
 import { UpdateCounselorProfileUseCase } from '@application/counselor/use-case/update-counselor-profile.usecase';
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
 
-@ApiTags('상담사 프로필')
+@ApiTags('상담사 관리')
 @Controller('counselors')
 export class CounselorProfileController {
   constructor(
