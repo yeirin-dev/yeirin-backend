@@ -32,7 +32,7 @@ export class RegisterChildDto {
   gender: GenderType;
 
   @ApiPropertyOptional({
-    description: '보호자 ID (부모 또는 양육시설 교사)',
+    description: '보호자 ID (Controller에서 자동 주입, 클라이언트는 전송하지 않음)',
     example: 'guardian-uuid-123',
   })
   @ValidateIf((o) => !o.institutionId)
