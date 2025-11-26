@@ -11,31 +11,38 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateCounselRequestDto } from '@application/counsel-request/dto/create-counsel-request.dto';
-import { UpdateCounselRequestDto } from '@application/counsel-request/dto/update-counsel-request.dto';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CounselRequestResponseDto } from '@application/counsel-request/dto/counsel-request-response.dto';
-import { PaginationQueryDto } from '@application/counsel-request/dto/pagination-query.dto';
+import { CreateCounselRequestDto } from '@application/counsel-request/dto/create-counsel-request.dto';
 import { PaginatedResponseDto } from '@application/counsel-request/dto/paginated-response.dto';
+import { PaginationQueryDto } from '@application/counsel-request/dto/pagination-query.dto';
+import { SouliWebhookDto } from '@application/counsel-request/dto/souli-webhook.dto';
+import { UpdateCounselRequestDto } from '@application/counsel-request/dto/update-counsel-request.dto';
+import { CompleteCounselingUseCase } from '@application/counsel-request/use-cases/complete-counseling.usecase';
+import { CreateCounselRequestFromSouliUseCase } from '@application/counsel-request/use-cases/create-counsel-request-from-souli.usecase';
 import { CreateCounselRequestUseCase } from '@application/counsel-request/use-cases/create-counsel-request.usecase';
+import { DeleteCounselRequestUseCase } from '@application/counsel-request/use-cases/delete-counsel-request.usecase';
+import { GetCounselRequestRecommendationsUseCase } from '@application/counsel-request/use-cases/get-counsel-request-recommendations.usecase';
 import { GetCounselRequestUseCase } from '@application/counsel-request/use-cases/get-counsel-request.usecase';
 import { GetCounselRequestsByChildUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-by-child.usecase';
 import { GetCounselRequestsByGuardianUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-by-guardian.usecase';
 import { GetCounselRequestsPaginatedUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-paginated.usecase';
-import { UpdateCounselRequestUseCase } from '@application/counsel-request/use-cases/update-counsel-request.usecase';
-import { DeleteCounselRequestUseCase } from '@application/counsel-request/use-cases/delete-counsel-request.usecase';
 import { RequestCounselRequestRecommendationUseCase } from '@application/counsel-request/use-cases/request-counsel-request-recommendation.usecase';
-import { GetCounselRequestRecommendationsUseCase } from '@application/counsel-request/use-cases/get-counsel-request-recommendations.usecase';
 import { SelectRecommendedInstitutionUseCase } from '@application/counsel-request/use-cases/select-recommended-institution.usecase';
 import { StartCounselingUseCase } from '@application/counsel-request/use-cases/start-counseling.usecase';
-import { CompleteCounselingUseCase } from '@application/counsel-request/use-cases/complete-counseling.usecase';
-import { CreateCounselRequestFromSouliUseCase } from '@application/counsel-request/use-cases/create-counsel-request-from-souli.usecase';
-import { SouliWebhookDto } from '@application/counsel-request/dto/souli-webhook.dto';
-import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
+import { UpdateCounselRequestUseCase } from '@application/counsel-request/use-cases/update-counsel-request.usecase';
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
+import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 
 @ApiTags('상담의뢰지')
-@Controller('counsel-requests')
+@Controller('api/v1/counsel-requests')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class CounselRequestController {
@@ -74,7 +81,12 @@ export class CounselRequestController {
   @ApiOperation({ summary: '상담의뢰지 목록 조회 (페이지네이션 + 필터)' })
   @ApiQuery({ name: 'page', required: false, description: '페이지 번호 (1부터 시작)', example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: '페이지당 항목 수', example: 10 })
-  @ApiQuery({ name: 'status', required: false, description: '상태별 필터', enum: ['PENDING', 'MATCHED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED'] })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: '상태별 필터',
+    enum: ['PENDING', 'MATCHED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED'],
+  })
   @ApiResponse({
     status: 200,
     description: '조회 성공',

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { UploadController } from './upload.controller';
 import { S3Service } from '@infrastructure/storage/s3.service';
+import { UploadController } from './upload.controller';
 
 @Module({
   imports: [ConfigModule],

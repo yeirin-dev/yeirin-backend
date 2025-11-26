@@ -7,9 +7,12 @@ import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 import { getTypeOrmConfig } from '@infrastructure/config/typeorm.config';
 import { LoggingInterceptor } from '@infrastructure/logging/logging.interceptor';
 import { AuthModule } from '@presentation/auth/auth.module';
+import { CareFacilityModule } from '@presentation/care-facility/care-facility.module';
 import { ChildModule } from '@presentation/child/child.module';
-import { CounselorProfileModule } from '@presentation/counselor/counselor-profile.module';
+import { CommunityChildCenterModule } from '@presentation/community-child-center/community-child-center.module';
+import { CounselReportModule } from '@presentation/counsel-report/counsel-report.module';
 import { CounselRequestModule } from '@presentation/counsel-request/counsel-request.module';
+import { CounselorProfileModule } from '@presentation/counselor/counselor-profile.module';
 import { InstitutionModule } from '@presentation/institution/institution.module';
 import { MatchingModule } from '@presentation/matching/matching.module';
 import { ReviewModule } from '@presentation/review/review.module';
@@ -33,8 +36,11 @@ import { UploadModule } from '@presentation/upload/upload.module';
       },
     ]),
     AuthModule,
+    CareFacilityModule,
     ChildModule,
+    CommunityChildCenterModule,
     CounselRequestModule,
+    CounselReportModule,
     CounselorProfileModule,
     InstitutionModule,
     MatchingModule,

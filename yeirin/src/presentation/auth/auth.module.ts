@@ -9,10 +9,14 @@ import { RegisterGuardianUseCase } from '@application/auth/use-cases/register-gu
 import { RegisterInstitutionUseCase } from '@application/auth/use-cases/register-institution/register-institution.use-case';
 import { RegisterUserUseCase } from '@application/auth/use-cases/register-user/register-user.use-case';
 import { JwtStrategy } from '@infrastructure/auth/strategies/jwt.strategy';
+import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
+import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
 import { CounselorProfileEntity } from '@infrastructure/persistence/typeorm/entity/counselor-profile.entity';
 import { GuardianProfileEntity } from '@infrastructure/persistence/typeorm/entity/guardian-profile.entity';
 import { UserEntity } from '@infrastructure/persistence/typeorm/entity/user.entity';
 import { VoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/voucher-institution.entity';
+import { CareFacilityRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/care-facility.repository.impl';
+import { CommunityChildCenterRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/community-child-center.repository.impl';
 import { CounselorProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counselor-profile.repository.impl';
 import { GuardianProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/guardian-profile.repository.impl';
 import { InstitutionRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/institution.repository.impl';
@@ -31,6 +35,8 @@ import { AuthController } from './auth.controller';
       GuardianProfileEntity,
       VoucherInstitutionEntity,
       CounselorProfileEntity,
+      CareFacilityEntity,
+      CommunityChildCenterEntity,
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
@@ -69,6 +75,14 @@ import { AuthController } from './auth.controller';
     {
       provide: 'CounselorProfileRepository',
       useClass: CounselorProfileRepositoryImpl,
+    },
+    {
+      provide: 'CareFacilityRepository',
+      useClass: CareFacilityRepositoryImpl,
+    },
+    {
+      provide: 'CommunityChildCenterRepository',
+      useClass: CommunityChildCenterRepositoryImpl,
     },
   ],
   exports: [AuthService, JwtStrategy],
