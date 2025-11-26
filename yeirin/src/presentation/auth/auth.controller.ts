@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '@application/auth/auth.service';
 import { AuthResponseDto } from '@application/auth/dto/auth-response.dto';
@@ -7,11 +7,15 @@ import { RegisterCounselorDto } from '@application/auth/dto/register-counselor.d
 import { RegisterGuardianDto } from '@application/auth/dto/register-guardian.dto';
 import { RegisterInstitutionDto } from '@application/auth/dto/register-institution.dto';
 import { RegisterDto } from '@application/auth/dto/register.dto';
+import {
+  CurrentUser,
+  CurrentUserData,
+} from '@infrastructure/auth/decorators/current-user.decorator';
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 
 @ApiTags('인증')
-@Controller('auth')
+@Controller('api/v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -82,8 +86,8 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({ status: 204, description: '로그아웃 성공' })
-  async logout(@Request() req: any) {
-    await this.authService.logout(req.user.userId);
+  async logout(@CurrentUser('userId') userId: string) {
+    await this.authService.logout(userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -91,7 +95,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '현재 사용자 정보 조회' })
   @ApiResponse({ status: 200, description: '사용자 정보 조회 성공' })
-  async getMe(@Request() req: any) {
-    return req.user;
+  async getMe(@CurrentUser() user: CurrentUserData) {
+    return user;
   }
 }
