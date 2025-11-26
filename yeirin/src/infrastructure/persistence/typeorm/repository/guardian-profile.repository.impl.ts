@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
+import { GuardianType } from '../entity/enums/guardian-type.enum';
 import { GuardianProfileEntity } from '../entity/guardian-profile.entity';
 
 /**
@@ -17,19 +18,22 @@ export class GuardianProfileRepositoryImpl implements GuardianProfileRepository 
   async findById(id: string): Promise<GuardianProfileEntity | null> {
     return this.repository.findOne({
       where: { id },
-      relations: ['user'],
+      relations: ['user', 'careFacility', 'communityChildCenter'],
     });
   }
 
   async findByUserId(userId: string): Promise<GuardianProfileEntity | null> {
     return this.repository.findOne({
       where: { userId },
-      relations: ['user'],
+      relations: ['user', 'careFacility', 'communityChildCenter'],
     });
   }
 
   async create(
-    profile: Omit<GuardianProfileEntity, 'id' | 'createdAt' | 'updatedAt' | 'user'>,
+    profile: Omit<
+      GuardianProfileEntity,
+      'id' | 'createdAt' | 'updatedAt' | 'user' | 'careFacility' | 'communityChildCenter'
+    >,
   ): Promise<GuardianProfileEntity> {
     const entity = this.repository.create(profile);
     return this.repository.save(entity);
@@ -51,22 +55,43 @@ export class GuardianProfileRepositoryImpl implements GuardianProfileRepository 
     await this.repository.delete(id);
   }
 
-  async findByGuardianType(guardianType: 'TEACHER' | 'PARENT'): Promise<GuardianProfileEntity[]> {
+  async findByGuardianType(guardianType: GuardianType): Promise<GuardianProfileEntity[]> {
     return this.repository.find({
       where: { guardianType },
-      relations: ['user'],
+      relations: ['user', 'careFacility', 'communityChildCenter'],
     });
   }
 
-  async findByOrganization(organizationName: string): Promise<GuardianProfileEntity[]> {
+  async findByCareFacilityId(careFacilityId: string): Promise<GuardianProfileEntity[]> {
     return this.repository.find({
-      where: { organizationName },
-      relations: ['user'],
+      where: { careFacilityId },
+      relations: ['user', 'careFacility'],
+    });
+  }
+
+  async findByCommunityChildCenterId(
+    communityChildCenterId: string,
+  ): Promise<GuardianProfileEntity[]> {
+    return this.repository.find({
+      where: { communityChildCenterId },
+      relations: ['user', 'communityChildCenter'],
     });
   }
 
   async exists(id: string): Promise<boolean> {
     const count = await this.repository.count({ where: { id } });
     return count > 0;
+  }
+
+  async countByCareFacilityId(careFacilityId: string): Promise<number> {
+    return this.repository.count({
+      where: { careFacilityId },
+    });
+  }
+
+  async countByCommunityChildCenterId(communityChildCenterId: string): Promise<number> {
+    return this.repository.count({
+      where: { communityChildCenterId },
+    });
   }
 }

@@ -1,3 +1,4 @@
+import { GuardianType } from '@infrastructure/persistence/typeorm/entity/enums/guardian-type.enum';
 import { GuardianProfileEntity } from '@infrastructure/persistence/typeorm/entity/guardian-profile.entity';
 
 /**
@@ -18,7 +19,10 @@ export interface GuardianProfileRepository {
    * 보호자 프로필 생성
    */
   create(
-    profile: Omit<GuardianProfileEntity, 'id' | 'createdAt' | 'updatedAt' | 'user'>,
+    profile: Omit<
+      GuardianProfileEntity,
+      'id' | 'createdAt' | 'updatedAt' | 'user' | 'careFacility' | 'communityChildCenter'
+    >,
   ): Promise<GuardianProfileEntity>;
 
   /**
@@ -34,15 +38,30 @@ export interface GuardianProfileRepository {
   /**
    * 보호자 유형으로 검색
    */
-  findByGuardianType(guardianType: 'TEACHER' | 'PARENT'): Promise<GuardianProfileEntity[]>;
+  findByGuardianType(guardianType: GuardianType): Promise<GuardianProfileEntity[]>;
 
   /**
-   * 소속 기관명으로 검색
+   * 양육시설 ID로 소속 선생님 목록 조회
    */
-  findByOrganization(organizationName: string): Promise<GuardianProfileEntity[]>;
+  findByCareFacilityId(careFacilityId: string): Promise<GuardianProfileEntity[]>;
+
+  /**
+   * 지역아동센터 ID로 소속 선생님 목록 조회
+   */
+  findByCommunityChildCenterId(communityChildCenterId: string): Promise<GuardianProfileEntity[]>;
 
   /**
    * 보호자 프로필 존재 여부 확인
    */
   exists(id: string): Promise<boolean>;
+
+  /**
+   * 양육시설 소속 선생님 수 조회
+   */
+  countByCareFacilityId(careFacilityId: string): Promise<number>;
+
+  /**
+   * 지역아동센터 소속 선생님 수 조회
+   */
+  countByCommunityChildCenterId(communityChildCenterId: string): Promise<number>;
 }
