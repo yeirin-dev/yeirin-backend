@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
-import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 
 /**
  * 보호자 ID로 상담의뢰지 목록 조회 Use Case

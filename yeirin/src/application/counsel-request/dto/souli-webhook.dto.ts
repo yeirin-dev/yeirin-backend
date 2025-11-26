@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsObject, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { ConsentStatus } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import {
   BasicInfoDto,
   CoverInfoDto,
@@ -8,7 +9,6 @@ import {
   RequestMotivationDto,
   TestResultsDto,
 } from './create-counsel-request.dto';
-import { ConsentStatus } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 
 /**
  * 소울이 Webhook DTO

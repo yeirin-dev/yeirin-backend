@@ -25,12 +25,7 @@ export class PaginatedResponseDto<T> {
   @ApiProperty({ description: '다음 페이지 존재 여부', example: true })
   hasNextPage: boolean;
 
-  constructor(
-    data: T[],
-    total: number,
-    page: number,
-    limit: number,
-  ) {
+  constructor(data: T[], total: number, page: number, limit: number) {
     this.data = data;
     this.total = total;
     this.page = page;

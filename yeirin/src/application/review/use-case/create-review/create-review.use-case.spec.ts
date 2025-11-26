@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateReviewUseCase } from './create-review.use-case';
-import { ReviewRepository } from '@domain/review/repository/review.repository.interface';
 import { Review } from '@domain/review/model/review';
 import { Rating } from '@domain/review/model/value-objects/rating.vo';
 import { ReviewContent } from '@domain/review/model/value-objects/review-content.vo';
+import { ReviewRepository } from '@domain/review/repository/review.repository.interface';
+import { CreateReviewUseCase } from './create-review.use-case';
 
 describe('CreateReviewUseCase', () => {
   let useCase: CreateReviewUseCase;
@@ -76,9 +76,7 @@ describe('CreateReviewUseCase', () => {
       mockReviewRepository.existsByUserIdAndInstitutionId.mockResolvedValue(true);
 
       // When & Then
-      await expect(useCase.execute(dto)).rejects.toThrow(
-        '이미 해당 기관에 리뷰를 작성하셨습니다',
-      );
+      await expect(useCase.execute(dto)).rejects.toThrow('이미 해당 기관에 리뷰를 작성하셨습니다');
       expect(mockReviewRepository.save).not.toHaveBeenCalled();
     });
 
@@ -110,9 +108,7 @@ describe('CreateReviewUseCase', () => {
       mockReviewRepository.existsByUserIdAndInstitutionId.mockResolvedValue(false);
 
       // When & Then
-      await expect(useCase.execute(dto)).rejects.toThrow(
-        '리뷰 내용은 최소 10자 이상이어야 합니다',
-      );
+      await expect(useCase.execute(dto)).rejects.toThrow('리뷰 내용은 최소 10자 이상이어야 합니다');
       expect(mockReviewRepository.save).not.toHaveBeenCalled();
     });
   });

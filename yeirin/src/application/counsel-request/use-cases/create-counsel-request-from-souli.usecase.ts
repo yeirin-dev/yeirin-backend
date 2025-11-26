@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
-import { SouliWebhookDto } from '../dto/souli-webhook.dto';
 import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
-import { v4 as uuidv4 } from 'uuid';
+import { SouliWebhookDto } from '../dto/souli-webhook.dto';
 
 @Injectable()
 export class CreateCounselRequestFromSouliUseCase {

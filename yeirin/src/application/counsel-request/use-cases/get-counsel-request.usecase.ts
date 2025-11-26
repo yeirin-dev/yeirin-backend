@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
-import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 
 @Injectable()
 export class GetCounselRequestUseCase {

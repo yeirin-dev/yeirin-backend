@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { CounselRequestRecommendationRepository } from '@domain/counsel-request-recommendation/repository/counsel-request-recommendation.repository';
 import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
-import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 
 /**
  * 추천된 기관 중 하나 선택 Use Case

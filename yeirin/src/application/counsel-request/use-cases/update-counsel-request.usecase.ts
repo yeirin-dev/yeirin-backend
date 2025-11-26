@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
-import { UpdateCounselRequestDto } from '../dto/update-counsel-request.dto';
-import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
+import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
+import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
+import { UpdateCounselRequestDto } from '../dto/update-counsel-request.dto';
 
 @Injectable()
 export class UpdateCounselRequestUseCase {
