@@ -1,6 +1,6 @@
 import { DomainError, Result } from '@domain/common/result';
-import { CounselRequestFormData } from './value-objects/counsel-request-form-data';
 import { CareType, CounselRequestStatus } from './value-objects/counsel-request-enums';
+import { CounselRequestFormData } from './value-objects/counsel-request-form-data';
 
 /**
  * CounselRequest Aggregate Root

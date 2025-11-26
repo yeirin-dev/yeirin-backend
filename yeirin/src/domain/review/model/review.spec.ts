@@ -1,6 +1,6 @@
+import { Review } from './review';
 import { Rating } from './value-objects/rating.vo';
 import { ReviewContent } from './value-objects/review-content.vo';
-import { Review } from './review';
 
 describe('Review Aggregate Root', () => {
   describe('생성', () => {
@@ -10,7 +10,9 @@ describe('Review Aggregate Root', () => {
         institutionId: 'inst-123',
         userId: 'user-456',
         rating: Rating.create(5).value,
-        content: ReviewContent.create('정말 좋은 상담 기관입니다. 상담사 선생님들이 매우 친절하십니다.').value,
+        content: ReviewContent.create(
+          '정말 좋은 상담 기관입니다. 상담사 선생님들이 매우 친절하십니다.',
+        ).value,
       };
 
       // When
@@ -95,7 +97,9 @@ describe('Review Aggregate Root', () => {
         content: ReviewContent.create('좋은 상담 기관입니다').value,
       }).value;
 
-      const newContent = ReviewContent.create('매우 만족스러운 상담이었습니다. 강력 추천합니다!').value;
+      const newContent = ReviewContent.create(
+        '매우 만족스러운 상담이었습니다. 강력 추천합니다!',
+      ).value;
 
       // When
       const result = review.updateContent(newContent);
