@@ -31,6 +31,7 @@ export class ChildProfileEntity {
   @Column({
     type: 'enum',
     enum: ChildType,
+    default: ChildType.REGULAR,
   })
   childType: ChildType;
 

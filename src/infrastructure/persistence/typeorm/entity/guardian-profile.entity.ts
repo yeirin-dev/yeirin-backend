@@ -48,6 +48,7 @@ export class GuardianProfileEntity {
   @Column({
     type: 'enum',
     enum: GuardianType,
+    default: GuardianType.PARENT,
   })
   guardianType: GuardianType;
 
