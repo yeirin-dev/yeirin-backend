@@ -79,17 +79,15 @@ export class Review extends AggregateRoot<ReviewProps> {
 
     const now = new Date();
 
-    const review = new Review(
-      {
-        institutionId: props.institutionId,
-        userId: props.userId,
-        rating: props.rating,
-        content: props.content,
-        helpfulCount: 0,
-        createdAt: now,
-        updatedAt: now,
-      },
-    );
+    const review = new Review({
+      institutionId: props.institutionId,
+      userId: props.userId,
+      rating: props.rating,
+      content: props.content,
+      helpfulCount: 0,
+      createdAt: now,
+      updatedAt: now,
+    });
 
     return Result.ok(review);
   }

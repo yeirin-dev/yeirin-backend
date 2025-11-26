@@ -9,13 +9,7 @@ import {
   Put,
   Req,
 } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateReviewDto } from '@application/review/dto/create-review.dto';
 import { ReviewResponseDto } from '@application/review/dto/review-response.dto';
 import { UpdateReviewDto } from '@application/review/dto/update-review.dto';
@@ -24,7 +18,7 @@ import { DeleteReviewUseCase } from '@application/review/use-case/delete-review/
 import { UpdateReviewUseCase } from '@application/review/use-case/update-review/update-review.use-case';
 
 @ApiTags('리뷰')
-@Controller('reviews')
+@Controller('api/v1/reviews')
 @ApiBearerAuth()
 export class ReviewController {
   constructor(
@@ -38,10 +32,7 @@ export class ReviewController {
   @ApiResponse({ status: 201, description: '리뷰 생성 성공', type: ReviewResponseDto })
   @ApiResponse({ status: 400, description: '잘못된 요청' })
   @ApiResponse({ status: 409, description: '이미 리뷰를 작성함' })
-  async createReview(
-    @Body() dto: CreateReviewDto,
-    @Req() req: any,
-  ): Promise<ReviewResponseDto> {
+  async createReview(@Body() dto: CreateReviewDto, @Req() req: any): Promise<ReviewResponseDto> {
     // JWT에서 userId 추출 (추후 구현)
     const userId = req.user?.userId || dto.userId;
     return await this.createReviewUseCase.execute({ ...dto, userId });

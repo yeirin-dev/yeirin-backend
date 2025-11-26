@@ -4,7 +4,8 @@ describe('ReviewContent Value Object', () => {
   describe('생성', () => {
     it('유효한 리뷰 내용(10-1000자)이면 ReviewContent를 생성한다', () => {
       // Given
-      const validContent = '정말 좋은 상담 기관입니다. 상담사 선생님이 친절하시고 아이도 좋아합니다.';
+      const validContent =
+        '정말 좋은 상담 기관입니다. 상담사 선생님이 친절하시고 아이도 좋아합니다.';
 
       // When
       const result = ReviewContent.create(validContent);

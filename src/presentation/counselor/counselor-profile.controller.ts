@@ -34,7 +34,7 @@ import { UpdateCounselorProfileUseCase } from '@application/counselor/use-case/u
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
 
 @ApiTags('상담사 관리')
-@Controller('counselors')
+@Controller('api/v1/counselors')
 export class CounselorProfileController {
   constructor(
     private readonly createCounselorProfileUseCase: CreateCounselorProfileUseCase,

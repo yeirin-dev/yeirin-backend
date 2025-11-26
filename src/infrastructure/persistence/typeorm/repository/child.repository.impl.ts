@@ -44,9 +44,18 @@ export class ChildRepositoryImpl implements ChildRepository {
     return entities.map((entity) => ChildMapper.toDomain(entity));
   }
 
-  async findByInstitutionId(institutionId: string): Promise<Child[]> {
+  async findByCareFacilityId(careFacilityId: string): Promise<Child[]> {
     const entities = await this.childRepository.find({
-      where: { institutionId },
+      where: { careFacilityId },
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => ChildMapper.toDomain(entity));
+  }
+
+  async findByCommunityChildCenterId(communityChildCenterId: string): Promise<Child[]> {
+    const entities = await this.childRepository.find({
+      where: { communityChildCenterId },
       order: { createdAt: 'DESC' },
     });
 
@@ -63,5 +72,23 @@ export class ChildRepositoryImpl implements ChildRepository {
     });
 
     return count > 0;
+  }
+
+  async countByGuardianId(guardianId: string): Promise<number> {
+    return this.childRepository.count({
+      where: { guardianId },
+    });
+  }
+
+  async countByCareFacilityId(careFacilityId: string): Promise<number> {
+    return this.childRepository.count({
+      where: { careFacilityId },
+    });
+  }
+
+  async countByCommunityChildCenterId(communityChildCenterId: string): Promise<number> {
+    return this.childRepository.count({
+      where: { communityChildCenterId },
+    });
   }
 }

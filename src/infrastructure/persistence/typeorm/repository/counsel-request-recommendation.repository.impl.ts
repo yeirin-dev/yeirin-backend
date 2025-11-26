@@ -18,9 +18,7 @@ export class CounselRequestRecommendationRepositoryImpl
     private readonly repository: Repository<CounselRequestRecommendationEntity>,
   ) {}
 
-  async save(
-    recommendation: CounselRequestRecommendation,
-  ): Promise<CounselRequestRecommendation> {
+  async save(recommendation: CounselRequestRecommendation): Promise<CounselRequestRecommendation> {
     const entity = CounselRequestRecommendationMapper.toEntity(recommendation);
     const saved = await this.repository.save(entity);
     return CounselRequestRecommendationMapper.toDomain(saved);
@@ -29,16 +27,12 @@ export class CounselRequestRecommendationRepositoryImpl
   async saveAll(
     recommendations: CounselRequestRecommendation[],
   ): Promise<CounselRequestRecommendation[]> {
-    const entities = recommendations.map((rec) =>
-      CounselRequestRecommendationMapper.toEntity(rec),
-    );
+    const entities = recommendations.map((rec) => CounselRequestRecommendationMapper.toEntity(rec));
     const saved = await this.repository.save(entities);
     return saved.map((entity) => CounselRequestRecommendationMapper.toDomain(entity));
   }
 
-  async findByCounselRequestId(
-    counselRequestId: string,
-  ): Promise<CounselRequestRecommendation[]> {
+  async findByCounselRequestId(counselRequestId: string): Promise<CounselRequestRecommendation[]> {
     const entities = await this.repository.find({
       where: { counselRequestId },
       order: { rank: 'ASC' }, // rank 순 정렬

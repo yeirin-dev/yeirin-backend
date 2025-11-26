@@ -8,16 +8,23 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { S3Service } from '@infrastructure/storage/s3.service';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
+import { S3Service } from '@infrastructure/storage/s3.service';
 
 /**
  * 파일 업로드 Controller
  * Presentation Layer - 파일 업로드 API 엔드포인트
  */
 @ApiTags('파일 업로드')
-@Controller('upload')
+@Controller('api/v1/upload')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class UploadController {
@@ -35,7 +42,10 @@ export class UploadController {
       },
       fileFilter: (req, file, callback) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
-          return callback(new BadRequestException('이미지 파일만 업로드 가능합니다 (jpg, jpeg, png, gif, webp)'), false);
+          return callback(
+            new BadRequestException('이미지 파일만 업로드 가능합니다 (jpg, jpeg, png, gif, webp)'),
+            false,
+          );
         }
         callback(null, true);
       },
@@ -61,7 +71,11 @@ export class UploadController {
     schema: {
       type: 'object',
       properties: {
-        url: { type: 'string', example: 'https://yeirin-counsel-requests.s3.ap-northeast-2.amazonaws.com/counsel-requests/uuid.jpg' },
+        url: {
+          type: 'string',
+          example:
+            'https://yeirin-counsel-requests.s3.ap-northeast-2.amazonaws.com/counsel-requests/uuid.jpg',
+        },
       },
     },
   })
@@ -89,7 +103,10 @@ export class UploadController {
       },
       fileFilter: (req, file, callback) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
-          return callback(new BadRequestException('이미지 파일만 업로드 가능합니다 (jpg, jpeg, png, gif, webp)'), false);
+          return callback(
+            new BadRequestException('이미지 파일만 업로드 가능합니다 (jpg, jpeg, png, gif, webp)'),
+            false,
+          );
         }
         callback(null, true);
       },

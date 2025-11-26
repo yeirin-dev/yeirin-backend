@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { DeleteReviewUseCase } from './delete-review.use-case';
-import { ReviewRepository } from '@domain/review/repository/review.repository.interface';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Review } from '@domain/review/model/review';
 import { Rating } from '@domain/review/model/value-objects/rating.vo';
 import { ReviewContent } from '@domain/review/model/value-objects/review-content.vo';
+import { ReviewRepository } from '@domain/review/repository/review.repository.interface';
+import { DeleteReviewUseCase } from './delete-review.use-case';
 
 describe('DeleteReviewUseCase', () => {
   let useCase: DeleteReviewUseCase;
@@ -59,9 +59,7 @@ describe('DeleteReviewUseCase', () => {
       mockReviewRepository.findById.mockResolvedValue(null);
 
       // When & Then
-      await expect(
-        useCase.execute('non-existent', 'user-456'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(useCase.execute('non-existent', 'user-456')).rejects.toThrow(NotFoundException);
       expect(mockReviewRepository.delete).not.toHaveBeenCalled();
     });
 
@@ -77,9 +75,7 @@ describe('DeleteReviewUseCase', () => {
       mockReviewRepository.findById.mockResolvedValue(review);
 
       // When & Then
-      await expect(
-        useCase.execute('review-123', 'other-user'),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(useCase.execute('review-123', 'other-user')).rejects.toThrow(ForbiddenException);
       expect(mockReviewRepository.delete).not.toHaveBeenCalled();
     });
   });

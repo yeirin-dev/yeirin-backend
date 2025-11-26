@@ -13,9 +13,7 @@ export interface CounselRequestRecommendationRepository {
   /**
    * 추천 목록 저장 (벌크)
    */
-  saveAll(
-    recommendations: CounselRequestRecommendation[],
-  ): Promise<CounselRequestRecommendation[]>;
+  saveAll(recommendations: CounselRequestRecommendation[]): Promise<CounselRequestRecommendation[]>;
 
   /**
    * 상담의뢰지 ID로 추천 목록 조회 (rank 순)

@@ -5,11 +5,14 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUUID,
   Matches,
   MaxLength,
   Min,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
+import { GuardianType } from '@infrastructure/persistence/typeorm/entity/enums/guardian-type.enum';
 
 /**
  * 보호자 회원가입 DTO
@@ -21,7 +24,10 @@ export class RegisterGuardianDto {
   @IsEmail({}, { message: '올바른 이메일 형식이 아닙니다' })
   email: string;
 
-  @ApiProperty({ example: 'Test1234!@#', description: '비밀번호 (최소 8자, 영문+숫자+특수문자)' })
+  @ApiProperty({
+    example: 'Test1234!@#',
+    description: '비밀번호 (최소 8자, 영문+숫자+특수문자)',
+  })
   @IsString()
   @MinLength(8, { message: '비밀번호는 최소 8자 이상이어야 합니다' })
   @MaxLength(100, { message: '비밀번호는 최대 100자까지 가능합니다' })
@@ -44,21 +50,37 @@ export class RegisterGuardianDto {
   phoneNumber: string;
 
   // ========== GuardianProfile 정보 ==========
-  @ApiProperty({ example: 'OO어린이집', description: '소속 기관명 (선택)', required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100, { message: '기관명은 최대 100자까지 가능합니다' })
-  organizationName?: string;
-
   @ApiProperty({
     example: 'PARENT',
     description: '보호자 유형',
-    enum: ['TEACHER', 'PARENT'],
+    enum: GuardianType,
   })
-  @IsEnum(['TEACHER', 'PARENT'], { message: '유효하지 않은 보호자 유형입니다' })
-  guardianType: 'TEACHER' | 'PARENT';
+  @IsEnum(GuardianType, { message: '유효하지 않은 보호자 유형입니다' })
+  guardianType: GuardianType;
 
-  @ApiProperty({ example: 3, description: '담당 아동 수 (교사의 경우, 선택)', required: false })
+  @ApiProperty({
+    example: 'uuid',
+    description: '양육시설 ID (CARE_FACILITY_TEACHER인 경우 필수)',
+    required: false,
+  })
+  @ValidateIf((o) => o.guardianType === GuardianType.CARE_FACILITY_TEACHER)
+  @IsUUID('4', { message: '유효한 양육시설 ID가 아닙니다' })
+  careFacilityId?: string;
+
+  @ApiProperty({
+    example: 'uuid',
+    description: '지역아동센터 ID (COMMUNITY_CENTER_TEACHER인 경우 필수)',
+    required: false,
+  })
+  @ValidateIf((o) => o.guardianType === GuardianType.COMMUNITY_CENTER_TEACHER)
+  @IsUUID('4', { message: '유효한 지역아동센터 ID가 아닙니다' })
+  communityChildCenterId?: string;
+
+  @ApiProperty({
+    example: 3,
+    description: '담당 아동 수 (선생님의 경우, 선택)',
+    required: false,
+  })
   @IsOptional()
   @IsInt({ message: '아동 수는 정수여야 합니다' })
   @Min(0, { message: '아동 수는 0 이상이어야 합니다' })
@@ -74,19 +96,31 @@ export class RegisterGuardianDto {
   @MaxLength(200, { message: '주소는 최대 200자까지 가능합니다' })
   address?: string;
 
-  @ApiProperty({ example: '101동 101호', description: '상세 주소 (선택)', required: false })
+  @ApiProperty({
+    example: '101동 101호',
+    description: '상세 주소 (선택)',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100, { message: '상세 주소는 최대 100자까지 가능합니다' })
   addressDetail?: string;
 
-  @ApiProperty({ example: '06234', description: '우편번호 (선택)', required: false })
+  @ApiProperty({
+    example: '06234',
+    description: '우편번호 (선택)',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(10, { message: '우편번호는 최대 10자까지 가능합니다' })
   postalCode?: string;
 
-  @ApiProperty({ example: '추가 정보', description: '비고 (선택)', required: false })
+  @ApiProperty({
+    example: '추가 정보',
+    description: '비고 (선택)',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   notes?: string;

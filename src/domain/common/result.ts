@@ -90,9 +90,12 @@ export class Result<T, E = Error> {
  * Domain Error 기본 클래스
  */
 export class DomainError extends Error {
-  constructor(message: string) {
+  public readonly code?: string;
+
+  constructor(message: string, code?: string) {
     super(message);
     this.name = this.constructor.name;
+    this.code = code;
     Error.captureStackTrace(this, this.constructor);
   }
 }

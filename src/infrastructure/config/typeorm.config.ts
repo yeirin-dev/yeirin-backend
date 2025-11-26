@@ -1,8 +1,10 @@
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { CareFacilityEntity } from '../persistence/typeorm/entity/care-facility.entity';
 import { ChildProfileEntity } from '../persistence/typeorm/entity/child-profile.entity';
-import { CounselRequestEntity } from '../persistence/typeorm/entity/counsel-request.entity';
+import { CommunityChildCenterEntity } from '../persistence/typeorm/entity/community-child-center.entity';
 import { CounselRequestRecommendationEntity } from '../persistence/typeorm/entity/counsel-request-recommendation.entity';
+import { CounselRequestEntity } from '../persistence/typeorm/entity/counsel-request.entity';
 import { CounselorProfileEntity } from '../persistence/typeorm/entity/counselor-profile.entity';
 import { GuardianProfileEntity } from '../persistence/typeorm/entity/guardian-profile.entity';
 import { ReviewEntity } from '../persistence/typeorm/entity/review.entity';
@@ -28,6 +30,8 @@ export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOpt
       ChildProfileEntity,
       CounselRequestEntity,
       CounselRequestRecommendationEntity,
+      CareFacilityEntity,
+      CommunityChildCenterEntity,
     ],
     synchronize: isDevelopment,
     logging: isDevelopment,
