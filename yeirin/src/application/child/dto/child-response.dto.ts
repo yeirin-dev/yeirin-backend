@@ -12,6 +12,13 @@ export class ChildResponseDto {
   id: string;
 
   @ApiProperty({
+    description: '아동 유형',
+    example: 'REGULAR',
+    enum: ['CARE_FACILITY', 'COMMUNITY_CENTER', 'REGULAR'],
+  })
+  childType: string;
+
+  @ApiProperty({
     description: '아동 이름',
     example: '김철수',
   })
@@ -35,25 +42,38 @@ export class ChildResponseDto {
   })
   age: number;
 
+  // ========== 기관 연결 ==========
+
   @ApiPropertyOptional({
-    description: '보호자 ID',
-    example: 'guardian-uuid-123',
+    description: '양육시설 ID (CARE_FACILITY 유형만 해당)',
+    example: 'care-facility-uuid-123',
+    nullable: true,
+  })
+  careFacilityId: string | null;
+
+  @ApiPropertyOptional({
+    description: '지역아동센터 ID (COMMUNITY_CENTER 유형만 해당)',
+    example: 'community-center-uuid-456',
+    nullable: true,
+  })
+  communityChildCenterId: string | null;
+
+  // ========== 부모(보호자) 연결 ==========
+
+  @ApiPropertyOptional({
+    description: '부모 보호자 ID (COMMUNITY_CENTER, REGULAR 유형만 해당)',
+    example: 'guardian-uuid-789',
     nullable: true,
   })
   guardianId: string | null;
 
-  @ApiPropertyOptional({
-    description: '양육시설 ID',
-    example: 'institution-uuid-456',
-    nullable: true,
-  })
-  institutionId: string | null;
-
   @ApiProperty({
-    description: '고아 여부',
+    description: '고아 여부 (CARE_FACILITY 유형이면 true)',
     example: false,
   })
   isOrphan: boolean;
+
+  // ========== 추가 정보 ==========
 
   @ApiPropertyOptional({
     description: '의료 정보',
@@ -87,12 +107,14 @@ export class ChildResponseDto {
   static fromDomain(child: Child): ChildResponseDto {
     const dto = new ChildResponseDto();
     dto.id = child.id;
+    dto.childType = child.childType.value;
     dto.name = child.name.value;
     dto.birthDate = child.birthDate.value.toISOString().split('T')[0];
     dto.gender = child.gender.value;
     dto.age = child.getAge();
+    dto.careFacilityId = child.careFacilityId;
+    dto.communityChildCenterId = child.communityChildCenterId;
     dto.guardianId = child.guardianId;
-    dto.institutionId = child.institutionId;
     dto.isOrphan = child.isOrphan;
     dto.medicalInfo = child.medicalInfo;
     dto.specialNeeds = child.specialNeeds;
