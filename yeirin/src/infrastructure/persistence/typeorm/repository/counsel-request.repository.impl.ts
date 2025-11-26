@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
-import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { CounselRequestStatus } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
+import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { CounselRequestEntity } from '../entity/counsel-request.entity';
 import { CounselRequestMapper } from '../mapper/counsel-request.mapper';
 

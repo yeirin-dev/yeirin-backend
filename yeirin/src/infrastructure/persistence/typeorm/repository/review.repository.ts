@@ -51,10 +51,7 @@ export class ReviewRepositoryImpl implements ReviewRepository {
     return ReviewMapper.toDomainList(entities);
   }
 
-  async existsByUserIdAndInstitutionId(
-    userId: string,
-    institutionId: string,
-  ): Promise<boolean> {
+  async existsByUserIdAndInstitutionId(userId: string, institutionId: string): Promise<boolean> {
     const count = await this.repository.count({
       where: { userId, institutionId },
     });
@@ -62,10 +59,7 @@ export class ReviewRepositoryImpl implements ReviewRepository {
     return count > 0;
   }
 
-  async findAll(
-    page: number,
-    limit: number,
-  ): Promise<{ reviews: Review[]; total: number }> {
+  async findAll(page: number, limit: number): Promise<{ reviews: Review[]; total: number }> {
     const [entities, total] = await this.repository.findAndCount({
       relations: ['institution'],
       skip: (page - 1) * limit,

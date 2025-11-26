@@ -32,7 +32,9 @@ export class S3Service {
     this.bucketName = this.configService.getOrThrow<string>('AWS_S3_BUCKET_NAME');
     this.baseUrl = this.configService.getOrThrow<string>('AWS_S3_BASE_URL');
 
-    this.logger.log(`S3 서비스 초기화 완료 - Bucket: ${this.bucketName}, Endpoint: ${endpoint || 'AWS S3'}`);
+    this.logger.log(
+      `S3 서비스 초기화 완료 - Bucket: ${this.bucketName}, Endpoint: ${endpoint || 'AWS S3'}`,
+    );
   }
 
   /**
