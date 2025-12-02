@@ -1,12 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsDateString,
-  IsEnum,
-  IsOptional,
-  IsString,
-  IsUUID,
-  ValidateIf,
-} from 'class-validator';
+import { IsDateString, IsEnum, IsOptional, IsString, IsUUID, ValidateIf } from 'class-validator';
 import { GenderType } from '@domain/child/model/value-objects/gender.vo';
 import { ChildType } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';
 

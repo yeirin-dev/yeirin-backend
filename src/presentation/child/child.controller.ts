@@ -9,11 +9,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { ChildResponseDto } from '@application/child/dto/child-response.dto';
 import { RegisterChildDto } from '@application/child/dto/register-child.dto';
 import { GetChildrenByGuardianUseCase } from '@application/child/use-cases/get-children-by-guardian/get-children-by-guardian.use-case';
 import { RegisterChildUseCase } from '@application/child/use-cases/register-child/register-child.use-case';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { CurrentUser } from '@infrastructure/auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 import { ChildType } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';

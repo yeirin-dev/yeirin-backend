@@ -10,6 +10,7 @@ import {
 import { CareFacilityEntity } from './care-facility.entity';
 import { CommunityChildCenterEntity } from './community-child-center.entity';
 import { ChildType } from './enums/child-type.enum';
+import { PsychologicalStatus } from './enums/psychological-status.enum';
 import { GuardianProfileEntity } from './guardian-profile.entity';
 
 /**
@@ -116,6 +117,19 @@ export class ChildProfileEntity {
    */
   @Column({ type: 'text', nullable: true })
   specialNeeds: string | null;
+
+  /**
+   * 심리 상태 (Soul-E 챗봇에서 감지)
+   * - NORMAL: 일반 (정상 상태)
+   * - AT_RISK: 위험 (관심 필요)
+   * - HIGH_RISK: 고위험 (즉시 개입 필요)
+   */
+  @Column({
+    type: 'enum',
+    enum: PsychologicalStatus,
+    default: PsychologicalStatus.NORMAL,
+  })
+  psychologicalStatus: PsychologicalStatus;
 
   @CreateDateColumn()
   createdAt: Date;
