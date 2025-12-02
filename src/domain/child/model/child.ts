@@ -5,6 +5,10 @@ import { BirthDate } from './value-objects/birth-date.vo';
 import { ChildName } from './value-objects/child-name.vo';
 import { ChildType, ChildTypeValue } from './value-objects/child-type.vo';
 import { Gender } from './value-objects/gender.vo';
+import {
+  PsychologicalStatus,
+  PsychologicalStatusValue,
+} from './value-objects/psychological-status.vo';
 
 /**
  * Child 생성 Props
@@ -22,6 +26,8 @@ export interface ChildProps {
   // 추가 정보
   medicalInfo?: string; // 의료 정보 (선택)
   specialNeeds?: string; // 특수 요구사항 (선택)
+  // 심리 상태 (Soul-E 챗봇에서 감지)
+  psychologicalStatus?: PsychologicalStatus; // 심리 상태 (기본값: NORMAL)
 }
 
 /**
@@ -62,6 +68,9 @@ export class Child extends AggregateRoot {
   private _medicalInfo: string | null;
   private _specialNeeds: string | null;
 
+  // 심리 상태 (Soul-E 챗봇에서 감지)
+  private _psychologicalStatus: PsychologicalStatus;
+
   // 타임스탬프
   private readonly _createdAt: Date;
   private _updatedAt: Date;
@@ -78,6 +87,7 @@ export class Child extends AggregateRoot {
     this._guardianId = props.guardianId;
     this._medicalInfo = props.medicalInfo ?? null;
     this._specialNeeds = props.specialNeeds ?? null;
+    this._psychologicalStatus = props.psychologicalStatus ?? PsychologicalStatus.createDefault();
     this._createdAt = createdAt ?? new Date();
     this._updatedAt = new Date();
   }
@@ -123,6 +133,10 @@ export class Child extends AggregateRoot {
     return this._specialNeeds;
   }
 
+  get psychologicalStatus(): PsychologicalStatus {
+    return this._psychologicalStatus;
+  }
+
   get createdAt(): Date {
     return this._createdAt;
   }
@@ -158,7 +172,9 @@ export class Child extends AggregateRoot {
         return Result.fail(new DomainError('양육시설 아동은 지역아동센터와 연결될 수 없습니다'));
       }
       if (props.guardianId) {
-        return Result.fail(new DomainError('양육시설 아동(고아)은 부모 보호자와 연결될 수 없습니다'));
+        return Result.fail(
+          new DomainError('양육시설 아동(고아)은 부모 보호자와 연결될 수 없습니다'),
+        );
       }
     }
 
@@ -277,5 +293,49 @@ export class Child extends AggregateRoot {
   public updateSpecialNeeds(specialNeeds: string): void {
     this._specialNeeds = specialNeeds;
     this._updatedAt = new Date();
+  }
+
+  /**
+   * 심리 상태 업데이트
+   * Soul-E 챗봇에서 위험 징후 감지 시 호출됩니다.
+   *
+   * @param newStatus 새로운 심리 상태
+   * @returns 상태 변경 결과 (escalation: 위험도 상승, deescalation: 위험도 하락)
+   */
+  public updatePsychologicalStatus(
+    newStatus: PsychologicalStatus,
+  ): Result<{ isEscalation: boolean; isDeescalation: boolean }, DomainError> {
+    if (!newStatus) {
+      return Result.fail(new DomainError('새로운 심리 상태는 필수입니다'));
+    }
+
+    const previousStatus = this._psychologicalStatus;
+
+    // 동일한 상태면 변경 없음
+    if (previousStatus.equals(newStatus)) {
+      return Result.ok({ isEscalation: false, isDeescalation: false });
+    }
+
+    const isEscalation = previousStatus.isEscalationTo(newStatus);
+    const isDeescalation = previousStatus.isDeescalationTo(newStatus);
+
+    this._psychologicalStatus = newStatus;
+    this._updatedAt = new Date();
+
+    return Result.ok({ isEscalation, isDeescalation });
+  }
+
+  /**
+   * 위험 상태 이상인지 확인
+   */
+  public isAtRiskOrHigher(): boolean {
+    return this._psychologicalStatus.isAtRiskOrHigher;
+  }
+
+  /**
+   * 고위험 상태인지 확인
+   */
+  public isHighRisk(): boolean {
+    return this._psychologicalStatus.isHighRisk;
   }
 }
