@@ -1,9 +1,14 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuditModule } from '@infrastructure/audit/audit.module';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
+import { RolesGuard } from '@infrastructure/auth/guards/roles.guard';
+import { GlobalHttpExceptionFilter } from '@infrastructure/common/filters/http-exception.filter';
+import { HealthModule } from '@infrastructure/common/health/health.module';
+import { RequestIdMiddleware } from '@infrastructure/common/middleware/request-id.middleware';
 import { getTypeOrmConfig } from '@infrastructure/config/typeorm.config';
 import { LoggingInterceptor } from '@infrastructure/logging/logging.interceptor';
 import { AuthModule } from '@presentation/auth/auth.module';
@@ -17,6 +22,7 @@ import { InstitutionModule } from '@presentation/institution/institution.module'
 import { MatchingModule } from '@presentation/matching/matching.module';
 import { ReviewModule } from '@presentation/review/review.module';
 import { UploadModule } from '@presentation/upload/upload.module';
+import { WebhookModule } from '@presentation/webhook/webhook.module';
 
 @Module({
   imports: [
@@ -35,6 +41,10 @@ import { UploadModule } from '@presentation/upload/upload.module';
         limit: 10, // 10개 요청
       },
     ]),
+    // Infrastructure Modules
+    HealthModule,
+    AuditModule,
+    // Domain Modules
     AuthModule,
     CareFacilityModule,
     ChildModule,
@@ -46,12 +56,23 @@ import { UploadModule } from '@presentation/upload/upload.module';
     MatchingModule,
     ReviewModule,
     UploadModule,
+    WebhookModule,
   ],
   providers: [
+    // 글로벌 예외 필터 (표준화된 에러 응답)
+    {
+      provide: APP_FILTER,
+      useClass: GlobalHttpExceptionFilter,
+    },
     // 글로벌 JWT 가드 (모든 라우트에 적용, @Public()으로 제외 가능)
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    // 글로벌 역할 가드 (RBAC)
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
     // 글로벌 Rate Limiting 가드 (DDoS 방어)
     {
@@ -65,4 +86,9 @@ import { UploadModule } from '@presentation/upload/upload.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Request ID 미들웨어 (모든 요청에 적용)
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
+  }
+}
