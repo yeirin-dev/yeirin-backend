@@ -21,6 +21,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
+import { Public } from '@infrastructure/auth/decorators/public.decorator';
 import { S3Service } from '@infrastructure/storage/s3.service';
 
 /**
@@ -188,6 +189,7 @@ export class UploadController {
    * yeirin-ai에서 호출하여 KPRC 검사 결과 PDF를 업로드합니다.
    * JWT 인증 대신 내부 API 키로 인증합니다.
    */
+  @Public()
   @Post('internal/pdf')
   @UseInterceptors(
     FileInterceptor('file', {
