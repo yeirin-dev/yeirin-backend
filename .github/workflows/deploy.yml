@@ -10,7 +10,6 @@ env:
   EC2_HOST: 3.38.162.252
   EC2_USER: ec2-user
   APP_DIR: /home/ec2-user/app/yeirin
-  SERVICE_NAME: yeirin
 
 jobs:
   deploy:
@@ -38,13 +37,19 @@ jobs:
             --exclude='coverage' \
             ./ ${{ env.EC2_USER }}@${{ env.EC2_HOST }}:${{ env.APP_DIR }}/
 
-      - name: Install dependencies and restart service
+      - name: Install dependencies, build and restart with PM2
         run: |
           ssh ${{ env.EC2_USER }}@${{ env.EC2_HOST }} << 'ENDSSH'
             set -e
 
             echo "=== Starting Yeirin Backend Deployment ==="
             cd /home/ec2-user/app/yeirin
+
+            # Install PM2 globally if not exists
+            if ! command -v pm2 &> /dev/null; then
+              echo "Installing PM2..."
+              sudo npm install -g pm2
+            fi
 
             # Install dependencies
             echo "Installing dependencies..."
@@ -70,24 +75,34 @@ jobs:
           JWT_SECRET=$(aws ssm get-parameter --name "/yeirin/dev/common/jwt-secret" --with-decryption --query "Parameter.Value" --output text)
           JWT_ACCESS_EXPIRATION=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/jwt-access-expiration" --query "Parameter.Value" --output text)
           JWT_REFRESH_EXPIRATION=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/jwt-refresh-expiration" --query "Parameter.Value" --output text)
-          AI_SERVICE_URL=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/ai-service-url" --query "Parameter.Value" --output text)
+          AI_RECOMMENDATION_SERVICE_URL=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/ai-recommendation-service-url" --query "Parameter.Value" --output text)
           AI_SERVICE_TIMEOUT=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/ai-service-timeout" --query "Parameter.Value" --output text)
           INTERNAL_API_SECRET=$(aws ssm get-parameter --name "/yeirin/dev/common/internal-api-secret" --with-decryption --query "Parameter.Value" --output text)
           SOUL_E_WEBHOOK_SECRET=$(aws ssm get-parameter --name "/yeirin/dev/common/webhook-secret" --with-decryption --query "Parameter.Value" --output text)
-          S3_BUCKET_NAME=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/s3-bucket-name" --query "Parameter.Value" --output text)
+          SOUL_E_SERVICE_URL=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/soul-e-service-url" --query "Parameter.Value" --output text)
+          AWS_S3_BUCKET_NAME=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/s3-bucket-name" --query "Parameter.Value" --output text)
           AWS_REGION=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/aws-region" --query "Parameter.Value" --output text)
           LOG_LEVEL=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/log-level" --query "Parameter.Value" --output text)
           EOF
 
             echo "Environment file created."
 
-            # Restart service
-            echo "Restarting service..."
-            sudo systemctl restart yeirin
+            # Stop existing systemd service if running
+            sudo systemctl stop yeirin 2>/dev/null || true
+            sudo systemctl disable yeirin 2>/dev/null || true
+
+            # Restart with PM2
+            echo "Restarting with PM2..."
+            pm2 delete yeirin 2>/dev/null || true
+            pm2 start ecosystem.config.js --env production
+            pm2 save
+
+            # Setup PM2 startup
+            pm2 startup systemd -u ec2-user --hp /home/ec2-user 2>/dev/null || true
 
             # Wait and check status
             sleep 5
-            sudo systemctl status yeirin --no-pager || true
+            pm2 status
 
             echo "=== Deployment completed! ==="
           ENDSSH
@@ -95,7 +110,7 @@ jobs:
       - name: Health Check
         run: |
           echo "Waiting for service to start..."
-          sleep 15
+          sleep 10
           echo "Running health check..."
           curl -f http://${{ env.EC2_HOST }}:3000/health || exit 1
           echo "Health check passed!"

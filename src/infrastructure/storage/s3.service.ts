@@ -18,19 +18,27 @@ export class S3Service {
   constructor(private readonly configService: ConfigService) {
     const endpoint = this.configService.get<string>('AWS_S3_ENDPOINT');
     const forcePathStyle = this.configService.get<string>('AWS_S3_FORCE_PATH_STYLE') === 'true';
+    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
+    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
+
+    // 로컬 개발 환경(MinIO)에서는 명시적 자격증명 사용
+    // EC2 환경에서는 IAM Role 자동 사용 (credentials 생략 시 SDK가 자동 탐지)
+    const credentials =
+      accessKeyId && secretAccessKey
+        ? { accessKeyId, secretAccessKey }
+        : undefined;
 
     this.s3Client = new S3Client({
       region: this.configService.getOrThrow<string>('AWS_REGION'),
-      credentials: {
-        accessKeyId: this.configService.getOrThrow<string>('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: this.configService.getOrThrow<string>('AWS_SECRET_ACCESS_KEY'),
-      },
+      ...(credentials && { credentials }),
       // MinIO 로컬 개발 환경 지원
       ...(endpoint && { endpoint }),
       forcePathStyle, // MinIO는 path-style URL 필요
     });
-    this.bucketName = this.configService.getOrThrow<string>('AWS_S3_BUCKET_NAME');
-    this.baseUrl = this.configService.getOrThrow<string>('AWS_S3_BASE_URL');
+    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME') || 'yeirin-uploads';
+    this.baseUrl =
+      this.configService.get<string>('AWS_S3_BASE_URL') ||
+      `https://${this.bucketName}.s3.${this.configService.getOrThrow<string>('AWS_REGION')}.amazonaws.com`;
 
     this.logger.log(
       `S3 서비스 초기화 완료 - Bucket: ${this.bucketName}, Endpoint: ${endpoint || 'AWS S3'}`,
