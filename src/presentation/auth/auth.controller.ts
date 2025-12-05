@@ -1,4 +1,13 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '@application/auth/auth.service';
 import { AuthResponseDto } from '@application/auth/dto/auth-response.dto';
@@ -7,6 +16,7 @@ import { RegisterCounselorDto } from '@application/auth/dto/register-counselor.d
 import { RegisterGuardianDto } from '@application/auth/dto/register-guardian.dto';
 import { RegisterInstitutionDto } from '@application/auth/dto/register-institution.dto';
 import { RegisterDto } from '@application/auth/dto/register.dto';
+import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import {
   CurrentUser,
   CurrentUserData,
@@ -17,7 +27,11 @@ import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 @ApiTags('인증')
 @Controller('api/v1/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    @Inject('GuardianProfileRepository')
+    private readonly guardianProfileRepository: GuardianProfileRepository,
+  ) {}
 
   @Public()
   @Post('register')
@@ -96,12 +110,27 @@ export class AuthController {
   @ApiOperation({ summary: '현재 사용자 정보 조회' })
   @ApiResponse({ status: 200, description: '사용자 정보 조회 성공' })
   async getMe(@CurrentUser() user: CurrentUserData) {
+    // GUARDIAN 역할인 경우 guardian profile 정보도 함께 반환
+    let guardianProfile = null;
+    if (user.role === 'GUARDIAN') {
+      const profile = await this.guardianProfileRepository.findByUserId(user.userId);
+      if (profile) {
+        guardianProfile = {
+          id: profile.id,
+          guardianType: profile.guardianType,
+          careFacilityId: profile.careFacilityId,
+          communityChildCenterId: profile.communityChildCenterId,
+        };
+      }
+    }
+
     // 프론트엔드 User 타입과 호환되도록 userId를 id로 매핑
     return {
       id: user.userId,
       email: user.email,
       role: user.role,
       institutionId: user.institutionId,
+      guardianProfile,
     };
   }
 }
