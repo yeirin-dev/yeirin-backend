@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestStatus } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
@@ -78,5 +78,68 @@ export class CounselRequestRepositoryImpl implements CounselRequestRepository {
 
   async delete(id: string): Promise<void> {
     await this.repository.delete(id);
+  }
+
+  async countByGuardianIdAndStatus(guardianId: string): Promise<{
+    total: number;
+    pending: number;
+    recommended: number;
+    matched: number;
+    inProgress: number;
+    completed: number;
+    rejected: number;
+  }> {
+    const entities = await this.repository.find({ where: { guardianId } });
+
+    const counts = {
+      total: entities.length,
+      pending: 0,
+      recommended: 0,
+      matched: 0,
+      inProgress: 0,
+      completed: 0,
+      rejected: 0,
+    };
+
+    for (const entity of entities) {
+      switch (entity.status) {
+        case CounselRequestStatus.PENDING:
+          counts.pending++;
+          break;
+        case CounselRequestStatus.RECOMMENDED:
+          counts.recommended++;
+          break;
+        case CounselRequestStatus.MATCHED:
+          counts.matched++;
+          break;
+        case CounselRequestStatus.IN_PROGRESS:
+          counts.inProgress++;
+          break;
+        case CounselRequestStatus.COMPLETED:
+          counts.completed++;
+          break;
+        case CounselRequestStatus.REJECTED:
+          counts.rejected++;
+          break;
+      }
+    }
+
+    return counts;
+  }
+
+  async findRecentByGuardianId(guardianId: string, days: number): Promise<CounselRequest[]> {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const entities = await this.repository.find({
+      where: {
+        guardianId,
+        updatedAt: MoreThanOrEqual(since),
+      },
+      order: { updatedAt: 'DESC' },
+      take: 10, // 최대 10개
+    });
+
+    return entities.map((entity) => CounselRequestMapper.toDomain(entity));
   }
 }

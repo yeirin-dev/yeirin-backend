@@ -22,6 +22,7 @@ import { InstitutionModule } from '@presentation/institution/institution.module'
 import { MatchingModule } from '@presentation/matching/matching.module';
 import { ReviewModule } from '@presentation/review/review.module';
 import { UploadModule } from '@presentation/upload/upload.module';
+import { GuardianModule } from '@presentation/guardian/guardian.module';
 import { WebhookModule } from '@presentation/webhook/webhook.module';
 
 @Module({
@@ -56,6 +57,7 @@ import { WebhookModule } from '@presentation/webhook/webhook.module';
     MatchingModule,
     ReviewModule,
     UploadModule,
+    GuardianModule,
     WebhookModule,
   ],
   providers: [

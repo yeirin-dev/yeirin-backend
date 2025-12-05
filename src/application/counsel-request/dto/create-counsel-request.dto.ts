@@ -135,6 +135,15 @@ export class TestResultsDto {
   @IsString()
   @IsOptional()
   difficultySurvey?: string;
+
+  @ApiProperty({
+    description: 'Soul-E KPRC 심리검사 결과 PDF URL (S3)',
+    required: false,
+    example: 'https://s3.amazonaws.com/bucket/assessment-reports/result-123.pdf',
+  })
+  @IsString()
+  @IsOptional()
+  assessmentReportUrl?: string;
 }
 
 // ============================================

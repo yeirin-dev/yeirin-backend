@@ -96,6 +96,12 @@ export class AuthController {
   @ApiOperation({ summary: '현재 사용자 정보 조회' })
   @ApiResponse({ status: 200, description: '사용자 정보 조회 성공' })
   async getMe(@CurrentUser() user: CurrentUserData) {
-    return user;
+    // 프론트엔드 User 타입과 호환되도록 userId를 id로 매핑
+    return {
+      id: user.userId,
+      email: user.email,
+      role: user.role,
+      institutionId: user.institutionId,
+    };
   }
 }

@@ -60,6 +60,7 @@ export interface TestResults {
   childReactionScale?: string; // 아동 반응척도 심리검사
   strengthSurvey?: string; // 강점 설문지 심리검사
   difficultySurvey?: string; // 난점 설문지 심리검사
+  assessmentReportUrl?: string; // Soul-E KPRC 심리검사 결과 PDF URL (S3)
 }
 
 /**
