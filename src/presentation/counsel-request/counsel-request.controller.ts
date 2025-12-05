@@ -25,10 +25,12 @@ import { PaginatedResponseDto } from '@application/counsel-request/dto/paginated
 import { PaginationQueryDto } from '@application/counsel-request/dto/pagination-query.dto';
 import { SouliWebhookDto } from '@application/counsel-request/dto/souli-webhook.dto';
 import { UpdateCounselRequestDto } from '@application/counsel-request/dto/update-counsel-request.dto';
+import { AssessmentResultResponseDto } from '@application/counsel-request/dto/assessment-result-response.dto';
 import { CompleteCounselingUseCase } from '@application/counsel-request/use-cases/complete-counseling.usecase';
 import { CreateCounselRequestFromSouliUseCase } from '@application/counsel-request/use-cases/create-counsel-request-from-souli.usecase';
 import { CreateCounselRequestUseCase } from '@application/counsel-request/use-cases/create-counsel-request.usecase';
 import { DeleteCounselRequestUseCase } from '@application/counsel-request/use-cases/delete-counsel-request.usecase';
+import { GetChildAssessmentResultsUseCase } from '@application/counsel-request/use-cases/get-child-assessment-results.usecase';
 import { GetCounselRequestRecommendationsUseCase } from '@application/counsel-request/use-cases/get-counsel-request-recommendations.usecase';
 import { GetCounselRequestUseCase } from '@application/counsel-request/use-cases/get-counsel-request.usecase';
 import { GetCounselRequestsByChildUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-by-child.usecase';
@@ -60,6 +62,7 @@ export class CounselRequestController {
     private readonly selectInstitutionUseCase: SelectRecommendedInstitutionUseCase,
     private readonly startCounselingUseCase: StartCounselingUseCase,
     private readonly completeCounselingUseCase: CompleteCounselingUseCase,
+    private readonly getChildAssessmentResultsUseCase: GetChildAssessmentResultsUseCase,
   ) {}
 
   @Public()
@@ -285,5 +288,24 @@ export class CounselRequestController {
   @ApiResponse({ status: 404, description: '상담의뢰지를 찾을 수 없음' })
   async completeCounseling(@Param('id') id: string): Promise<CounselRequestResponseDto> {
     return await this.completeCounselingUseCase.execute(id);
+  }
+
+  @Get('assessment-results/child/:childId')
+  @ApiOperation({
+    summary: '아동의 Soul-E 심리검사 결과 목록 조회',
+    description:
+      '아동 ID로 Soul-E MSA에서 완료된 심리검사 결과 목록을 조회합니다. 상담의뢰지 작성 시 검사 결과 PDF를 첨부하기 위해 사용됩니다.',
+  })
+  @ApiParam({ name: 'childId', description: '아동 ID (UUID)' })
+  @ApiResponse({
+    status: 200,
+    description: '조회 성공',
+    type: [AssessmentResultResponseDto],
+  })
+  @ApiResponse({ status: 500, description: 'Soul-E 서비스 오류' })
+  async getChildAssessmentResults(
+    @Param('childId') childId: string,
+  ): Promise<AssessmentResultResponseDto[]> {
+    return await this.getChildAssessmentResultsUseCase.execute(childId);
   }
 }
