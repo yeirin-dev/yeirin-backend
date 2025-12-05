@@ -1,0 +1,132 @@
+# ============================================
+# Yeirin MSA - Development Server Docker Compose
+# Run on AWS EC2 Development Server
+# ============================================
+
+version: '3.8'
+
+services:
+  # Yeirin Backend (NestJS)
+  yeirin:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/yeirin-backend:${TAG:-latest}
+    container_name: yeirin-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - LOG_LEVEL=debug
+      # Database
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=5432
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=yeirin_dev
+      # JWT
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ACCESS_TOKEN_EXPIRATION=7d
+      - JWT_REFRESH_TOKEN_EXPIRATION=30d
+      # AWS S3
+      - AWS_REGION=ap-northeast-2
+      - AWS_S3_BUCKET_NAME=yeirin-uploads
+      # MSA
+      - AI_RECOMMENDATION_SERVICE_URL=http://yeirin-ai:8001
+      - AI_RECOMMENDATION_API_TIMEOUT=30000
+      - INTERNAL_API_SECRET=${INTERNAL_API_SECRET}
+    networks:
+      - yeirin-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - yeirin-ai
+
+  # Soul-E Backend (FastAPI)
+  soul-e:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/soul-e-backend:${TAG:-latest}
+    container_name: soul-e-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=soul-e
+      - APP_ENV=development
+      - DEBUG=true
+      - HOST=0.0.0.0
+      - PORT=8000
+      # Database
+      - DATABASE_URL=postgresql+asyncpg://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:5432/soul_e
+      - YEIRIN_DATABASE_URL=postgresql+asyncpg://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:5432/yeirin_dev
+      # LLM
+      - LLM_PROVIDER=openai
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4o-mini
+      - OPENAI_TEMPERATURE=0.7
+      - OPENAI_MAX_TOKENS=1024
+      # JWT
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=HS256
+      - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=60
+      # MSA
+      - YEIRIN_BACKEND_URL=http://yeirin:3000
+      - YEIRIN_WEBHOOK_SECRET=${WEBHOOK_SECRET}
+      # Inpsyt
+      - INPSYT_AUTH_TOKEN=${INPSYT_AUTH_TOKEN}
+      - INPSYT_LOGIN_ID=devyeirin
+      - INPSYT_USE_PRODUCTION=false
+      # AWS S3
+      - AWS_REGION=ap-northeast-2
+      - AWS_S3_BUCKET_NAME=yeirin-uploads
+    volumes:
+      - soul-e-chroma:/app/data/chroma
+    networks:
+      - yeirin-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - yeirin
+
+  # Yeirin-AI Backend (FastAPI)
+  yeirin-ai:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/yeirin-ai:${TAG:-latest}
+    container_name: yeirin-ai
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - APP_NAME=yeirin-ai
+      - APP_VERSION=0.1.0
+      - DEBUG=true
+      - LOG_LEVEL=INFO
+      - PORT=8001
+      # Database (Read-Only)
+      - DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:5432/yeirin_dev
+      # OpenAI
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=gpt-4o-mini
+      # CORS
+      - CORS_ORIGINS=["http://localhost:3000","http://yeirin:3000"]
+    networks:
+      - yeirin-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  soul-e-chroma:
+    driver: local
+
+networks:
+  yeirin-network:
+    driver: bridge
