@@ -18,7 +18,7 @@ export class CareFacilityMapper {
       representativeName: entity.representativeName,
       phoneNumber: entity.phoneNumber,
       capacity: entity.capacity,
-      establishedDate: entity.establishedDate,
+      establishedDate: new Date(entity.establishedDate),
       introduction: entity.introduction || undefined,
       isActive: entity.isActive,
       createdAt: entity.createdAt,

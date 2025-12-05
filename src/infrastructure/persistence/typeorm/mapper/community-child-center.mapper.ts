@@ -18,7 +18,7 @@ export class CommunityChildCenterMapper {
       representativeName: entity.representativeName,
       phoneNumber: entity.phoneNumber,
       capacity: entity.capacity,
-      establishedDate: entity.establishedDate,
+      establishedDate: new Date(entity.establishedDate),
       introduction: entity.introduction || undefined,
       operatingHours: entity.operatingHours || undefined,
       isActive: entity.isActive,
