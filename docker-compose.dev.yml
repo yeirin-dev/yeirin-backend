@@ -43,6 +43,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - HOST=13.124.149.80
       - LOG_LEVEL=debug
       # Database (Docker internal network)
       - DB_HOST=postgres

@@ -41,6 +41,9 @@ async function bootstrap() {
       'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:3002',
+      'http://13.124.149.80:3000',
+      'http://13.124.149.80:3001',
+      'http://13.124.149.80:3002',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -48,6 +51,11 @@ async function bootstrap() {
   });
 
   // Swagger 설정
+  const host = process.env.HOST || 'localhost';
+  const port = process.env.PORT || 3000;
+  const serverUrl = `http://${host}:${port}`;
+  const serverDesc = host === 'localhost' ? 'Local Development' : 'Development Server';
+
   const config = new DocumentBuilder()
     .setTitle('Yeirin API')
     .setDescription('Yeirin 상담기관 매칭 플랫폼 API 문서')
@@ -60,7 +68,7 @@ async function bootstrap() {
     .addTag('바우처 기관', '바우처 공급기관 관리 API')
     .addTag('상담 매칭', 'AI 기반 상담기관 추천 API')
     .addTag('리뷰', '바우처 기관 리뷰 작성 및 관리 API')
-    .addServer('http://localhost:3000', 'Local Development')
+    .addServer(serverUrl, serverDesc)
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -72,12 +80,11 @@ async function bootstrap() {
     },
   });
 
-  const port = process.env.PORT || 3000;
   await app.listen(port);
 
   logger.log(`🚀 Yeirin 백엔드 서버가 포트 ${port}에서 시작되었습니다`);
-  logger.log(`📍 API: http://localhost:${port}/api/v1`);
-  logger.log(`📚 Swagger: http://localhost:${port}/api`);
+  logger.log(`📍 API: ${serverUrl}/api/v1`);
+  logger.log(`📚 Swagger: ${serverUrl}/api`);
 }
 
 bootstrap();
