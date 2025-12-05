@@ -12,25 +12,25 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   // 보안 헤더 설정 (Helmet)
-  // 개발 환경(HTTP)에서는 HTTPS 강제 헤더 비활성화
-  const isDev = process.env.NODE_ENV === 'development';
+  // 개발/비프로덕션 환경(HTTP)에서는 보안 헤더 완화
+  const isProduction = process.env.NODE_ENV === 'production';
   app.use(
     helmet({
-      contentSecurityPolicy: isDev
-        ? false // 개발 환경에서는 CSP 비활성화
-        : {
+      contentSecurityPolicy: isProduction
+        ? {
             directives: {
               defaultSrc: ["'self'"],
               styleSrc: ["'self'", "'unsafe-inline'"],
               scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
               imgSrc: ["'self'", 'data:', 'https:'],
             },
-          },
+          }
+        : false, // 비프로덕션 환경에서는 CSP 비활성화
       crossOriginEmbedderPolicy: false,
-      crossOriginOpenerPolicy: isDev ? false : { policy: 'same-origin' },
-      crossOriginResourcePolicy: isDev ? false : { policy: 'same-origin' },
-      originAgentCluster: isDev ? false : true,
-      hsts: isDev ? false : true, // HTTP 환경에서 HSTS 비활성화
+      crossOriginOpenerPolicy: false, // Swagger UI 호환성을 위해 비활성화
+      crossOriginResourcePolicy: false, // Swagger UI 호환성을 위해 비활성화
+      originAgentCluster: false,
+      hsts: isProduction, // HTTP 환경에서 HSTS 비활성화
     }),
   );
 
@@ -49,9 +49,10 @@ async function bootstrap() {
       'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:3002',
-      'http://13.124.149.80:3000',
-      'http://13.124.149.80:3001',
-      'http://13.124.149.80:3002',
+      // EC2 서버 (Yeirin, Soul-E, Yeirin-AI)
+      'http://3.38.162.252:3000',
+      'http://43.202.32.196:8000',
+      'http://43.203.210.136:8001',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
