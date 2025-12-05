@@ -16,6 +16,8 @@ import { VoucherInstitutionEntity } from '../persistence/typeorm/entity/voucher-
 
 export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => {
   const isDevelopment = configService.get<string>('NODE_ENV') !== 'production';
+  const isLocalDb = configService.get<string>('DB_HOST')?.includes('localhost') ||
+                    configService.get<string>('DB_HOST')?.includes('127.0.0.1');
 
   return {
     type: 'postgres',
@@ -24,6 +26,8 @@ export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOpt
     username: configService.get<string>('DB_USERNAME'),
     password: configService.get<string>('DB_PASSWORD'),
     database: configService.get<string>('DB_DATABASE'),
+    // RDS 연결 시 SSL 필수 (로컬 DB는 SSL 불필요)
+    ssl: isLocalDb ? false : { rejectUnauthorized: false },
     entities: [
       // Core User & Profile
       UserEntity,
