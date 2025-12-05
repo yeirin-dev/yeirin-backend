@@ -6,7 +6,34 @@
 version: '3.8'
 
 services:
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: yeirin-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USERNAME:-yeirin}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-yeirin_dev_password}
+      - POSTGRES_DB=yeirin_dev
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - yeirin-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-yeirin} -d yeirin_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ============================================
   # Yeirin Backend (NestJS)
+  # ============================================
   yeirin:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/yeirin-backend:${TAG:-latest}
     container_name: yeirin-backend
@@ -17,11 +44,11 @@ services:
       - NODE_ENV=development
       - PORT=3000
       - LOG_LEVEL=debug
-      # Database
-      - DB_HOST=${DB_HOST}
+      # Database (Docker internal network)
+      - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_USERNAME=${DB_USERNAME:-yeirin}
+      - DB_PASSWORD=${DB_PASSWORD:-yeirin_dev_password}
       - DB_DATABASE=yeirin_dev
       # JWT
       - JWT_SECRET=${JWT_SECRET}
@@ -43,9 +70,14 @@ services:
       retries: 3
       start_period: 40s
     depends_on:
-      - yeirin-ai
+      postgres:
+        condition: service_healthy
+      yeirin-ai:
+        condition: service_started
 
+  # ============================================
   # Soul-E Backend (FastAPI)
+  # ============================================
   soul-e:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/soul-e-backend:${TAG:-latest}
     container_name: soul-e-backend
@@ -58,9 +90,9 @@ services:
       - DEBUG=true
       - HOST=0.0.0.0
       - PORT=8000
-      # Database
-      - DATABASE_URL=postgresql+asyncpg://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:5432/soul_e
-      - YEIRIN_DATABASE_URL=postgresql+asyncpg://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:5432/yeirin_dev
+      # Database (Docker internal network)
+      - DATABASE_URL=postgresql+asyncpg://${DB_USERNAME:-yeirin}:${DB_PASSWORD:-yeirin_dev_password}@postgres:5432/soul_e
+      - YEIRIN_DATABASE_URL=postgresql+asyncpg://${DB_USERNAME:-yeirin}:${DB_PASSWORD:-yeirin_dev_password}@postgres:5432/yeirin_dev
       # LLM
       - LLM_PROVIDER=openai
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -92,9 +124,14 @@ services:
       retries: 3
       start_period: 40s
     depends_on:
-      - yeirin
+      postgres:
+        condition: service_healthy
+      yeirin:
+        condition: service_started
 
+  # ============================================
   # Yeirin-AI Backend (FastAPI)
+  # ============================================
   yeirin-ai:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/yeirin-ai:${TAG:-latest}
     container_name: yeirin-ai
@@ -107,8 +144,8 @@ services:
       - DEBUG=true
       - LOG_LEVEL=INFO
       - PORT=8001
-      # Database (Read-Only)
-      - DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:5432/yeirin_dev
+      # Database (Read-Only, Docker internal network)
+      - DATABASE_URL=postgresql://${DB_USERNAME:-yeirin}:${DB_PASSWORD:-yeirin_dev_password}@postgres:5432/yeirin_dev
       # OpenAI
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_MODEL=gpt-4o-mini
@@ -122,11 +159,22 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
 
+# ============================================
+# Volumes
+# ============================================
 volumes:
+  postgres-data:
+    driver: local
   soul-e-chroma:
     driver: local
 
+# ============================================
+# Networks
+# ============================================
 networks:
   yeirin-network:
     driver: bridge
