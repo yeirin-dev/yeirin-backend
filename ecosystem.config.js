@@ -8,9 +8,7 @@ module.exports = {
       watch: false,
       max_memory_restart: '1G',
       env_file: '.env',
-      env: {
-        NODE_ENV: 'production',
-      },
+      // NODE_ENV는 .env 파일에서 로드 (deploy/dev = development)
     },
   ],
 };
