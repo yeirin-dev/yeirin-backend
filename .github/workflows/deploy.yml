@@ -1,0 +1,103 @@
+name: Deploy Yeirin Backend
+
+on:
+  push:
+    branches:
+      - deploy/dev
+  workflow_dispatch:
+
+env:
+  EC2_HOST: 3.38.162.252
+  EC2_USER: ec2-user
+  APP_DIR: /home/ec2-user/app/yeirin
+  SERVICE_NAME: yeirin
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ env.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.EC2_USER }}@${{ env.EC2_HOST }} << 'ENDSSH'
+            set -e
+
+            echo "=== Starting Yeirin Backend Deployment ==="
+
+            # Navigate to app directory
+            mkdir -p $HOME/app/yeirin
+            cd $HOME/app/yeirin
+
+            # Clone or pull latest code
+            if [ -d ".git" ]; then
+              echo "Pulling latest changes..."
+              git fetch origin
+              git reset --hard origin/deploy/dev
+            else
+              echo "Cloning repository..."
+              git clone -b deploy/dev https://github.com/yeirin-dev/yeirin-backend.git .
+            fi
+
+            # Install dependencies
+            echo "Installing dependencies..."
+            yarn install --frozen-lockfile
+
+            # Build
+            echo "Building application..."
+            yarn build
+
+            # Load environment from SSM and create .env
+            echo "Loading environment from SSM Parameter Store..."
+            export AWS_DEFAULT_REGION=ap-northeast-2
+
+            # Generate .env file
+            cat > .env << EOF
+          NODE_ENV=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/node-env" --query "Parameter.Value" --output text)
+          PORT=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/port" --query "Parameter.Value" --output text)
+          DB_HOST=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/db-host" --query "Parameter.Value" --output text)
+          DB_PORT=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/db-port" --query "Parameter.Value" --output text)
+          DB_USERNAME=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/db-username" --with-decryption --query "Parameter.Value" --output text)
+          DB_PASSWORD=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/db-password" --with-decryption --query "Parameter.Value" --output text)
+          DB_DATABASE=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/db-database" --query "Parameter.Value" --output text)
+          JWT_SECRET=$(aws ssm get-parameter --name "/yeirin/dev/common/jwt-secret" --with-decryption --query "Parameter.Value" --output text)
+          JWT_ACCESS_EXPIRATION=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/jwt-access-expiration" --query "Parameter.Value" --output text)
+          JWT_REFRESH_EXPIRATION=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/jwt-refresh-expiration" --query "Parameter.Value" --output text)
+          AI_SERVICE_URL=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/ai-service-url" --query "Parameter.Value" --output text)
+          AI_SERVICE_TIMEOUT=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/ai-service-timeout" --query "Parameter.Value" --output text)
+          INTERNAL_API_SECRET=$(aws ssm get-parameter --name "/yeirin/dev/common/internal-api-secret" --with-decryption --query "Parameter.Value" --output text)
+          SOUL_E_WEBHOOK_SECRET=$(aws ssm get-parameter --name "/yeirin/dev/common/webhook-secret" --with-decryption --query "Parameter.Value" --output text)
+          S3_BUCKET_NAME=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/s3-bucket-name" --query "Parameter.Value" --output text)
+          AWS_REGION=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/aws-region" --query "Parameter.Value" --output text)
+          LOG_LEVEL=$(aws ssm get-parameter --name "/yeirin/dev/yeirin/log-level" --query "Parameter.Value" --output text)
+          EOF
+
+            echo "Environment file created."
+
+            # Restart service
+            echo "Restarting service..."
+            sudo systemctl restart yeirin
+
+            # Wait and check status
+            sleep 5
+            sudo systemctl status yeirin --no-pager || true
+
+            echo "=== Deployment completed! ==="
+          ENDSSH
+
+      - name: Health Check
+        run: |
+          echo "Waiting for service to start..."
+          sleep 15
+          echo "Running health check..."
+          curl -f http://${{ env.EC2_HOST }}:3000/health || exit 1
+          echo "Health check passed!"
