@@ -57,6 +57,22 @@ export class ChildController {
       throw new NotFoundException('보호자 프로필을 찾을 수 없습니다.');
     }
 
+    // 보호자 유형에 따라 다른 조회 방식 사용
+    const guardianType = guardianProfile.guardianType;
+
+    // 양육시설 선생님: careFacilityId로 조회
+    if (guardianType === 'CARE_FACILITY_TEACHER' && guardianProfile.careFacilityId) {
+      const children = await this.childRepository.findByCareFacilityId(guardianProfile.careFacilityId);
+      return children.map((child) => ChildResponseDto.fromDomain(child));
+    }
+
+    // 지역아동센터 선생님: communityChildCenterId로 조회
+    if (guardianType === 'COMMUNITY_CENTER_TEACHER' && guardianProfile.communityChildCenterId) {
+      const children = await this.childRepository.findByCommunityChildCenterId(guardianProfile.communityChildCenterId);
+      return children.map((child) => ChildResponseDto.fromDomain(child));
+    }
+
+    // 일반 보호자 (부모): guardianId로 조회
     return await this.getChildrenByGuardianUseCase.execute(guardianProfile.id);
   }
 
