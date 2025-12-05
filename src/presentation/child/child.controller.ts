@@ -1,15 +1,18 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   NotFoundException,
   Param,
   Post,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
+import { ChildRepository } from '@domain/child/repository/child.repository';
 import { ChildResponseDto } from '@application/child/dto/child-response.dto';
 import { RegisterChildDto } from '@application/child/dto/register-child.dto';
 import { GetChildrenByGuardianUseCase } from '@application/child/use-cases/get-children-by-guardian/get-children-by-guardian.use-case';
@@ -36,6 +39,8 @@ export class ChildController {
     private readonly getChildrenByGuardianUseCase: GetChildrenByGuardianUseCase,
     @Inject('GuardianProfileRepository')
     private readonly guardianRepository: GuardianProfileRepository,
+    @Inject('ChildRepository')
+    private readonly childRepository: ChildRepository,
   ) {}
 
   @Get()
@@ -108,5 +113,57 @@ export class ChildController {
     @Param('guardianId') guardianId: string,
   ): Promise<ChildResponseDto[]> {
     return await this.getChildrenByGuardianUseCase.execute(guardianId);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: '아동 상세 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '아동 상세 정보',
+    type: ChildResponseDto,
+  })
+  @ApiResponse({ status: 404, description: '아동을 찾을 수 없음' })
+  async getChild(@Param('id') id: string): Promise<ChildResponseDto> {
+    const child = await this.childRepository.findById(id);
+    if (!child) {
+      throw new NotFoundException('아동을 찾을 수 없습니다.');
+    }
+    return ChildResponseDto.fromDomain(child);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: '아동 삭제' })
+  @ApiResponse({ status: 200, description: '아동 삭제 성공' })
+  @ApiResponse({ status: 403, description: '삭제 권한 없음' })
+  @ApiResponse({ status: 404, description: '아동을 찾을 수 없음' })
+  async deleteChild(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+  ): Promise<{ message: string }> {
+    // 아동 존재 확인
+    const child = await this.childRepository.findById(id);
+    if (!child) {
+      throw new NotFoundException('아동을 찾을 수 없습니다.');
+    }
+
+    // 권한 확인: 해당 아동의 보호자인지 확인
+    const guardianProfile = await this.guardianRepository.findByUserId(userId);
+    if (!guardianProfile) {
+      throw new ForbiddenException('보호자 프로필을 찾을 수 없습니다.');
+    }
+
+    // 보호자 ID 또는 기관 ID로 권한 확인
+    const hasPermission =
+      child.guardianId === guardianProfile.id ||
+      (child.careFacilityId && child.careFacilityId === guardianProfile.careFacilityId) ||
+      (child.communityChildCenterId && child.communityChildCenterId === guardianProfile.communityChildCenterId);
+
+    if (!hasPermission) {
+      throw new ForbiddenException('이 아동을 삭제할 권한이 없습니다.');
+    }
+
+    await this.childRepository.delete(id);
+
+    return { message: '아동이 삭제되었습니다.' };
   }
 }
