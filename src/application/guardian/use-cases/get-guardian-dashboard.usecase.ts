@@ -25,14 +25,27 @@ export class GetGuardianDashboardUseCase {
   ) {}
 
   async execute(userId: string): Promise<GuardianDashboardDto> {
-    // 1. userId로 guardianProfileId 조회
+    // 1. userId로 guardianProfile 조회
     const guardianProfile = await this.guardianProfileRepository.findByUserId(userId);
     const guardianProfileId = guardianProfile?.id;
+    const guardianType = guardianProfile?.guardianType;
 
-    // 2. 등록된 아동 수 조회 (guardianProfileId 사용)
-    const childrenCount = guardianProfileId
-      ? await this.childRepository.countByGuardianId(guardianProfileId)
-      : 0;
+    // 2. 보호자 유형에 따라 다른 방식으로 아동 수 조회
+    let childrenCount = 0;
+    if (guardianProfile) {
+      // 양육시설 선생님: careFacilityId로 조회
+      if (guardianType === 'CARE_FACILITY_TEACHER' && guardianProfile.careFacilityId) {
+        childrenCount = await this.childRepository.countByCareFacilityId(guardianProfile.careFacilityId);
+      }
+      // 지역아동센터 선생님: communityChildCenterId로 조회
+      else if (guardianType === 'COMMUNITY_CENTER_TEACHER' && guardianProfile.communityChildCenterId) {
+        childrenCount = await this.childRepository.countByCommunityChildCenterId(guardianProfile.communityChildCenterId);
+      }
+      // 일반 보호자 (부모): guardianId로 조회
+      else if (guardianProfileId) {
+        childrenCount = await this.childRepository.countByGuardianId(guardianProfileId);
+      }
+    }
 
     // 3. 상담의뢰 상태별 통계 조회 (userId 사용 - counsel_requests는 guardianId가 userId와 동일)
     const stats = await this.counselRequestRepository.countByGuardianIdAndStatus(userId);
