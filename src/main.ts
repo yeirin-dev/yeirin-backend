@@ -12,17 +12,25 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   // 보안 헤더 설정 (Helmet)
+  // 개발 환경(HTTP)에서는 HTTPS 강제 헤더 비활성화
+  const isDev = process.env.NODE_ENV === 'development';
   app.use(
     helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Swagger 사용을 위해 필요
-          imgSrc: ["'self'", 'data:', 'https:'],
-        },
-      },
-      crossOriginEmbedderPolicy: false, // Swagger UI를 위해 비활성화
+      contentSecurityPolicy: isDev
+        ? false // 개발 환경에서는 CSP 비활성화
+        : {
+            directives: {
+              defaultSrc: ["'self'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+              scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+              imgSrc: ["'self'", 'data:', 'https:'],
+            },
+          },
+      crossOriginEmbedderPolicy: false,
+      crossOriginOpenerPolicy: isDev ? false : { policy: 'same-origin' },
+      crossOriginResourcePolicy: isDev ? false : { policy: 'same-origin' },
+      originAgentCluster: isDev ? false : true,
+      hsts: isDev ? false : true, // HTTP 환경에서 HSTS 비활성화
     }),
   );
 
