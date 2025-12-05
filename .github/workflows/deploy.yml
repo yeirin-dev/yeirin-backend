@@ -16,9 +16,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -27,23 +24,32 @@ jobs:
       - name: Add EC2 to known hosts
         run: ssh-keyscan -H ${{ env.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy code via rsync
+      - name: Deploy via Git Pull, build and restart with PM2
+        env:
+          GH_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
         run: |
-          rsync -avz --delete \
-            --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='dist' \
-            --exclude='.env' \
-            --exclude='coverage' \
-            ./ ${{ env.EC2_USER }}@${{ env.EC2_HOST }}:${{ env.APP_DIR }}/
-
-      - name: Install dependencies, build and restart with PM2
-        run: |
-          ssh ${{ env.EC2_USER }}@${{ env.EC2_HOST }} << 'ENDSSH'
+          ssh ${{ env.EC2_USER }}@${{ env.EC2_HOST }} << ENDSSH
             set -e
 
             echo "=== Starting Yeirin Backend Deployment ==="
+
+            # Create app directory if not exists
+            mkdir -p /home/ec2-user/app/yeirin
             cd /home/ec2-user/app/yeirin
+
+            # Clone or pull latest code using GitHub token
+            if [ -d ".git" ]; then
+              echo "Pulling latest changes..."
+              git remote set-url origin https://${GH_TOKEN}@github.com/yeirin-dev/yeirin-backend.git
+              git fetch origin deploy/dev
+              git reset --hard origin/deploy/dev
+            else
+              echo "Cloning repository..."
+              git clone -b deploy/dev https://${GH_TOKEN}@github.com/yeirin-dev/yeirin-backend.git .
+            fi
+
+            echo "Current commit:"
+            git log --oneline -1
 
             # Install PM2 globally if not exists
             if ! command -v pm2 &> /dev/null; then
