@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -134,5 +135,62 @@ export class S3Service {
       this.logger.error(`여러 파일 삭제 실패: ${error.message}`, error.stack);
       throw new Error(`파일 삭제 중 오류가 발생했습니다: ${error.message}`);
     }
+  }
+
+  /**
+   * Presigned URL 생성 (파일 조회용)
+   * S3 Public Access가 차단된 경우 임시 서명 URL로 파일 접근
+   * @param key - S3 객체 키 (폴더/파일명)
+   * @param expiresIn - URL 유효 시간 (초, 기본 1시간)
+   * @returns Presigned URL
+   */
+  async getPresignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
+
+      const presignedUrl = await getSignedUrl(this.s3Client, command, { expiresIn });
+      this.logger.debug(`Presigned URL 생성: ${key} (유효시간: ${expiresIn}초)`);
+
+      return presignedUrl;
+    } catch (error) {
+      this.logger.error(`Presigned URL 생성 실패: ${error.message}`, error.stack);
+      throw new Error(`Presigned URL 생성 중 오류가 발생했습니다: ${error.message}`);
+    }
+  }
+
+  /**
+   * 파일 URL에서 Presigned URL 생성
+   * @param fileUrl - 기존 S3 파일 URL
+   * @param expiresIn - URL 유효 시간 (초, 기본 1시간)
+   * @returns Presigned URL
+   */
+  async getPresignedUrlFromFileUrl(fileUrl: string, expiresIn: number = 3600): Promise<string> {
+    const key = this.extractKeyFromUrl(fileUrl);
+    return this.getPresignedUrl(key, expiresIn);
+  }
+
+  /**
+   * 여러 파일 URL에서 Presigned URL 일괄 생성
+   * @param fileUrls - 기존 S3 파일 URL 배열
+   * @param expiresIn - URL 유효 시간 (초, 기본 1시간)
+   * @returns Presigned URL 배열
+   */
+  async getPresignedUrls(fileUrls: string[], expiresIn: number = 3600): Promise<string[]> {
+    const promises = fileUrls.map((url) => this.getPresignedUrlFromFileUrl(url, expiresIn));
+    return Promise.all(promises);
+  }
+
+  /**
+   * 파일 URL에서 S3 Key 추출
+   * @param fileUrl - S3 파일 URL
+   * @returns S3 객체 키
+   */
+  extractKeyFromUrl(fileUrl: string): string {
+    // baseUrl 형식: https://bucket.s3.region.amazonaws.com 또는 커스텀
+    // URL 형식: https://bucket.s3.region.amazonaws.com/folder/file.ext
+    return fileUrl.replace(`${this.baseUrl}/`, '');
   }
 }

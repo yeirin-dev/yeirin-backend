@@ -21,8 +21,9 @@
     "seed": "ts-node -r tsconfig-paths/register src/infrastructure/persistence/seed/seed.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.933.0",
-    "@aws-sdk/lib-storage": "^3.933.0",
+    "@aws-sdk/client-s3": "^3.946.0",
+    "@aws-sdk/lib-storage": "^3.946.0",
+    "@aws-sdk/s3-request-presigner": "^3.946.0",
     "@nestjs/common": "^11.1.8",
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^11.1.8",

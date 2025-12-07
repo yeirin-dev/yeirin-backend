@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Body,
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
@@ -94,21 +95,29 @@ export class UploadController {
       properties: {
         url: {
           type: 'string',
+          description: '파일 접근용 Presigned URL (1시간 유효)',
           example:
-            'https://yeirin-counsel-requests.s3.ap-northeast-2.amazonaws.com/counsel-requests/uuid.jpg',
+            'https://yeirin-uploads.s3.ap-northeast-2.amazonaws.com/counsel-requests/uuid.jpg?X-Amz-...',
+        },
+        key: {
+          type: 'string',
+          description: 'S3 객체 키 (DB 저장용)',
+          example: 'counsel-requests/uuid.jpg',
         },
       },
     },
   })
   @ApiResponse({ status: 400, description: '잘못된 파일 형식 또는 크기 초과' })
   @ApiResponse({ status: 401, description: '인증 실패' })
-  async uploadImage(@UploadedFile() file: Express.Multer.File): Promise<{ url: string }> {
+  async uploadImage(@UploadedFile() file: Express.Multer.File): Promise<{ url: string; key: string }> {
     if (!file) {
       throw new BadRequestException('파일이 업로드되지 않았습니다');
     }
 
-    const url = await this.s3Service.uploadFile(file, 'counsel-requests');
-    return { url };
+    const s3Url = await this.s3Service.uploadFile(file, 'counsel-requests');
+    const key = this.s3Service.extractKeyFromUrl(s3Url);
+    const url = await this.s3Service.getPresignedUrl(key);
+    return { url, key };
   }
 
   /**
@@ -158,12 +167,18 @@ export class UploadController {
     schema: {
       type: 'object',
       properties: {
-        urls: {
+        files: {
           type: 'array',
-          items: { type: 'string' },
+          items: {
+            type: 'object',
+            properties: {
+              url: { type: 'string', description: 'Presigned URL (1시간 유효)' },
+              key: { type: 'string', description: 'S3 객체 키 (DB 저장용)' },
+            },
+          },
           example: [
-            'https://yeirin-counsel-requests.s3.ap-northeast-2.amazonaws.com/counsel-requests/uuid1.jpg',
-            'https://yeirin-counsel-requests.s3.ap-northeast-2.amazonaws.com/counsel-requests/uuid2.jpg',
+            { url: 'https://yeirin-uploads.s3.../uuid1.jpg?X-Amz-...', key: 'counsel-requests/uuid1.jpg' },
+            { url: 'https://yeirin-uploads.s3.../uuid2.jpg?X-Amz-...', key: 'counsel-requests/uuid2.jpg' },
           ],
         },
       },
@@ -171,7 +186,7 @@ export class UploadController {
   })
   @ApiResponse({ status: 400, description: '잘못된 파일 형식, 크기 초과, 또는 파일 개수 초과' })
   @ApiResponse({ status: 401, description: '인증 실패' })
-  async uploadImages(@UploadedFiles() files: Express.Multer.File[]): Promise<{ urls: string[] }> {
+  async uploadImages(@UploadedFiles() files: Express.Multer.File[]): Promise<{ files: Array<{ url: string; key: string }> }> {
     if (!files || files.length === 0) {
       throw new BadRequestException('파일이 업로드되지 않았습니다');
     }
@@ -180,8 +195,15 @@ export class UploadController {
       throw new BadRequestException('최대 3개의 파일만 업로드할 수 있습니다');
     }
 
-    const urls = await this.s3Service.uploadFiles(files, 'counsel-requests');
-    return { urls };
+    const s3Urls = await this.s3Service.uploadFiles(files, 'counsel-requests');
+    const results = await Promise.all(
+      s3Urls.map(async (s3Url) => {
+        const key = this.s3Service.extractKeyFromUrl(s3Url);
+        const url = await this.s3Service.getPresignedUrl(key);
+        return { url, key };
+      }),
+    );
+    return { files: results };
   }
 
   /**
@@ -237,8 +259,14 @@ export class UploadController {
       properties: {
         url: {
           type: 'string',
+          description: 'Presigned URL (1시간 유효)',
           example:
-            'https://yeirin-counsel-requests.s3.ap-northeast-2.amazonaws.com/assessment-reports/uuid.pdf',
+            'https://yeirin-uploads.s3.ap-northeast-2.amazonaws.com/assessment-reports/uuid.pdf?X-Amz-...',
+        },
+        key: {
+          type: 'string',
+          description: 'S3 객체 키 (DB 저장용)',
+          example: 'assessment-reports/uuid.pdf',
         },
       },
     },
@@ -248,7 +276,7 @@ export class UploadController {
   async uploadInternalPdf(
     @UploadedFile() file: Express.Multer.File,
     @Headers('X-Internal-Api-Key') apiKey: string,
-  ): Promise<{ url: string }> {
+  ): Promise<{ url: string; key: string }> {
     // 내부 API 키 검증
     this.validateInternalApiSecret(apiKey);
 
@@ -257,7 +285,56 @@ export class UploadController {
     }
 
     // assessment-reports 폴더에 저장
-    const url = await this.s3Service.uploadFile(file, 'assessment-reports');
+    const s3Url = await this.s3Service.uploadFile(file, 'assessment-reports');
+    const key = this.s3Service.extractKeyFromUrl(s3Url);
+    const url = await this.s3Service.getPresignedUrl(key);
+    return { url, key };
+  }
+
+  /**
+   * S3 키로 Presigned URL 생성
+   * DB에 저장된 S3 키를 이용해 파일 접근 URL 생성
+   */
+  @Post('presigned-url')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'S3 키로 Presigned URL 생성' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        key: {
+          type: 'string',
+          description: 'S3 객체 키',
+          example: 'counsel-requests/uuid.jpg',
+        },
+        expiresIn: {
+          type: 'number',
+          description: 'URL 유효 시간 (초, 기본 3600)',
+          example: 3600,
+        },
+      },
+      required: ['key'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Presigned URL 생성 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'Presigned URL' },
+      },
+    },
+  })
+  async getPresignedUrl(
+    @Body() body: { key: string; expiresIn?: number },
+  ): Promise<{ url: string }> {
+    const { key, expiresIn = 3600 } = body;
+    if (!key) {
+      throw new BadRequestException('S3 키가 필요합니다');
+    }
+    const url = await this.s3Service.getPresignedUrl(key, expiresIn);
     return { url };
   }
 }
