@@ -49,6 +49,7 @@ async function bootstrap() {
       'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:3002',
+      'http://localhost:3003', // yeirin-admin 프론트엔드
       // EC2 서버 (Yeirin, Soul-E, Yeirin-AI)
       'http://3.38.162.252:3000',
       'http://43.202.32.196:8000',
