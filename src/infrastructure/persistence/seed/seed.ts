@@ -1,10 +1,13 @@
+import * as path from 'path';
 import { DataSource } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { CounselorProfileEntity } from '../typeorm/entity/counselor-profile.entity';
 import { ServiceType } from '../typeorm/entity/enums/service-type.enum';
 import { SpecialTreatment } from '../typeorm/entity/enums/special-treatment.enum';
 import { VoucherType } from '../typeorm/entity/enums/voucher-type.enum';
 import { ReviewEntity } from '../typeorm/entity/review.entity';
 import { VoucherInstitutionEntity } from '../typeorm/entity/voucher-institution.entity';
+import { UserEntity } from '../typeorm/entity/user.entity';
 
 const dataSource = new DataSource({
   type: 'postgres',
@@ -13,7 +16,7 @@ const dataSource = new DataSource({
   username: 'yeirin',
   password: 'yeirin123',
   database: 'yeirin_dev',
-  entities: [VoucherInstitutionEntity, CounselorProfileEntity, ReviewEntity],
+  entities: [path.join(__dirname, '../typeorm/entity/*.entity.{ts,js}')],
   synchronize: false,
 });
 
@@ -24,12 +27,45 @@ async function seed() {
   const institutionRepo = dataSource.getRepository(VoucherInstitutionEntity);
   const counselorRepo = dataSource.getRepository(CounselorProfileEntity);
   const reviewRepo = dataSource.getRepository(ReviewEntity);
+  const userRepo = dataSource.getRepository(UserEntity);
 
   // 기존 데이터 삭제 (외래 키 제약 고려)
   await dataSource.query(
     'TRUNCATE TABLE reviews, counselor_profiles, voucher_institutions RESTART IDENTITY CASCADE',
   );
   console.log('🗑️  기존 데이터 삭제 완료');
+
+  // =====================================================
+  // Admin 사용자 생성 (기존 Admin 계정이 없는 경우에만)
+  // =====================================================
+  console.log('\n👑 Admin 사용자 확인 중...');
+
+  const existingAdmin = await userRepo.findOne({
+    where: { email: 'admin@yeirin.co.kr' },
+  });
+
+  if (!existingAdmin) {
+    // 비밀번호: Admin@123! (영문, 숫자, 특수문자 포함)
+    const adminPassword = await bcrypt.hash('Admin@123!', 10);
+
+    const adminUser = userRepo.create({
+      email: 'admin@yeirin.co.kr',
+      password: adminPassword,
+      realName: '시스템관리자',
+      phoneNumber: '010-0000-0000',
+      role: 'ADMIN',
+      isActive: true,
+      isEmailVerified: true,
+      isBanned: false,
+    });
+
+    await userRepo.save(adminUser);
+    console.log('✅ Admin 계정 생성 완료');
+    console.log('   📧 이메일: admin@yeirin.co.kr');
+    console.log('   🔑 비밀번호: Admin@123!');
+  } else {
+    console.log('ℹ️  Admin 계정이 이미 존재합니다');
+  }
 
   // 바우처 기관 더미 데이터
   const institutions = [

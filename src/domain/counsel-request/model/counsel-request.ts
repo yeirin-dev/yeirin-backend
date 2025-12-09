@@ -310,4 +310,42 @@ export class CounselRequest {
 
     return Result.ok(undefined);
   }
+
+  /**
+   * Admin 상태 강제 변경
+   * - COMPLETED 상태인 상담의뢰는 변경 불가
+   * - COMPLETED 상태로의 변경 불가
+   * - 사유 필수
+   */
+  adminForceStatus(newStatus: CounselRequestStatus, reason: string): Result<void, DomainError> {
+    // COMPLETED 상태인 경우 변경 불가
+    if (this._status === CounselRequestStatus.COMPLETED) {
+      return Result.fail(new DomainError('완료된 상담의뢰는 상태를 변경할 수 없습니다'));
+    }
+
+    // COMPLETED 상태로 직접 변경 불가
+    if (newStatus === CounselRequestStatus.COMPLETED) {
+      return Result.fail(
+        new DomainError(
+          '관리자가 직접 완료 상태로 변경할 수 없습니다. 정상적인 상담 완료 플로우를 사용해주세요.',
+        ),
+      );
+    }
+
+    // 사유 필수
+    if (!reason || reason.trim().length < 10) {
+      return Result.fail(new DomainError('변경 사유는 최소 10자 이상이어야 합니다'));
+    }
+
+    // 동일 상태로의 변경 방지
+    if (this._status === newStatus) {
+      return Result.fail(new DomainError('현재 상태와 동일한 상태로는 변경할 수 없습니다'));
+    }
+
+    // 상태 변경 (모든 상태 전환 허용 - Admin 권한)
+    this._status = newStatus;
+    this._updatedAt = new Date();
+
+    return Result.ok(undefined);
+  }
 }

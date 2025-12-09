@@ -1,7 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
-import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import {
   CareType,
   ConsentStatus,
@@ -9,6 +8,7 @@ import {
   Gender,
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
+import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { GetCounselRequestsByGuardianUseCase } from './get-counsel-requests-by-guardian.usecase';
 
 describe('GetCounselRequestsByGuardianUseCase', () => {
@@ -40,9 +40,7 @@ describe('GetCounselRequestsByGuardianUseCase', () => {
       ],
     }).compile();
 
-    useCase = module.get<GetCounselRequestsByGuardianUseCase>(
-      GetCounselRequestsByGuardianUseCase,
-    );
+    useCase = module.get<GetCounselRequestsByGuardianUseCase>(GetCounselRequestsByGuardianUseCase);
   });
 
   const createMockFormData = (): CounselRequestFormData => ({

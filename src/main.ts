@@ -70,6 +70,7 @@ async function bootstrap() {
     .setDescription('Yeirin 상담기관 매칭 플랫폼 API 문서')
     .setVersion('0.1.0')
     .addBearerAuth()
+    // 일반 API 태그
     .addTag('인증', '사용자 인증/인가 및 회원가입 API')
     .addTag('아동 관리', '보호자의 아동 등록 및 조회 API')
     .addTag('상담의뢰지', '상담의뢰지 생성, 조회, 매칭 및 상태 관리 API')
@@ -77,6 +78,13 @@ async function bootstrap() {
     .addTag('바우처 기관', '바우처 공급기관 관리 API')
     .addTag('상담 매칭', 'AI 기반 상담기관 추천 API')
     .addTag('리뷰', '바우처 기관 리뷰 작성 및 관리 API')
+    // Admin API 태그
+    .addTag('Admin - 대시보드', '관리자 대시보드 API (ADMIN 전용)')
+    .addTag('Admin - 사용자 관리', '사용자 조회, 정지, 활성화 관리 API (ADMIN 전용)')
+    .addTag('Admin - 상담의뢰 관리', '상담의뢰 조회, 상태 변경 API (ADMIN 전용)')
+    .addTag('Admin - 기관 관리', '기관 활성화/비활성화 관리 API (ADMIN 전용)')
+    .addTag('Admin - 통계', '사용자, 상담의뢰, 기관 통계 API (ADMIN 전용)')
+    .addTag('Admin - 감사 로그', '관리자 활동 감사 로그 조회 API (ADMIN 전용)')
     .addServer(serverUrl, serverDesc)
     .build();
 

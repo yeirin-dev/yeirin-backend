@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CounselorProfileRepository } from '@domain/counselor/repository/counselor-profile.repository';
-import { CreateCounselorProfileUseCase } from './create-counselor-profile.usecase';
 import { CreateCounselorProfileDto } from '../dto/create-counselor-profile.dto';
+import { CreateCounselorProfileUseCase } from './create-counselor-profile.usecase';
 
 describe('CreateCounselorProfileUseCase', () => {
   let useCase: CreateCounselorProfileUseCase;

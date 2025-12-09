@@ -1,5 +1,5 @@
-import { CreateInstitutionUseCase } from './create-institution.usecase';
 import { CreateInstitutionDto } from '../dto/create-institution.dto';
+import { CreateInstitutionUseCase } from './create-institution.usecase';
 
 describe('CreateInstitutionUseCase', () => {
   let useCase: CreateInstitutionUseCase;

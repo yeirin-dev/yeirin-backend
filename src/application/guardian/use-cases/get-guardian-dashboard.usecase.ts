@@ -35,11 +35,18 @@ export class GetGuardianDashboardUseCase {
     if (guardianProfile) {
       // 양육시설 선생님: careFacilityId로 조회
       if (guardianType === 'CARE_FACILITY_TEACHER' && guardianProfile.careFacilityId) {
-        childrenCount = await this.childRepository.countByCareFacilityId(guardianProfile.careFacilityId);
+        childrenCount = await this.childRepository.countByCareFacilityId(
+          guardianProfile.careFacilityId,
+        );
       }
       // 지역아동센터 선생님: communityChildCenterId로 조회
-      else if (guardianType === 'COMMUNITY_CENTER_TEACHER' && guardianProfile.communityChildCenterId) {
-        childrenCount = await this.childRepository.countByCommunityChildCenterId(guardianProfile.communityChildCenterId);
+      else if (
+        guardianType === 'COMMUNITY_CENTER_TEACHER' &&
+        guardianProfile.communityChildCenterId
+      ) {
+        childrenCount = await this.childRepository.countByCommunityChildCenterId(
+          guardianProfile.communityChildCenterId,
+        );
       }
       // 일반 보호자 (부모): guardianId로 조회
       else if (guardianProfileId) {

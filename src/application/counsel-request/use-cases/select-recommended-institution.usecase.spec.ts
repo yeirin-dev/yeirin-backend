@@ -1,9 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
-import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
-import { CounselRequestRecommendation } from '@domain/counsel-request-recommendation/model/counsel-request-recommendation';
-import { CounselRequestRecommendationRepository } from '@domain/counsel-request-recommendation/repository/counsel-request-recommendation.repository';
 import {
   CareType,
   ConsentStatus,
@@ -11,6 +8,9 @@ import {
   Gender,
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
+import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
+import { CounselRequestRecommendation } from '@domain/counsel-request-recommendation/model/counsel-request-recommendation';
+import { CounselRequestRecommendationRepository } from '@domain/counsel-request-recommendation/repository/counsel-request-recommendation.repository';
 import { SelectRecommendedInstitutionUseCase } from './select-recommended-institution.usecase';
 
 describe('SelectRecommendedInstitutionUseCase', () => {
@@ -56,9 +56,7 @@ describe('SelectRecommendedInstitutionUseCase', () => {
       ],
     }).compile();
 
-    useCase = module.get<SelectRecommendedInstitutionUseCase>(
-      SelectRecommendedInstitutionUseCase,
-    );
+    useCase = module.get<SelectRecommendedInstitutionUseCase>(SelectRecommendedInstitutionUseCase);
   });
 
   const createMockFormData = (): CounselRequestFormData => ({

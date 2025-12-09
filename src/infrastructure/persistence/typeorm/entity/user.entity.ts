@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -16,6 +17,10 @@ import { VoucherInstitutionEntity } from './voucher-institution.entity';
  * - Domain의 User Aggregate와 분리
  */
 @Entity('users')
+@Index('idx_users_role', ['role'])
+@Index('idx_users_created_at', ['createdAt'])
+@Index('idx_users_last_login', ['lastLoginAt'])
+@Index('idx_users_is_banned', ['isBanned'])
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -55,6 +60,18 @@ export class UserEntity {
   /** 계정 활성화 여부 */
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
+
+  /** 계정 정지 여부 */
+  @Column({ type: 'boolean', default: false })
+  isBanned: boolean;
+
+  /** 정지 사유 */
+  @Column({ type: 'text', nullable: true })
+  banReason: string | null;
+
+  /** 정지 일시 */
+  @Column({ type: 'timestamp', nullable: true })
+  bannedAt: Date | null;
 
   /** 마지막 로그인 시간 */
   @Column({ type: 'timestamp', nullable: true })

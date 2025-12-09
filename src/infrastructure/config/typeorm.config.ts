@@ -16,8 +16,9 @@ import { VoucherInstitutionEntity } from '../persistence/typeorm/entity/voucher-
 
 export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => {
   const isDevelopment = configService.get<string>('NODE_ENV') !== 'production';
-  const isLocalDb = configService.get<string>('DB_HOST')?.includes('localhost') ||
-                    configService.get<string>('DB_HOST')?.includes('127.0.0.1');
+  const isLocalDb =
+    configService.get<string>('DB_HOST')?.includes('localhost') ||
+    configService.get<string>('DB_HOST')?.includes('127.0.0.1');
 
   return {
     type: 'postgres',

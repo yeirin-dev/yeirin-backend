@@ -11,8 +11,8 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { ChildRepository } from '@domain/child/repository/child.repository';
+import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { ChildResponseDto } from '@application/child/dto/child-response.dto';
 import { RegisterChildDto } from '@application/child/dto/register-child.dto';
 import { GetChildrenByGuardianUseCase } from '@application/child/use-cases/get-children-by-guardian/get-children-by-guardian.use-case';
@@ -62,13 +62,17 @@ export class ChildController {
 
     // 양육시설 선생님: careFacilityId로 조회
     if (guardianType === 'CARE_FACILITY_TEACHER' && guardianProfile.careFacilityId) {
-      const children = await this.childRepository.findByCareFacilityId(guardianProfile.careFacilityId);
+      const children = await this.childRepository.findByCareFacilityId(
+        guardianProfile.careFacilityId,
+      );
       return children.map((child) => ChildResponseDto.fromDomain(child));
     }
 
     // 지역아동센터 선생님: communityChildCenterId로 조회
     if (guardianType === 'COMMUNITY_CENTER_TEACHER' && guardianProfile.communityChildCenterId) {
-      const children = await this.childRepository.findByCommunityChildCenterId(guardianProfile.communityChildCenterId);
+      const children = await this.childRepository.findByCommunityChildCenterId(
+        guardianProfile.communityChildCenterId,
+      );
       return children.map((child) => ChildResponseDto.fromDomain(child));
     }
 
@@ -172,7 +176,8 @@ export class ChildController {
     const hasPermission =
       child.guardianId === guardianProfile.id ||
       (child.careFacilityId && child.careFacilityId === guardianProfile.careFacilityId) ||
-      (child.communityChildCenterId && child.communityChildCenterId === guardianProfile.communityChildCenterId);
+      (child.communityChildCenterId &&
+        child.communityChildCenterId === guardianProfile.communityChildCenterId);
 
     if (!hasPermission) {
       throw new ForbiddenException('이 아동을 삭제할 권한이 없습니다.');

@@ -1,11 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Address } from '@domain/common/value-objects/address.vo';
+import { InstitutionName } from '@domain/common/value-objects/institution-name.vo';
 import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
 import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
-import { InstitutionName } from '@domain/common/value-objects/institution-name.vo';
-import { Address } from '@domain/common/value-objects/address.vo';
-import { CreateCommunityChildCenterUseCase } from './create-community-child-center.usecase';
 import { CreateCommunityChildCenterDto } from '../dto/create-community-child-center.dto';
+import { CreateCommunityChildCenterUseCase } from './create-community-child-center.usecase';
 
 describe('CreateCommunityChildCenterUseCase', () => {
   let useCase: CreateCommunityChildCenterUseCase;

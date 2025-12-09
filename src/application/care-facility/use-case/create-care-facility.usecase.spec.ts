@@ -1,12 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { CareFacility } from '@domain/care-facility/model/care-facility';
 import { CareFacilityRepository } from '@domain/care-facility/repository/care-facility.repository';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
-import { InstitutionName } from '@domain/common/value-objects/institution-name.vo';
 import { Address } from '@domain/common/value-objects/address.vo';
-import { CreateCareFacilityUseCase } from './create-care-facility.usecase';
+import { InstitutionName } from '@domain/common/value-objects/institution-name.vo';
+import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { CreateCareFacilityDto } from '../dto/create-care-facility.dto';
+import { CreateCareFacilityUseCase } from './create-care-facility.usecase';
 
 describe('CreateCareFacilityUseCase', () => {
   let useCase: CreateCareFacilityUseCase;

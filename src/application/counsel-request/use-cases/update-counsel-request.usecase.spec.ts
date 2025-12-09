@@ -1,7 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
-import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import {
   CareType,
   ConsentStatus,
@@ -9,8 +8,9 @@ import {
   Gender,
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
-import { UpdateCounselRequestUseCase } from './update-counsel-request.usecase';
+import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { UpdateCounselRequestDto } from '../dto/update-counsel-request.dto';
+import { UpdateCounselRequestUseCase } from './update-counsel-request.usecase';
 
 describe('UpdateCounselRequestUseCase', () => {
   let useCase: UpdateCounselRequestUseCase;

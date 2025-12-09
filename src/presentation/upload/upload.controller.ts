@@ -21,8 +21,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
+import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 import { S3Service } from '@infrastructure/storage/s3.service';
 
 /**
@@ -38,7 +38,8 @@ export class UploadController {
     private readonly s3Service: S3Service,
     private readonly configService: ConfigService,
   ) {
-    this.internalApiSecret = this.configService.get<string>('INTERNAL_API_SECRET') || 'yeirin-internal-secret';
+    this.internalApiSecret =
+      this.configService.get<string>('INTERNAL_API_SECRET') || 'yeirin-internal-secret';
   }
 
   /**
@@ -109,7 +110,9 @@ export class UploadController {
   })
   @ApiResponse({ status: 400, description: '잘못된 파일 형식 또는 크기 초과' })
   @ApiResponse({ status: 401, description: '인증 실패' })
-  async uploadImage(@UploadedFile() file: Express.Multer.File): Promise<{ url: string; key: string }> {
+  async uploadImage(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ url: string; key: string }> {
     if (!file) {
       throw new BadRequestException('파일이 업로드되지 않았습니다');
     }
@@ -177,8 +180,14 @@ export class UploadController {
             },
           },
           example: [
-            { url: 'https://yeirin-uploads.s3.../uuid1.jpg?X-Amz-...', key: 'counsel-requests/uuid1.jpg' },
-            { url: 'https://yeirin-uploads.s3.../uuid2.jpg?X-Amz-...', key: 'counsel-requests/uuid2.jpg' },
+            {
+              url: 'https://yeirin-uploads.s3.../uuid1.jpg?X-Amz-...',
+              key: 'counsel-requests/uuid1.jpg',
+            },
+            {
+              url: 'https://yeirin-uploads.s3.../uuid2.jpg?X-Amz-...',
+              key: 'counsel-requests/uuid2.jpg',
+            },
           ],
         },
       },
@@ -186,7 +195,9 @@ export class UploadController {
   })
   @ApiResponse({ status: 400, description: '잘못된 파일 형식, 크기 초과, 또는 파일 개수 초과' })
   @ApiResponse({ status: 401, description: '인증 실패' })
-  async uploadImages(@UploadedFiles() files: Express.Multer.File[]): Promise<{ files: Array<{ url: string; key: string }> }> {
+  async uploadImages(
+    @UploadedFiles() files: Express.Multer.File[],
+  ): Promise<{ files: Array<{ url: string; key: string }> }> {
     if (!files || files.length === 0) {
       throw new BadRequestException('파일이 업로드되지 않았습니다');
     }
@@ -220,10 +231,7 @@ export class UploadController {
       },
       fileFilter: (req, file, callback) => {
         if (file.mimetype !== 'application/pdf') {
-          return callback(
-            new BadRequestException('PDF 파일만 업로드 가능합니다'),
-            false,
-          );
+          return callback(new BadRequestException('PDF 파일만 업로드 가능합니다'), false);
         }
         callback(null, true);
       },
@@ -232,7 +240,8 @@ export class UploadController {
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: '내부 서비스용 PDF 업로드 (MSA 통신)',
-    description: 'yeirin-ai에서 KPRC 검사 결과 PDF를 업로드할 때 사용합니다. JWT 인증 대신 X-Internal-Api-Key 헤더로 인증합니다.',
+    description:
+      'yeirin-ai에서 KPRC 검사 결과 PDF를 업로드할 때 사용합니다. JWT 인증 대신 X-Internal-Api-Key 헤더로 인증합니다.',
   })
   @ApiHeader({
     name: 'X-Internal-Api-Key',

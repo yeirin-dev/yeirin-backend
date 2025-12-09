@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { AuthService } from '@application/auth/auth.service';
 import { AuthResponseDto } from '@application/auth/dto/auth-response.dto';
 import { LoginDto } from '@application/auth/dto/login.dto';
@@ -16,7 +17,6 @@ import { RegisterCounselorDto } from '@application/auth/dto/register-counselor.d
 import { RegisterGuardianDto } from '@application/auth/dto/register-guardian.dto';
 import { RegisterInstitutionDto } from '@application/auth/dto/register-institution.dto';
 import { RegisterDto } from '@application/auth/dto/register.dto';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import {
   CurrentUser,
   CurrentUserData,

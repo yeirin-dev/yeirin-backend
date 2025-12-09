@@ -1,5 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { CounselorProfileRepository } from '@domain/counselor/repository/counselor-profile.repository';
 import { GetCounselorProfileUseCase } from './get-counselor-profile.usecase';
 

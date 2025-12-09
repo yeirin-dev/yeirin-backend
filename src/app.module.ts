@@ -11,6 +11,7 @@ import { HealthModule } from '@infrastructure/common/health/health.module';
 import { RequestIdMiddleware } from '@infrastructure/common/middleware/request-id.middleware';
 import { getTypeOrmConfig } from '@infrastructure/config/typeorm.config';
 import { LoggingInterceptor } from '@infrastructure/logging/logging.interceptor';
+import { AdminApiModule } from '@presentation/admin-api/admin-api.module';
 import { AuthModule } from '@presentation/auth/auth.module';
 import { CareFacilityModule } from '@presentation/care-facility/care-facility.module';
 import { ChildModule } from '@presentation/child/child.module';
@@ -18,11 +19,11 @@ import { CommunityChildCenterModule } from '@presentation/community-child-center
 import { CounselReportModule } from '@presentation/counsel-report/counsel-report.module';
 import { CounselRequestModule } from '@presentation/counsel-request/counsel-request.module';
 import { CounselorProfileModule } from '@presentation/counselor/counselor-profile.module';
+import { GuardianModule } from '@presentation/guardian/guardian.module';
 import { InstitutionModule } from '@presentation/institution/institution.module';
 import { MatchingModule } from '@presentation/matching/matching.module';
 import { ReviewModule } from '@presentation/review/review.module';
 import { UploadModule } from '@presentation/upload/upload.module';
-import { GuardianModule } from '@presentation/guardian/guardian.module';
 import { WebhookModule } from '@presentation/webhook/webhook.module';
 
 @Module({
@@ -59,6 +60,8 @@ import { WebhookModule } from '@presentation/webhook/webhook.module';
     UploadModule,
     GuardianModule,
     WebhookModule,
+    // Admin API Module
+    AdminApiModule,
   ],
   providers: [
     // 글로벌 예외 필터 (표준화된 에러 응답)

@@ -27,6 +27,9 @@ export class UserMapper {
     entity.refreshToken = user.refreshToken;
     entity.isEmailVerified = user.isEmailVerified;
     entity.isActive = user.isActive;
+    entity.isBanned = user.isBanned;
+    entity.banReason = user.banReason;
+    entity.bannedAt = user.bannedAt;
     entity.lastLoginAt = user.lastLoginAt;
     entity.createdAt = user.createdAt;
     entity.updatedAt = user.updatedAt;
@@ -55,6 +58,9 @@ export class UserMapper {
       role,
       isEmailVerified: entity.isEmailVerified,
       isActive: entity.isActive,
+      isBanned: entity.isBanned,
+      banReason: entity.banReason,
+      bannedAt: entity.bannedAt,
       lastLoginAt: entity.lastLoginAt,
       refreshToken: entity.refreshToken,
       createdAt: entity.createdAt,

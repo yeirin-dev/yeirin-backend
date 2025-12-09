@@ -1,7 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ChildRepository } from '@domain/child/repository/child.repository';
-import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import {
   CareType,
@@ -10,6 +8,8 @@ import {
   Gender,
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
+import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
+import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { GetGuardianDashboardUseCase } from './get-guardian-dashboard.usecase';
 
 describe('GetGuardianDashboardUseCase', () => {

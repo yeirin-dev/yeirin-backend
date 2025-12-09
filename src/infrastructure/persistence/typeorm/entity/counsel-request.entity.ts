@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -16,6 +17,9 @@ import { ChildProfileEntity } from './child-profile.entity';
 import { GuardianProfileEntity } from './guardian-profile.entity';
 
 @Entity('counsel_requests')
+@Index('idx_counsel_requests_status', ['status'])
+@Index('idx_counsel_requests_status_created', ['status', 'createdAt'])
+@Index('idx_counsel_requests_created_at', ['createdAt'])
 export class CounselRequestEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
