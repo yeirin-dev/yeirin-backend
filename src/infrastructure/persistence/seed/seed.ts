@@ -67,9 +67,45 @@ async function seed() {
     console.log('ℹ️  Admin 계정이 이미 존재합니다');
   }
 
-  // 바우처 기관 더미 데이터
+  // =====================================================
+  // 기관 대표 (INSTITUTION_ADMIN) 사용자 생성
+  // =====================================================
+  console.log('\n🏢 기관 대표 사용자 생성 중...');
+
+  const institutionPassword = await bcrypt.hash('Institution@123!', 10);
+
+  const institutionAdminData = [
+    { email: 'seoul-center@yeirin.co.kr', realName: '김미영', phoneNumber: '010-1111-1111' },
+    { email: 'happy-child@yeirin.co.kr', realName: '이지은', phoneNumber: '010-2222-2222' },
+    { email: 'open-heart@yeirin.co.kr', realName: '박준호', phoneNumber: '010-3333-3333' },
+    { email: 'kids-mind@yeirin.co.kr', realName: '정수진', phoneNumber: '010-4444-4444' },
+    { email: 'bright-child@yeirin.co.kr', realName: '최영희', phoneNumber: '010-5555-5555' },
+  ];
+
+  const savedInstitutionAdmins: UserEntity[] = [];
+  for (const adminData of institutionAdminData) {
+    const existingUser = await userRepo.findOne({ where: { email: adminData.email } });
+    if (existingUser) {
+      savedInstitutionAdmins.push(existingUser);
+    } else {
+      const newUser = userRepo.create({
+        ...adminData,
+        password: institutionPassword,
+        role: 'INSTITUTION_ADMIN',
+        isActive: true,
+        isEmailVerified: true,
+        isBanned: false,
+      });
+      const saved = await userRepo.save(newUser);
+      savedInstitutionAdmins.push(saved);
+    }
+  }
+  console.log(`✅ ${savedInstitutionAdmins.length}명 기관 대표 생성 완료`);
+
+  // 바우처 기관 더미 데이터 (userId 연결)
   const institutions = [
     {
+      userId: savedInstitutionAdmins[0].id,
       centerName: '서울아동심리상담센터',
       representativeName: '김미영',
       address: '서울특별시 강남구 테헤란로 123',
@@ -88,6 +124,7 @@ async function seed() {
       canProvideParentCounseling: true,
     },
     {
+      userId: savedInstitutionAdmins[1].id,
       centerName: '행복한아이 발달센터',
       representativeName: '이지은',
       address: '서울특별시 송파구 올림픽로 456',
@@ -113,6 +150,7 @@ async function seed() {
       canProvideParentCounseling: true,
     },
     {
+      userId: savedInstitutionAdmins[2].id,
       centerName: '마음여는 아동상담소',
       representativeName: '박준호',
       address: '경기도 성남시 분당구 정자로 789',
@@ -131,6 +169,7 @@ async function seed() {
       canProvideParentCounseling: true,
     },
     {
+      userId: savedInstitutionAdmins[3].id,
       centerName: '키즈마인드 종합심리센터',
       representativeName: '정수진',
       address: '인천광역시 부평구 부평대로 321',
@@ -159,6 +198,7 @@ async function seed() {
       canProvideParentCounseling: true,
     },
     {
+      userId: savedInstitutionAdmins[4].id,
       centerName: '해맑은 아동발달클리닉',
       representativeName: '최영희',
       address: '대전광역시 유성구 대학로 111',
@@ -182,10 +222,54 @@ async function seed() {
   const savedInstitutions = await institutionRepo.save(institutions);
   console.log(`✅ ${savedInstitutions.length}개 기관 생성 완료`);
 
-  // 상담사 프로필 더미 데이터
+  // =====================================================
+  // 상담사 (COUNSELOR) 사용자 생성
+  // =====================================================
+  console.log('\n👨‍⚕️ 상담사 사용자 생성 중...');
+
+  const counselorPassword = await bcrypt.hash('Counselor@123!', 10);
+
+  const counselorUserData = [
+    // 서울아동심리상담센터 상담사들
+    { email: 'counselor-kimjw@yeirin.co.kr', realName: '김지원', phoneNumber: '010-1001-1001' },
+    { email: 'counselor-parksy@yeirin.co.kr', realName: '박서연', phoneNumber: '010-1001-1002' },
+    // 행복한아이 발달센터 상담사들
+    { email: 'counselor-leemj@yeirin.co.kr', realName: '이민주', phoneNumber: '010-1002-1001' },
+    { email: 'counselor-junghw@yeirin.co.kr', realName: '정현우', phoneNumber: '010-1002-1002' },
+    // 마음여는 아동상담소 상담사들
+    { email: 'counselor-kangej@yeirin.co.kr', realName: '강은지', phoneNumber: '010-1003-1001' },
+    // 키즈마인드 종합심리센터 상담사들
+    { email: 'counselor-yoonjh@yeirin.co.kr', realName: '윤지혜', phoneNumber: '010-1004-1001' },
+    { email: 'counselor-hansh@yeirin.co.kr', realName: '한승현', phoneNumber: '010-1004-1002' },
+    // 해맑은 아동발달클리닉 상담사들
+    { email: 'counselor-joym@yeirin.co.kr', realName: '조영민', phoneNumber: '010-1005-1001' },
+  ];
+
+  const savedCounselorUsers: UserEntity[] = [];
+  for (const userData of counselorUserData) {
+    const existingUser = await userRepo.findOne({ where: { email: userData.email } });
+    if (existingUser) {
+      savedCounselorUsers.push(existingUser);
+    } else {
+      const newUser = userRepo.create({
+        ...userData,
+        password: counselorPassword,
+        role: 'COUNSELOR',
+        isActive: true,
+        isEmailVerified: true,
+        isBanned: false,
+      });
+      const saved = await userRepo.save(newUser);
+      savedCounselorUsers.push(saved);
+    }
+  }
+  console.log(`✅ ${savedCounselorUsers.length}명 상담사 사용자 생성 완료`);
+
+  // 상담사 프로필 더미 데이터 (userId 연결)
   const counselors = [
     // 서울아동심리상담센터 상담사들
     {
+      userId: savedCounselorUsers[0].id,
       institutionId: savedInstitutions[0].id,
       name: '김지원',
       experienceYears: 12,
@@ -195,6 +279,7 @@ async function seed() {
         'ADHD 아동 전문 상담 12년 경력. 놀이치료와 인지행동치료를 병행하여 학교 적응력 향상에 중점을 둡니다.',
     },
     {
+      userId: savedCounselorUsers[1].id,
       institutionId: savedInstitutions[0].id,
       name: '박서연',
       experienceYears: 8,
@@ -206,6 +291,7 @@ async function seed() {
 
     // 행복한아이 발달센터 상담사들
     {
+      userId: savedCounselorUsers[2].id,
       institutionId: savedInstitutions[1].id,
       name: '이민주',
       experienceYears: 10,
@@ -215,6 +301,7 @@ async function seed() {
         '언어발달 전문 10년 경력. 개별 맞춤형 언어 프로그램으로 의사소통 능력 향상에 집중합니다.',
     },
     {
+      userId: savedCounselorUsers[3].id,
       institutionId: savedInstitutions[1].id,
       name: '정현우',
       experienceYears: 7,
@@ -225,6 +312,7 @@ async function seed() {
 
     // 마음여는 아동상담소 상담사들
     {
+      userId: savedCounselorUsers[4].id,
       institutionId: savedInstitutions[2].id,
       name: '강은지',
       experienceYears: 15,
@@ -236,6 +324,7 @@ async function seed() {
 
     // 키즈마인드 종합심리센터 상담사들
     {
+      userId: savedCounselorUsers[5].id,
       institutionId: savedInstitutions[3].id,
       name: '윤지혜',
       experienceYears: 11,
@@ -244,6 +333,7 @@ async function seed() {
       introduction: '종합심리검사 전문. 정확한 진단을 통해 개별 맞춤형 치료 계획을 수립합니다.',
     },
     {
+      userId: savedCounselorUsers[6].id,
       institutionId: savedInstitutions[3].id,
       name: '한승현',
       experienceYears: 9,
@@ -254,6 +344,7 @@ async function seed() {
 
     // 해맑은 아동발달클리닉 상담사들
     {
+      userId: savedCounselorUsers[7].id,
       institutionId: savedInstitutions[4].id,
       name: '조영민',
       experienceYears: 6,
@@ -264,7 +355,7 @@ async function seed() {
     },
   ];
 
-  console.log('👨‍⚕️ 상담사 프로필 생성 중...');
+  console.log('📋 상담사 프로필 생성 중...');
   const savedCounselors = await counselorRepo.save(counselors);
   console.log(`✅ ${savedCounselors.length}명 상담사 생성 완료`);
 
