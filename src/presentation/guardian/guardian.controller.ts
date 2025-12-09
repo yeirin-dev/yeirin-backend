@@ -13,9 +13,7 @@ import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class GuardianController {
-  constructor(
-    private readonly getGuardianDashboardUseCase: GetGuardianDashboardUseCase,
-  ) {}
+  constructor(private readonly getGuardianDashboardUseCase: GetGuardianDashboardUseCase) {}
 
   @Get('dashboard')
   @ApiOperation({

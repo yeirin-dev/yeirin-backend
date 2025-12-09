@@ -19,13 +19,13 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { AssessmentResultResponseDto } from '@application/counsel-request/dto/assessment-result-response.dto';
 import { CounselRequestResponseDto } from '@application/counsel-request/dto/counsel-request-response.dto';
 import { CreateCounselRequestDto } from '@application/counsel-request/dto/create-counsel-request.dto';
 import { PaginatedResponseDto } from '@application/counsel-request/dto/paginated-response.dto';
 import { PaginationQueryDto } from '@application/counsel-request/dto/pagination-query.dto';
 import { SouliWebhookDto } from '@application/counsel-request/dto/souli-webhook.dto';
 import { UpdateCounselRequestDto } from '@application/counsel-request/dto/update-counsel-request.dto';
-import { AssessmentResultResponseDto } from '@application/counsel-request/dto/assessment-result-response.dto';
 import { CompleteCounselingUseCase } from '@application/counsel-request/use-cases/complete-counseling.usecase';
 import { CreateCounselRequestFromSouliUseCase } from '@application/counsel-request/use-cases/create-counsel-request-from-souli.usecase';
 import { CreateCounselRequestUseCase } from '@application/counsel-request/use-cases/create-counsel-request.usecase';

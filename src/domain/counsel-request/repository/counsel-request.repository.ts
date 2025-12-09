@@ -63,9 +63,7 @@ export interface CounselRequestRepository {
   /**
    * 보호자별 상담의뢰 통계 조회
    */
-  countByGuardianIdAndStatus(
-    guardianId: string,
-  ): Promise<{
+  countByGuardianIdAndStatus(guardianId: string): Promise<{
     total: number;
     pending: number;
     recommended: number;
@@ -78,8 +76,5 @@ export interface CounselRequestRepository {
   /**
    * 보호자별 최근 활동 조회 (최근 N일간 변경된 상담의뢰)
    */
-  findRecentByGuardianId(
-    guardianId: string,
-    days: number,
-  ): Promise<CounselRequest[]>;
+  findRecentByGuardianId(guardianId: string, days: number): Promise<CounselRequest[]>;
 }

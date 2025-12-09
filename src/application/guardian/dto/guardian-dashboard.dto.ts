@@ -10,7 +10,10 @@ export class RecentActivityDto {
   @ApiProperty({ description: '아동 이름' })
   childName: string;
 
-  @ApiProperty({ description: '활동 유형', enum: ['CREATED', 'RECOMMENDED', 'MATCHED', 'IN_PROGRESS', 'COMPLETED'] })
+  @ApiProperty({
+    description: '활동 유형',
+    enum: ['CREATED', 'RECOMMENDED', 'MATCHED', 'IN_PROGRESS', 'COMPLETED'],
+  })
   activityType: string;
 
   @ApiProperty({ description: '활동 설명' })

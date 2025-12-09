@@ -37,6 +37,9 @@ export class User extends AggregateRoot {
   // 상태 필드
   private _isEmailVerified: boolean;
   private _isActive: boolean;
+  private _isBanned: boolean;
+  private _banReason: string | null;
+  private _bannedAt: Date | null;
   private _lastLoginAt: Date | null;
   private _refreshToken: string | null;
 
@@ -56,6 +59,9 @@ export class User extends AggregateRoot {
     // 기본값
     this._isEmailVerified = false;
     this._isActive = true;
+    this._isBanned = false;
+    this._banReason = null;
+    this._bannedAt = null;
     this._lastLoginAt = null;
     this._refreshToken = null;
 
@@ -90,6 +96,9 @@ export class User extends AggregateRoot {
       id: string;
       isEmailVerified: boolean;
       isActive: boolean;
+      isBanned?: boolean;
+      banReason?: string | null;
+      bannedAt?: Date | null;
       lastLoginAt: Date | null;
       refreshToken: string | null;
       createdAt: Date;
@@ -110,6 +119,9 @@ export class User extends AggregateRoot {
     // 상태 복원
     (user as any)._isEmailVerified = props.isEmailVerified;
     (user as any)._isActive = props.isActive;
+    (user as any)._isBanned = props.isBanned ?? false;
+    (user as any)._banReason = props.banReason ?? null;
+    (user as any)._bannedAt = props.bannedAt ?? null;
     (user as any)._lastLoginAt = props.lastLoginAt;
     (user as any)._refreshToken = props.refreshToken;
     (user as any)._createdAt = props.createdAt;
@@ -170,11 +182,56 @@ export class User extends AggregateRoot {
   }
 
   /**
+   * 계정 정지 (Admin 전용)
+   * - 정지 사유 필수
+   * - 이미 정지된 계정은 다시 정지 불가
+   */
+  ban(reason: string): Result<void, DomainError> {
+    if (this._isBanned) {
+      return Result.fail(new DomainError('이미 정지된 계정입니다'));
+    }
+
+    if (!reason || reason.trim().length < 10) {
+      return Result.fail(new DomainError('정지 사유는 최소 10자 이상이어야 합니다'));
+    }
+
+    (this as any)._isBanned = true;
+    (this as any)._banReason = reason;
+    (this as any)._bannedAt = new Date();
+    (this as any)._isActive = false; // 정지 시 비활성화
+    (this as any)._updatedAt = new Date();
+
+    return Result.ok(undefined);
+  }
+
+  /**
+   * 계정 정지 해제 (Admin 전용)
+   * - 정지되지 않은 계정은 해제 불가
+   */
+  unban(): Result<void, DomainError> {
+    if (!this._isBanned) {
+      return Result.fail(new DomainError('정지되지 않은 계정입니다'));
+    }
+
+    (this as any)._isBanned = false;
+    (this as any)._banReason = null;
+    (this as any)._bannedAt = null;
+    (this as any)._isActive = true; // 정지 해제 시 활성화
+    (this as any)._updatedAt = new Date();
+
+    return Result.ok(undefined);
+  }
+
+  /**
    * 로그인 기록
    */
   recordLogin(): Result<void, DomainError> {
     if (!this._isActive) {
       return Result.fail(new DomainError('비활성화된 계정입니다'));
+    }
+
+    if (this._isBanned) {
+      return Result.fail(new DomainError('정지된 계정입니다'));
     }
 
     (this as any)._lastLoginAt = new Date();
@@ -246,5 +303,17 @@ export class User extends AggregateRoot {
 
   get updatedAt(): Date {
     return this._updatedAt;
+  }
+
+  get isBanned(): boolean {
+    return this._isBanned;
+  }
+
+  get banReason(): string | null {
+    return this._banReason;
+  }
+
+  get bannedAt(): Date | null {
+    return this._bannedAt;
   }
 }

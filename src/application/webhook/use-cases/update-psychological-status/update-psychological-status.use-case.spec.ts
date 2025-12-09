@@ -1,21 +1,21 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Child } from '@domain/child/model/child';
-import { ChildRepository } from '@domain/child/repository/child.repository';
-import { ChildType, ChildTypeValue } from '@domain/child/model/value-objects/child-type.vo';
-import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { BirthDate } from '@domain/child/model/value-objects/birth-date.vo';
+import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
+import { ChildType, ChildTypeValue } from '@domain/child/model/value-objects/child-type.vo';
 import { Gender, GenderType } from '@domain/child/model/value-objects/gender.vo';
 import {
   PsychologicalStatus,
   PsychologicalStatusValue,
 } from '@domain/child/model/value-objects/psychological-status.vo';
+import { ChildRepository } from '@domain/child/repository/child.repository';
 import { PsychologicalStatus as PsychologicalStatusEnum } from '@infrastructure/persistence/typeorm/entity/enums/psychological-status.enum';
 import { PsychologicalStatusLogEntity } from '@infrastructure/persistence/typeorm/entity/psychological-status-log.entity';
-import { UpdatePsychologicalStatusUseCase } from './update-psychological-status.use-case';
 import { UpdatePsychologicalStatusDto } from '../../dto/update-psychological-status.dto';
+import { UpdatePsychologicalStatusUseCase } from './update-psychological-status.use-case';
 
 describe('UpdatePsychologicalStatusUseCase', () => {
   let useCase: UpdatePsychologicalStatusUseCase;

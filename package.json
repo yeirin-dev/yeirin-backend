@@ -117,7 +117,9 @@
       "^@application/(.*)$": "<rootDir>/application/$1",
       "^@infrastructure/(.*)$": "<rootDir>/infrastructure/$1",
       "^@presentation/(.*)$": "<rootDir>/presentation/$1",
-      "^@shared/(.*)$": "<rootDir>/shared/$1"
+      "^@shared/(.*)$": "<rootDir>/shared/$1",
+      "^@yeirin/admin-common$": "<rootDir>/shared/admin-common",
+      "^@yeirin/admin-common/(.*)$": "<rootDir>/shared/admin-common/$1"
     }
   }
 }

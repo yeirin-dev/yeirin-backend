@@ -1,17 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { ChildRepository } from '@domain/child/repository/child.repository';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
+import { Test, TestingModule } from '@nestjs/testing';
 import { CareFacilityRepository } from '@domain/care-facility/repository/care-facility.repository';
-import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
 import { Child } from '@domain/child/model/child';
-import { ChildType, ChildTypeValue } from '@domain/child/model/value-objects/child-type.vo';
-import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { BirthDate } from '@domain/child/model/value-objects/birth-date.vo';
+import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
+import { ChildType, ChildTypeValue } from '@domain/child/model/value-objects/child-type.vo';
 import { Gender, GenderType } from '@domain/child/model/value-objects/gender.vo';
+import { ChildRepository } from '@domain/child/repository/child.repository';
+import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
+import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { ChildType as ChildTypeEnum } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';
-import { RegisterChildUseCase } from './register-child.use-case';
 import { RegisterChildDto } from '../../dto/register-child.dto';
+import { RegisterChildUseCase } from './register-child.use-case';
 
 describe('RegisterChildUseCase', () => {
   let useCase: RegisterChildUseCase;
@@ -190,9 +190,7 @@ describe('RegisterChildUseCase', () => {
 
       // When & Then
       await expect(useCase.execute(dto)).rejects.toThrow(BadRequestException);
-      await expect(useCase.execute(dto)).rejects.toThrow(
-        '일반 아동은 부모 보호자 ID가 필수입니다',
-      );
+      await expect(useCase.execute(dto)).rejects.toThrow('일반 아동은 부모 보호자 ID가 필수입니다');
     });
   });
 

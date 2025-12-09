@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
-import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import {
   CareType,
   ConsentStatus,
@@ -8,8 +7,9 @@ import {
   Gender,
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
-import { CreateCounselRequestUseCase } from './create-counsel-request.usecase';
+import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { CreateCounselRequestDto } from '../dto/create-counsel-request.dto';
+import { CreateCounselRequestUseCase } from './create-counsel-request.usecase';
 
 describe('CreateCounselRequestUseCase', () => {
   let useCase: CreateCounselRequestUseCase;

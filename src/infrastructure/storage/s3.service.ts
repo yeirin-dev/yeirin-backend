@@ -1,8 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -25,9 +30,7 @@ export class S3Service {
     // 로컬 개발 환경(MinIO)에서는 명시적 자격증명 사용
     // EC2 환경에서는 IAM Role 자동 사용 (credentials 생략 시 SDK가 자동 탐지)
     const credentials =
-      accessKeyId && secretAccessKey
-        ? { accessKeyId, secretAccessKey }
-        : undefined;
+      accessKeyId && secretAccessKey ? { accessKeyId, secretAccessKey } : undefined;
 
     this.s3Client = new S3Client({
       region: this.configService.getOrThrow<string>('AWS_REGION'),

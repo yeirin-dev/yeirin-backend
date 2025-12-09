@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -22,6 +23,9 @@ import { GuardianProfileEntity } from './guardian-profile.entity';
  * - REGULAR (일반 아동, 부모 직접보호): guardianId(부모)만 연결
  */
 @Entity('child_profiles')
+@Index('idx_child_profiles_type', ['childType'])
+@Index('idx_child_profiles_psychological_status', ['psychologicalStatus'])
+@Index('idx_child_profiles_gender', ['gender'])
 export class ChildProfileEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
