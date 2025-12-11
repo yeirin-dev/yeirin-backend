@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IntegratedReportStatus } from '@domain/counsel-request/model/counsel-request';
 import {
   CareType,
   CounselRequestStatus,
@@ -38,6 +39,21 @@ export class CounselRequestResponseDto {
 
   @ApiProperty({ description: '매칭된 상담사 ID', nullable: true })
   matchedCounselorId?: string;
+
+  @ApiProperty({
+    description: '통합 보고서 생성 상태',
+    enum: ['pending', 'processing', 'completed', 'failed'],
+    nullable: true,
+  })
+  integratedReportStatus?: IntegratedReportStatus;
+
+  @ApiProperty({
+    description: '통합 보고서 URL (Presigned URL, 1시간 유효)',
+    nullable: true,
+    example:
+      'https://yeirin-uploads.s3.ap-northeast-2.amazonaws.com/assessment-reports/xxx.pdf?X-Amz-...',
+  })
+  integratedReportUrl?: string;
 
   @ApiProperty({ description: '생성일' })
   createdAt: Date;
