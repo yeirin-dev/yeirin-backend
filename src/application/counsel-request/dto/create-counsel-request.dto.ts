@@ -120,30 +120,86 @@ export class RequestMotivationDto {
   goals: string;
 }
 
-export class TestResultsDto {
-  @ApiProperty({ description: '아동 반응척도 심리검사 (이미지 URL)', required: false })
-  @IsString()
+/**
+ * KPRC 검사소견 DTO
+ * yeirin-ai에서 생성한 검사소견 (DocumentSummary 기반)
+ */
+export class KprcAssessmentSummaryDto {
+  @ApiProperty({
+    description: '요약 문장 (최대 5줄)',
+    example: ['아동은 전반적으로 양호한 적응 수준을 보입니다.', '또래 관계에서 다소 어려움이 관찰됩니다.'],
+    type: [String],
+    required: false,
+  })
+  @IsString({ each: true })
   @IsOptional()
-  childReactionScale?: string;
-
-  @ApiProperty({ description: '강점 설문지 심리검사 (이미지 URL)', required: false })
-  @IsString()
-  @IsOptional()
-  strengthSurvey?: string;
-
-  @ApiProperty({ description: '난점 설문지 심리검사 (이미지 URL)', required: false })
-  @IsString()
-  @IsOptional()
-  difficultySurvey?: string;
+  summaryLines?: string[];
 
   @ApiProperty({
-    description: 'Soul-E KPRC 심리검사 결과 PDF URL (S3)',
+    description: '전문가 소견 형태의 종합 요약',
+    example:
+      '본 아동은 KPRC 검사 결과, 전반적인 적응 수준이 양호한 것으로 나타났습니다. 다만, 또래 관계에서 다소 어려움이 관찰되어 사회성 향상을 위한 지원이 권장됩니다.',
     required: false,
-    example: 'https://s3.amazonaws.com/bucket/assessment-reports/result-123.pdf',
   })
   @IsString()
   @IsOptional()
-  assessmentReportUrl?: string;
+  expertOpinion?: string;
+
+  @ApiProperty({
+    description: '핵심 발견 사항',
+    example: ['전반적 적응 수준 양호', '또래 관계 어려움 관찰', '정서적 안정감 높음'],
+    type: [String],
+    required: false,
+  })
+  @IsString({ each: true })
+  @IsOptional()
+  keyFindings?: string[];
+
+  @ApiProperty({
+    description: '권장 사항',
+    example: ['사회성 향상 프로그램 참여 권장', '또래 관계 개선을 위한 상담 권장'],
+    type: [String],
+    required: false,
+  })
+  @IsString({ each: true })
+  @IsOptional()
+  recommendations?: string[];
+
+  @ApiProperty({
+    description: '요약 신뢰도 점수 (0.0 ~ 1.0)',
+    example: 0.85,
+    minimum: 0,
+    maximum: 1,
+    required: false,
+  })
+  @IsOptional()
+  confidenceScore?: number;
+}
+
+/**
+ * 검사 결과 DTO
+ * S3 Key 기반 저장 - Presigned URL은 조회 시 생성
+ * @see POST /api/v1/upload/presigned-url (S3 Key → Presigned URL 변환)
+ */
+export class TestResultsDto {
+  @ApiProperty({
+    description: 'Soul-E KPRC 심리검사 결과 PDF S3 Key (DB 저장용, Presigned URL은 조회 시 생성)',
+    required: false,
+    example: 'assessment-reports/KPRC_홍길동_abc12345_20240115.pdf',
+  })
+  @IsString()
+  @IsOptional()
+  assessmentReportS3Key?: string;
+
+  @ApiProperty({
+    description: 'KPRC 검사소견 (yeirin-ai 생성)',
+    required: false,
+    type: KprcAssessmentSummaryDto,
+  })
+  @ValidateNested()
+  @Type(() => KprcAssessmentSummaryDto)
+  @IsOptional()
+  kprcSummary?: KprcAssessmentSummaryDto;
 }
 
 // ============================================

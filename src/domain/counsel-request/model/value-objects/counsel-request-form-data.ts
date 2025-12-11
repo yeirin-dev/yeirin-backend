@@ -54,13 +54,24 @@ export interface RequestMotivation {
 }
 
 /**
- * 소울이 검사 결과지 (이미지 URL)
+ * KPRC 검사소견 (yeirin-ai 생성)
+ */
+export interface KprcAssessmentSummary {
+  summaryLines?: string[]; // 요약 문장 (최대 5줄)
+  expertOpinion?: string; // 전문가 소견 형태의 종합 요약
+  keyFindings?: string[]; // 핵심 발견 사항
+  recommendations?: string[]; // 권장 사항
+  confidenceScore?: number; // 요약 신뢰도 점수 (0.0 ~ 1.0)
+}
+
+/**
+ * 검사 결과
+ * S3 Key 기반 저장 - Presigned URL은 조회 시 생성
+ * @see POST /api/v1/upload/presigned-url (S3 Key → Presigned URL 변환)
  */
 export interface TestResults {
-  childReactionScale?: string; // 아동 반응척도 심리검사
-  strengthSurvey?: string; // 강점 설문지 심리검사
-  difficultySurvey?: string; // 난점 설문지 심리검사
-  assessmentReportUrl?: string; // Soul-E KPRC 심리검사 결과 PDF URL (S3)
+  assessmentReportS3Key?: string; // Soul-E KPRC 심리검사 결과 PDF S3 Key
+  kprcSummary?: KprcAssessmentSummary; // KPRC 검사소견 (yeirin-ai 생성)
 }
 
 /**
