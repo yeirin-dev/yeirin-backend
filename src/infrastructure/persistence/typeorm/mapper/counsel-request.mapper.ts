@@ -1,4 +1,4 @@
-import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
+import { CounselRequest, IntegratedReportStatus } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestEntity } from '../entity/counsel-request.entity';
 
 /**
@@ -21,6 +21,8 @@ export class CounselRequestMapper {
       requestDate: entity.requestDate,
       matchedInstitutionId: entity.matchedInstitutionId,
       matchedCounselorId: entity.matchedCounselorId,
+      integratedReportS3Key: entity.integratedReportS3Key,
+      integratedReportStatus: entity.integratedReportStatus as IntegratedReportStatus | undefined,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
@@ -41,6 +43,8 @@ export class CounselRequestMapper {
     entity.requestDate = domain.requestDate;
     entity.matchedInstitutionId = domain.matchedInstitutionId;
     entity.matchedCounselorId = domain.matchedCounselorId;
+    entity.integratedReportS3Key = domain.integratedReportS3Key;
+    entity.integratedReportStatus = domain.integratedReportStatus;
     entity.createdAt = domain.createdAt;
     entity.updatedAt = domain.updatedAt;
     return entity;

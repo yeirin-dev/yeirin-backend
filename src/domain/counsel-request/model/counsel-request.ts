@@ -6,6 +6,11 @@ import { CounselRequestFormData } from './value-objects/counsel-request-form-dat
  * CounselRequest Aggregate Root
  * 상담의뢰지 도메인 모델
  */
+/**
+ * 통합 보고서 생성 상태
+ */
+export type IntegratedReportStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
 export class CounselRequest {
   private constructor(
     private readonly _id: string,
@@ -18,6 +23,8 @@ export class CounselRequest {
     private _requestDate: Date,
     private _matchedInstitutionId?: string,
     private _matchedCounselorId?: string,
+    private _integratedReportS3Key?: string,
+    private _integratedReportStatus?: IntegratedReportStatus,
     private readonly _createdAt: Date = new Date(),
     private _updatedAt: Date = new Date(),
   ) {}
@@ -66,6 +73,14 @@ export class CounselRequest {
     return this._matchedCounselorId;
   }
 
+  get integratedReportS3Key(): string | undefined {
+    return this._integratedReportS3Key;
+  }
+
+  get integratedReportStatus(): IntegratedReportStatus | undefined {
+    return this._integratedReportStatus;
+  }
+
   get createdAt(): Date {
     return this._createdAt;
   }
@@ -104,6 +119,13 @@ export class CounselRequest {
       formData.coverInfo.requestDate.day,
     );
 
+    // KPRC 검사 결과가 있으면 통합 보고서 생성 대기 상태로 설정
+    const hasKprcResult =
+      formData.testResults?.assessmentReportS3Key && formData.testResults?.kprcSummary;
+    const integratedReportStatus: IntegratedReportStatus | undefined = hasKprcResult
+      ? 'pending'
+      : undefined;
+
     return Result.ok(
       new CounselRequest(
         id,
@@ -114,6 +136,10 @@ export class CounselRequest {
         centerName,
         careType,
         requestDate,
+        undefined, // matchedInstitutionId
+        undefined, // matchedCounselorId
+        undefined, // integratedReportS3Key
+        integratedReportStatus,
       ),
     );
   }
@@ -132,6 +158,8 @@ export class CounselRequest {
     requestDate: Date;
     matchedInstitutionId?: string;
     matchedCounselorId?: string;
+    integratedReportS3Key?: string;
+    integratedReportStatus?: IntegratedReportStatus;
     createdAt: Date;
     updatedAt: Date;
   }): CounselRequest {
@@ -146,6 +174,8 @@ export class CounselRequest {
       props.requestDate,
       props.matchedInstitutionId,
       props.matchedCounselorId,
+      props.integratedReportS3Key,
+      props.integratedReportStatus,
       props.createdAt,
       props.updatedAt,
     );
@@ -344,6 +374,80 @@ export class CounselRequest {
 
     // 상태 변경 (모든 상태 전환 허용 - Admin 권한)
     this._status = newStatus;
+    this._updatedAt = new Date();
+
+    return Result.ok(undefined);
+  }
+
+  // ============================================
+  // 통합 보고서 관련 메서드
+  // ============================================
+
+  /**
+   * 통합 보고서 생성 시작
+   * pending → processing
+   */
+  startIntegratedReportGeneration(): Result<void, DomainError> {
+    if (this._integratedReportStatus !== 'pending') {
+      return Result.fail(new DomainError('통합 보고서가 대기 상태가 아닙니다'));
+    }
+
+    this._integratedReportStatus = 'processing';
+    this._updatedAt = new Date();
+
+    return Result.ok(undefined);
+  }
+
+  /**
+   * 통합 보고서 생성 완료
+   * processing → completed
+   */
+  completeIntegratedReport(s3Key: string): Result<void, DomainError> {
+    if (this._integratedReportStatus !== 'processing') {
+      return Result.fail(new DomainError('통합 보고서가 처리 중 상태가 아닙니다'));
+    }
+
+    if (!s3Key || s3Key.trim().length === 0) {
+      return Result.fail(new DomainError('S3 키는 필수입니다'));
+    }
+
+    this._integratedReportS3Key = s3Key;
+    this._integratedReportStatus = 'completed';
+    this._updatedAt = new Date();
+
+    return Result.ok(undefined);
+  }
+
+  /**
+   * 통합 보고서 생성 실패
+   * processing → failed
+   */
+  failIntegratedReport(): Result<void, DomainError> {
+    if (this._integratedReportStatus !== 'processing') {
+      return Result.fail(new DomainError('통합 보고서가 처리 중 상태가 아닙니다'));
+    }
+
+    this._integratedReportStatus = 'failed';
+    this._updatedAt = new Date();
+
+    return Result.ok(undefined);
+  }
+
+  /**
+   * 통합 보고서 상태 직접 업데이트 (웹훅용)
+   */
+  updateIntegratedReportStatus(
+    status: IntegratedReportStatus,
+    s3Key?: string,
+  ): Result<void, DomainError> {
+    if (status === 'completed' && (!s3Key || s3Key.trim().length === 0)) {
+      return Result.fail(new DomainError('완료 상태에는 S3 키가 필요합니다'));
+    }
+
+    this._integratedReportStatus = status;
+    if (s3Key) {
+      this._integratedReportS3Key = s3Key;
+    }
     this._updatedAt = new Date();
 
     return Result.ok(undefined);

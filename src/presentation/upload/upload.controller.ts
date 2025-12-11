@@ -301,6 +301,66 @@ export class UploadController {
   }
 
   /**
+   * 내부 서비스용 Presigned URL 생성 (MSA 통신용)
+   * yeirin-ai에서 S3 객체에 접근할 때 사용합니다.
+   */
+  @Public()
+  @Post('internal/presigned-url')
+  @ApiOperation({
+    summary: '내부 서비스용 Presigned URL 생성 (MSA 통신)',
+    description:
+      'yeirin-ai에서 S3 객체에 접근할 때 사용합니다. JWT 인증 대신 X-Internal-Api-Key 헤더로 인증합니다.',
+  })
+  @ApiHeader({
+    name: 'X-Internal-Api-Key',
+    description: '내부 서비스 API 키',
+    required: true,
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        key: {
+          type: 'string',
+          description: 'S3 객체 키',
+          example: 'assessment-reports/uuid.pdf',
+        },
+        expiresIn: {
+          type: 'number',
+          description: 'URL 유효 시간 (초, 기본 3600)',
+          example: 3600,
+        },
+      },
+      required: ['key'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Presigned URL 생성 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'Presigned URL' },
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: '내부 API 키 인증 실패' })
+  async getInternalPresignedUrl(
+    @Body() body: { key: string; expiresIn?: number },
+    @Headers('X-Internal-Api-Key') apiKey: string,
+  ): Promise<{ url: string }> {
+    // 내부 API 키 검증
+    this.validateInternalApiSecret(apiKey);
+
+    const { key, expiresIn = 3600 } = body;
+    if (!key) {
+      throw new BadRequestException('S3 키가 필요합니다');
+    }
+    const url = await this.s3Service.getPresignedUrl(key, expiresIn);
+    return { url };
+  }
+
+  /**
    * S3 키로 Presigned URL 생성
    * DB에 저장된 S3 키를 이용해 파일 접근 URL 생성
    */

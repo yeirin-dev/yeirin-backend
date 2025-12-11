@@ -63,6 +63,24 @@ export class CounselRequestEntity {
   @Column({ type: 'uuid', nullable: true, name: 'matched_counselor_id' })
   matchedCounselorId?: string;
 
+  /**
+   * 통합 보고서 S3 키
+   * yeirin-ai에서 생성된 통합 보고서 (상담의뢰지 + KPRC 검사지)
+   */
+  @Column({ type: 'varchar', nullable: true, name: 'integrated_report_s3_key' })
+  integratedReportS3Key?: string;
+
+  /**
+   * 통합 보고서 생성 상태
+   */
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    default: null,
+    name: 'integrated_report_status',
+  })
+  integratedReportStatus?: 'pending' | 'processing' | 'completed' | 'failed';
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

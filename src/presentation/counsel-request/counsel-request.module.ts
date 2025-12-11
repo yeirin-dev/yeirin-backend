@@ -16,6 +16,7 @@ import { SelectRecommendedInstitutionUseCase } from '@application/counsel-reques
 import { StartCounselingUseCase } from '@application/counsel-request/use-cases/start-counseling.usecase';
 import { UpdateCounselRequestUseCase } from '@application/counsel-request/use-cases/update-counsel-request.usecase';
 import { SoulEClient } from '@infrastructure/external/soul-e.client';
+import { YeirinAIClient } from '@infrastructure/external/yeirin-ai.client';
 import { CounselRequestRecommendationEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request-recommendation.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { CounselRequestRecommendationRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-request-recommendation.repository.impl';
@@ -42,6 +43,8 @@ import { CounselRequestController } from './counsel-request.controller';
     // AIRecommendationClient 제거 - MatchingModule을 통해 Domain Service 사용
     // Soul-E MSA 클라이언트
     SoulEClient,
+    // Yeirin-AI MSA 클라이언트 (통합 보고서 생성)
+    YeirinAIClient,
     CreateCounselRequestUseCase,
     CreateCounselRequestFromSouliUseCase,
     GetCounselRequestUseCase,
