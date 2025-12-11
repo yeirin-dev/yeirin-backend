@@ -3,6 +3,17 @@ import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 
 /**
+ * KPRC 검사소견 요약 (통합 보고서용)
+ */
+export interface IntegratedReportKprcSummary {
+  summaryLines?: string[];
+  expertOpinion?: string;
+  keyFindings?: string[];
+  recommendations?: string[];
+  confidenceScore?: number;
+}
+
+/**
  * 통합 보고서 생성 요청 DTO
  */
 export interface IntegratedReportRequestDto {
@@ -32,13 +43,7 @@ export interface IntegratedReportRequestDto {
     motivation: string;
     goals: string;
   };
-  kprc_summary: {
-    summaryLines?: string[];
-    expertOpinion?: string;
-    keyFindings?: string[];
-    recommendations?: string[];
-    confidenceScore?: number;
-  };
+  kprc_summary: IntegratedReportKprcSummary;
   assessment_report_s3_key: string;
 }
 

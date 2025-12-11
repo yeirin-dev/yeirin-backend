@@ -2,8 +2,13 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
-import { YeirinAIClient } from '@infrastructure/external/yeirin-ai.client';
+import { SoulEClient, KprcSummary } from '@infrastructure/external/soul-e.client';
+import {
+  YeirinAIClient,
+  IntegratedReportKprcSummary,
+} from '@infrastructure/external/yeirin-ai.client';
 import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
+import { KprcAssessmentSummaryDto } from '../dto/create-counsel-request.dto';
 import { SouliWebhookDto } from '../dto/souli-webhook.dto';
 
 @Injectable()
@@ -14,6 +19,7 @@ export class CreateCounselRequestFromSouliUseCase {
     @Inject('CounselRequestRepository')
     private readonly counselRequestRepository: CounselRequestRepository,
     private readonly yeirinAIClient: YeirinAIClient,
+    private readonly soulEClient: SoulEClient,
   ) {}
 
   async execute(dto: SouliWebhookDto): Promise<CounselRequestResponseDto> {
@@ -46,9 +52,61 @@ export class CreateCounselRequestFromSouliUseCase {
 
     this.logger.log(`✅ 소울이 연동 성공 - Session ID: ${dto.souliSessionId}`);
 
+    // 통합 보고서 생성을 위해 KPRC 검사 결과 확인
+    // 1. webhook에서 kprcSummary가 전달되었으면 사용
+    // 2. 없으면 Soul-E API에서 조회
+    const webhookKprcSummary: KprcAssessmentSummaryDto | undefined = dto.testResults?.kprcSummary;
+    let soulEKprcSummary: KprcSummary | null = null;
+    let assessmentReportS3Key: string | null = dto.testResults?.assessmentReportS3Key ?? null;
+
+    // Soul-E에서 검사 결과 조회 (MSA 연동)
+    if (!webhookKprcSummary || !assessmentReportS3Key) {
+      this.logger.log(`🔍 Soul-E에서 KPRC 검사 결과 조회 시도 - childId: ${dto.childId}`);
+
+      try {
+        const latestResult = await this.soulEClient.getLatestAssessmentResult(dto.childId);
+
+        if (latestResult) {
+          // summary가 있으면 soulEKprcSummary로 사용
+          if (latestResult.summary && !webhookKprcSummary) {
+            soulEKprcSummary = latestResult.summary;
+            this.logger.log(`✅ Soul-E에서 kprcSummary 조회 성공`);
+          }
+
+          // s3_report_url이 있으면 assessmentReportS3Key로 사용
+          if (latestResult.s3_report_url && !assessmentReportS3Key) {
+            assessmentReportS3Key = latestResult.s3_report_url;
+            this.logger.log(
+              `✅ Soul-E에서 assessmentReportS3Key 조회 성공: ${assessmentReportS3Key}`,
+            );
+          }
+        }
+      } catch (error) {
+        this.logger.warn(`⚠️ Soul-E 검사 결과 조회 실패 - 통합 보고서 생성 건너뜀`, error);
+      }
+    }
+
     // KPRC 검사 결과가 있으면 통합 보고서 생성 요청
-    if (dto.testResults?.assessmentReportS3Key && dto.testResults?.kprcSummary) {
+    const hasKprcSummary = webhookKprcSummary || soulEKprcSummary;
+    if (assessmentReportS3Key && hasKprcSummary) {
       this.logger.log(`📋 통합 보고서 생성 요청 시작 - counselRequestId: ${saved.id}`);
+
+      // kprc_summary 통합 (webhook 우선, 없으면 Soul-E API 결과 사용)
+      const kprcSummaryForReport: IntegratedReportKprcSummary = webhookKprcSummary
+        ? {
+            summaryLines: webhookKprcSummary.summaryLines || [],
+            expertOpinion: webhookKprcSummary.expertOpinion || '',
+            keyFindings: webhookKprcSummary.keyFindings || [],
+            recommendations: webhookKprcSummary.recommendations || [],
+            confidenceScore: webhookKprcSummary.confidenceScore || 0,
+          }
+        : {
+            summaryLines: soulEKprcSummary!.key_findings || [],
+            expertOpinion: soulEKprcSummary!.overall_assessment || '',
+            keyFindings: soulEKprcSummary!.key_findings || [],
+            recommendations: soulEKprcSummary!.recommendations || [],
+            confidenceScore: soulEKprcSummary!.confidence_score || 0,
+          };
 
       // Fire-and-forget: 통합 보고서 생성 요청
       // 실패해도 상담의뢰지 생성은 성공 처리
@@ -79,19 +137,16 @@ export class CreateCounselRequestFromSouliUseCase {
           motivation: dto.requestMotivation.motivation,
           goals: dto.requestMotivation.goals,
         },
-        kprc_summary: {
-          summaryLines: dto.testResults.kprcSummary.summaryLines,
-          expertOpinion: dto.testResults.kprcSummary.expertOpinion,
-          keyFindings: dto.testResults.kprcSummary.keyFindings,
-          recommendations: dto.testResults.kprcSummary.recommendations,
-          confidenceScore: dto.testResults.kprcSummary.confidenceScore,
-        },
-        assessment_report_s3_key: dto.testResults.assessmentReportS3Key,
+        kprc_summary: kprcSummaryForReport,
+        assessment_report_s3_key: assessmentReportS3Key,
       });
 
       this.logger.log(`📋 통합 보고서 생성 요청 완료 - counselRequestId: ${saved.id}`);
     } else {
-      this.logger.log(`⚠️ KPRC 검사 결과 없음 - 통합 보고서 생성 건너뜀`);
+      this.logger.log(
+        `⚠️ KPRC 검사 결과 없음 - 통합 보고서 생성 건너뜀 ` +
+          `(kprcSummary: ${!!hasKprcSummary}, assessmentReportS3Key: ${!!assessmentReportS3Key})`,
+      );
     }
 
     // Response DTO 변환
