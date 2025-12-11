@@ -22,6 +22,7 @@ import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity
 import { CounselRequestRecommendationRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-request-recommendation.repository.impl';
 import { CounselRequestRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-request.repository.impl';
 import { MatchingModule } from '@presentation/matching/matching.module';
+import { UploadModule } from '@presentation/upload/upload.module';
 import { CounselRequestController } from './counsel-request.controller';
 
 @Module({
@@ -29,6 +30,7 @@ import { CounselRequestController } from './counsel-request.controller';
     TypeOrmModule.forFeature([CounselRequestEntity, CounselRequestRecommendationEntity]),
     ConfigModule,
     MatchingModule, // Matching Domain Service 사용 (DDD 패턴)
+    UploadModule, // S3Service 사용 (통합 보고서 Presigned URL)
   ],
   controllers: [CounselRequestController],
   providers: [
