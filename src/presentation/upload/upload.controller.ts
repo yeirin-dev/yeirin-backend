@@ -219,7 +219,7 @@ export class UploadController {
 
   /**
    * 내부 서비스용 PDF 업로드 (MSA 통신용)
-   * yeirin-ai에서 호출하여 KPRC 검사 결과 PDF를 업로드합니다.
+   * yeirin-ai에서 호출하여 KPRC 검사 결과 PDF 또는 통합 보고서를 업로드합니다.
    * JWT 인증 대신 내부 API 키로 인증합니다.
    */
   @Public()
@@ -241,12 +241,17 @@ export class UploadController {
   @ApiOperation({
     summary: '내부 서비스용 PDF 업로드 (MSA 통신)',
     description:
-      'yeirin-ai에서 KPRC 검사 결과 PDF를 업로드할 때 사용합니다. JWT 인증 대신 X-Internal-Api-Key 헤더로 인증합니다.',
+      'yeirin-ai에서 KPRC 검사 결과 PDF 또는 통합 보고서를 업로드할 때 사용합니다. JWT 인증 대신 X-Internal-Api-Key 헤더로 인증합니다.',
   })
   @ApiHeader({
     name: 'X-Internal-Api-Key',
     description: '내부 서비스 API 키',
     required: true,
+  })
+  @ApiHeader({
+    name: 'X-Upload-Folder',
+    description: 'S3 업로드 폴더 (기본: assessment-reports, 옵션: integrated-reports)',
+    required: false,
   })
   @ApiBody({
     schema: {
@@ -270,12 +275,12 @@ export class UploadController {
           type: 'string',
           description: 'Presigned URL (1시간 유효)',
           example:
-            'https://yeirin-uploads.s3.ap-northeast-2.amazonaws.com/assessment-reports/uuid.pdf?X-Amz-...',
+            'https://yeirin-uploads.s3.ap-northeast-2.amazonaws.com/integrated-reports/uuid.pdf?X-Amz-...',
         },
         key: {
           type: 'string',
           description: 'S3 객체 키 (DB 저장용)',
-          example: 'assessment-reports/uuid.pdf',
+          example: 'integrated-reports/uuid.pdf',
         },
       },
     },
@@ -285,6 +290,7 @@ export class UploadController {
   async uploadInternalPdf(
     @UploadedFile() file: Express.Multer.File,
     @Headers('X-Internal-Api-Key') apiKey: string,
+    @Headers('X-Upload-Folder') uploadFolder?: string,
   ): Promise<{ url: string; key: string }> {
     // 내부 API 키 검증
     this.validateInternalApiSecret(apiKey);
@@ -293,8 +299,13 @@ export class UploadController {
       throw new BadRequestException('파일이 업로드되지 않았습니다');
     }
 
-    // assessment-reports 폴더에 저장
-    const s3Url = await this.s3Service.uploadFile(file, 'assessment-reports');
+    // 허용된 폴더만 사용 (기본: assessment-reports)
+    const allowedFolders = ['assessment-reports', 'integrated-reports'];
+    const folder = allowedFolders.includes(uploadFolder || '')
+      ? uploadFolder
+      : 'assessment-reports';
+
+    const s3Url = await this.s3Service.uploadFile(file, folder!);
     const key = this.s3Service.extractKeyFromUrl(s3Url);
     const url = await this.s3Service.getPresignedUrl(key);
     return { url, key };
