@@ -125,6 +125,7 @@ export class CreateCounselRequestFromSouliUseCase {
             gender: dto.basicInfo.childInfo.gender,
             age: dto.basicInfo.childInfo.age,
             grade: dto.basicInfo.childInfo.grade,
+            birthDate: dto.basicInfo.childInfo.birthDate, // 사회서비스 이용 추천서용
           },
           careType: dto.basicInfo.careType,
           priorityReason: dto.basicInfo.priorityReason,
@@ -139,6 +140,9 @@ export class CreateCounselRequestFromSouliUseCase {
         },
         kprc_summary: kprcSummaryForReport,
         assessment_report_s3_key: assessmentReportS3Key,
+        // 사회서비스 이용 추천서 데이터 (Optional)
+        guardian_info: dto.guardianInfo,
+        institution_info: dto.institutionInfo,
       });
 
       this.logger.log(`📋 통합 보고서 생성 요청 완료 - counselRequestId: ${saved.id}`);

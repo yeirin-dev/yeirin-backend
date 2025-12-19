@@ -1,4 +1,7 @@
-import { CounselRequest, IntegratedReportStatus } from '@domain/counsel-request/model/counsel-request';
+import {
+  CounselRequest,
+  IntegratedReportStatus,
+} from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestEntity } from '../entity/counsel-request.entity';
 
 /**

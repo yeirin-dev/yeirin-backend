@@ -1,10 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsObject, IsString, IsUUID, ValidateNested } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 import { ConsentStatus } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import {
   BasicInfoDto,
   CoverInfoDto,
+  GuardianInfoDto,
+  InstitutionInfoDto,
   PsychologicalInfoDto,
   RequestMotivationDto,
   TestResultsDto,
@@ -61,4 +71,27 @@ export class SouliWebhookDto {
   @ApiProperty({ description: '보호자 동의 여부', enum: ConsentStatus })
   @IsEnum(ConsentStatus)
   consent: ConsentStatus;
+
+  // 사회서비스 이용 추천서 (Government Doc) 데이터 - Optional
+  @ApiProperty({
+    description: '보호자 정보 (사회서비스 이용 추천서용)',
+    type: GuardianInfoDto,
+    required: false,
+  })
+  @IsObject()
+  @ValidateNested()
+  @Type(() => GuardianInfoDto)
+  @IsOptional()
+  guardianInfo?: GuardianInfoDto;
+
+  @ApiProperty({
+    description: '기관/작성자 정보 (사회서비스 이용 추천서용)',
+    type: InstitutionInfoDto,
+    required: false,
+  })
+  @IsObject()
+  @ValidateNested()
+  @Type(() => InstitutionInfoDto)
+  @IsOptional()
+  institutionInfo?: InstitutionInfoDto;
 }

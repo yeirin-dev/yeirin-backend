@@ -58,6 +58,27 @@ export class CoverInfoDto {
   counselorName: string;
 }
 
+/**
+ * 생년월일 DTO (사회서비스 이용 추천서용)
+ */
+export class BirthDateDto {
+  @ApiProperty({ description: '년', example: 2015 })
+  @IsInt()
+  year: number;
+
+  @ApiProperty({ description: '월', example: 3, minimum: 1, maximum: 12 })
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  month: number;
+
+  @ApiProperty({ description: '일', example: 15, minimum: 1, maximum: 31 })
+  @IsInt()
+  @Min(1)
+  @Max(31)
+  day: number;
+}
+
 export class ChildInfoDto {
   @ApiProperty({ description: '아동 이름', example: '김철수' })
   @IsString()
@@ -76,6 +97,12 @@ export class ChildInfoDto {
   @ApiProperty({ description: '학년', example: '초1' })
   @IsString()
   grade: string;
+
+  @ApiProperty({ description: '생년월일 (사회서비스 이용 추천서용)', required: false })
+  @ValidateNested()
+  @Type(() => BirthDateDto)
+  @IsOptional()
+  birthDate?: BirthDateDto;
 }
 
 export class BasicInfoDto {
@@ -127,7 +154,10 @@ export class RequestMotivationDto {
 export class KprcAssessmentSummaryDto {
   @ApiProperty({
     description: '요약 문장 (최대 5줄)',
-    example: ['아동은 전반적으로 양호한 적응 수준을 보입니다.', '또래 관계에서 다소 어려움이 관찰됩니다.'],
+    example: [
+      '아동은 전반적으로 양호한 적응 수준을 보입니다.',
+      '또래 관계에서 다소 어려움이 관찰됩니다.',
+    ],
     type: [String],
     required: false,
   })
@@ -174,6 +204,81 @@ export class KprcAssessmentSummaryDto {
   })
   @IsOptional()
   confidenceScore?: number;
+}
+
+/**
+ * 보호자 정보 DTO (사회서비스 이용 추천서용)
+ */
+export class GuardianInfoDto {
+  @ApiProperty({ description: '보호자 성명', example: '홍부모' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiProperty({ description: '전화번호 (휴대전화)', example: '010-1234-5678' })
+  @IsString()
+  @IsNotEmpty()
+  phoneNumber: string;
+
+  @ApiProperty({ description: '자택 전화번호', example: '02-1234-5678', required: false })
+  @IsString()
+  @IsOptional()
+  homePhone?: string;
+
+  @ApiProperty({ description: '주소', example: '서울시 강남구 테헤란로 123' })
+  @IsString()
+  @IsNotEmpty()
+  address: string;
+
+  @ApiProperty({ description: '상세 주소', example: '101동 1001호', required: false })
+  @IsString()
+  @IsOptional()
+  addressDetail?: string;
+
+  @ApiProperty({ description: '이용자와의 관계', example: '부' })
+  @IsString()
+  @IsNotEmpty()
+  relationToChild: string;
+}
+
+/**
+ * 기관/작성자 정보 DTO (사회서비스 이용 추천서용)
+ */
+export class InstitutionInfoDto {
+  @ApiProperty({ description: '소속기관명', example: '서울초등학교' })
+  @IsString()
+  @IsNotEmpty()
+  institutionName: string;
+
+  @ApiProperty({ description: '기관 연락처', example: '02-123-4567' })
+  @IsString()
+  @IsNotEmpty()
+  phoneNumber: string;
+
+  @ApiProperty({ description: '기관 소재지', example: '서울시 강남구 학동로 456' })
+  @IsString()
+  @IsNotEmpty()
+  address: string;
+
+  @ApiProperty({ description: '상세 주소', required: false })
+  @IsString()
+  @IsOptional()
+  addressDetail?: string;
+
+  @ApiProperty({ description: '직 또는 자격', example: '담임교사' })
+  @IsString()
+  @IsNotEmpty()
+  writerPosition: string;
+
+  @ApiProperty({ description: '작성자 성명', example: '김선생' })
+  @IsString()
+  @IsNotEmpty()
+  writerName: string;
+
+  @ApiProperty({ description: '이용자와의 관계', example: '담임교사' })
+  @IsString()
+  @IsNotEmpty()
+  relationToChild: string;
 }
 
 /**
@@ -248,4 +353,30 @@ export class CreateCounselRequestDto {
   @ApiProperty({ description: '보호자 동의 여부', enum: ConsentStatus })
   @IsEnum(ConsentStatus)
   consent: ConsentStatus;
+
+  // ============================================
+  // 사회서비스 이용 추천서 (Government Doc) 전용 - Optional
+  // ============================================
+
+  @ApiProperty({
+    description: '보호자 정보 (사회서비스 이용 추천서용)',
+    required: false,
+    type: GuardianInfoDto,
+  })
+  @IsObject()
+  @ValidateNested()
+  @Type(() => GuardianInfoDto)
+  @IsOptional()
+  guardianInfo?: GuardianInfoDto;
+
+  @ApiProperty({
+    description: '기관/작성자 정보 (사회서비스 이용 추천서용)',
+    required: false,
+    type: InstitutionInfoDto,
+  })
+  @IsObject()
+  @ValidateNested()
+  @Type(() => InstitutionInfoDto)
+  @IsOptional()
+  institutionInfo?: InstitutionInfoDto;
 }

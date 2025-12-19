@@ -14,6 +14,40 @@ export interface IntegratedReportKprcSummary {
 }
 
 /**
+ * 생년월일 (사회서비스 이용 추천서용)
+ */
+export interface BirthDate {
+  year: number;
+  month: number;
+  day: number;
+}
+
+/**
+ * 보호자 정보 (사회서비스 이용 추천서용)
+ */
+export interface GuardianInfo {
+  name: string;
+  phoneNumber: string;
+  homePhone?: string;
+  address: string;
+  addressDetail?: string;
+  relationToChild: string;
+}
+
+/**
+ * 기관/작성자 정보 (사회서비스 이용 추천서용)
+ */
+export interface InstitutionInfo {
+  institutionName: string;
+  phoneNumber: string;
+  address: string;
+  addressDetail?: string;
+  writerPosition: string;
+  writerName: string;
+  relationToChild: string;
+}
+
+/**
  * 통합 보고서 생성 요청 DTO
  */
 export interface IntegratedReportRequestDto {
@@ -31,6 +65,7 @@ export interface IntegratedReportRequestDto {
       gender: string;
       age: number;
       grade: string;
+      birthDate?: BirthDate; // 사회서비스 이용 추천서용
     };
     careType: string;
     priorityReason?: string;
@@ -45,6 +80,10 @@ export interface IntegratedReportRequestDto {
   };
   kprc_summary: IntegratedReportKprcSummary;
   assessment_report_s3_key: string;
+
+  // 사회서비스 이용 추천서 (Government Doc) 데이터 - Optional
+  guardian_info?: GuardianInfo;
+  institution_info?: InstitutionInfo;
 }
 
 /**
