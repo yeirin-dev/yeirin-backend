@@ -3,14 +3,36 @@ import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 
 /**
- * KPRC 검사소견 요약 (통합 보고서용)
+ * 검사소견 요약 (통합 보고서용)
+ * KPRC, CRTES-R, SDQ-A 공통
  */
-export interface IntegratedReportKprcSummary {
+export interface AssessmentSummaryDto {
   summaryLines?: string[];
   expertOpinion?: string;
   keyFindings?: string[];
   recommendations?: string[];
   confidenceScore?: number;
+}
+
+/**
+ * @deprecated IntegratedReportKprcSummary 대신 AssessmentSummaryDto 사용
+ */
+export type IntegratedReportKprcSummary = AssessmentSummaryDto;
+
+/**
+ * 첨부된 검사 결과 DTO
+ * KPRC, CRTES-R, SDQ-A 등 모든 심리검사 결과
+ */
+export interface AttachedAssessmentDto {
+  assessmentType: string; // 'KPRC_CO_SG_E' | 'CRTES_R' | 'SDQ_A'
+  assessmentName: string;
+  reportS3Key?: string; // KPRC만 있음 (Inpsyt PDF), CRTES-R/SDQ-A는 없음
+  resultId: string;
+  totalScore?: number | null;
+  maxScore?: number | null;
+  overallLevel?: 'normal' | 'caution' | 'clinical' | null;
+  scoredAt?: string | null;
+  summary?: AssessmentSummaryDto;
 }
 
 /**
@@ -78,8 +100,17 @@ export interface IntegratedReportRequestDto {
     motivation: string;
     goals: string;
   };
-  kprc_summary: IntegratedReportKprcSummary;
-  assessment_report_s3_key: string;
+
+  // 첨부된 검사 결과들 (KPRC, CRTES-R, SDQ-A)
+  // 새 방식: attached_assessments 사용 권장
+  attached_assessments?: AttachedAssessmentDto[];
+
+  // ⚠️ 하위 호환성: 기존 필드 유지 (deprecated)
+  // KPRC만 있는 경우 또는 legacy 호환용
+  /** @deprecated Use attached_assessments instead */
+  kprc_summary?: IntegratedReportKprcSummary;
+  /** @deprecated Use attached_assessments instead */
+  assessment_report_s3_key?: string;
 
   // 사회서비스 이용 추천서 (Government Doc) 데이터 - Optional
   guardian_info?: GuardianInfo;

@@ -110,7 +110,10 @@ export interface SdqAAssessmentSummary extends BaseAssessmentSummary {
 /**
  * 검사소견 유니온 타입
  */
-export type AssessmentSummary = KprcAssessmentSummary | CrtesRAssessmentSummary | SdqAAssessmentSummary;
+export type AssessmentSummary =
+  | KprcAssessmentSummary
+  | CrtesRAssessmentSummary
+  | SdqAAssessmentSummary;
 
 // =============================================================================
 // 개별 검사 결과 첨부 정보
@@ -122,7 +125,7 @@ export type AssessmentSummary = KprcAssessmentSummary | CrtesRAssessmentSummary 
 export interface AttachedAssessment {
   assessmentType: AssessmentTypeValue;
   assessmentName: string;
-  reportS3Key: string; // S3 PDF 키
+  reportS3Key?: string; // S3 PDF 키 (KPRC만 있음, CRTES-R/SDQ-A는 없음)
   resultId: string; // 검사 결과 ID
   totalScore?: number | null;
   maxScore?: number | null;

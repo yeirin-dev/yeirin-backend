@@ -18,6 +18,10 @@ import {
   Gender,
   PriorityReason,
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
+import {
+  AssessmentTypeValue,
+  ASSESSMENT_TYPES,
+} from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
 
 // ============================================
 // Sub DTOs
@@ -230,11 +234,11 @@ export class AttachedAssessmentDto {
   @ApiProperty({
     description: '검사 유형',
     example: 'KPRC_CO_SG_E',
-    enum: ['KPRC_CO_SG_E', 'CRTES_R', 'SDQ_A'],
+    enum: Object.values(ASSESSMENT_TYPES),
   })
-  @IsString()
+  @IsEnum(Object.values(ASSESSMENT_TYPES) as unknown as object)
   @IsNotEmpty()
-  assessmentType: string;
+  assessmentType: AssessmentTypeValue;
 
   @ApiProperty({
     description: '검사명',
@@ -245,12 +249,13 @@ export class AttachedAssessmentDto {
   assessmentName: string;
 
   @ApiProperty({
-    description: '결과 PDF S3 키',
+    description: '결과 PDF S3 키 (KPRC만 있음, CRTES-R/SDQ-A는 없음)',
     example: 'assessment-reports/KPRC_홍길동_abc12345_20240115.pdf',
+    required: false,
   })
   @IsString()
-  @IsNotEmpty()
-  reportS3Key: string;
+  @IsOptional()
+  reportS3Key?: string;
 
   @ApiProperty({
     description: '검사 결과 ID',
