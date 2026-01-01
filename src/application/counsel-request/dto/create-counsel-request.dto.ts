@@ -147,11 +147,14 @@ export class RequestMotivationDto {
   goals: string;
 }
 
+// =============================================================================
+// 검사소견 DTOs
+// =============================================================================
+
 /**
- * KPRC 검사소견 DTO
- * yeirin-ai에서 생성한 검사소견 (DocumentSummary 기반)
+ * 공통 검사소견 DTO
  */
-export class KprcAssessmentSummaryDto {
+export class BaseAssessmentSummaryDto {
   @ApiProperty({
     description: '요약 문장 (최대 5줄)',
     example: [
@@ -204,6 +207,103 @@ export class KprcAssessmentSummaryDto {
   })
   @IsOptional()
   confidenceScore?: number;
+}
+
+/**
+ * KPRC 검사소견 DTO (하위 호환성 유지)
+ */
+export class KprcAssessmentSummaryDto extends BaseAssessmentSummaryDto {
+  @ApiProperty({
+    description: '검사 유형',
+    example: 'KPRC_CO_SG_E',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  assessmentType?: 'KPRC_CO_SG_E';
+}
+
+/**
+ * 첨부된 검사 결과 DTO
+ */
+export class AttachedAssessmentDto {
+  @ApiProperty({
+    description: '검사 유형',
+    example: 'KPRC_CO_SG_E',
+    enum: ['KPRC_CO_SG_E', 'CRTES_R', 'SDQ_A'],
+  })
+  @IsString()
+  @IsNotEmpty()
+  assessmentType: string;
+
+  @ApiProperty({
+    description: '검사명',
+    example: 'KPRC 인성평정척도',
+  })
+  @IsString()
+  @IsNotEmpty()
+  assessmentName: string;
+
+  @ApiProperty({
+    description: '결과 PDF S3 키',
+    example: 'assessment-reports/KPRC_홍길동_abc12345_20240115.pdf',
+  })
+  @IsString()
+  @IsNotEmpty()
+  reportS3Key: string;
+
+  @ApiProperty({
+    description: '검사 결과 ID',
+    example: 'uuid-string',
+  })
+  @IsString()
+  @IsNotEmpty()
+  resultId: string;
+
+  @ApiProperty({
+    description: '총점',
+    example: 85,
+    required: false,
+  })
+  @IsOptional()
+  totalScore?: number | null;
+
+  @ApiProperty({
+    description: '만점',
+    example: 100,
+    required: false,
+  })
+  @IsOptional()
+  maxScore?: number | null;
+
+  @ApiProperty({
+    description: '전반적 수준',
+    example: 'normal',
+    enum: ['normal', 'caution', 'clinical'],
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  overallLevel?: 'normal' | 'caution' | 'clinical' | null;
+
+  @ApiProperty({
+    description: '채점 일시',
+    example: '2024-01-15T12:00:00Z',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  scoredAt?: string | null;
+
+  @ApiProperty({
+    description: 'AI 생성 요약',
+    required: false,
+    type: BaseAssessmentSummaryDto,
+  })
+  @ValidateNested()
+  @Type(() => BaseAssessmentSummaryDto)
+  @IsOptional()
+  summary?: BaseAssessmentSummaryDto;
 }
 
 /**
@@ -288,18 +388,34 @@ export class InstitutionInfoDto {
  */
 export class TestResultsDto {
   @ApiProperty({
-    description: 'Soul-E KPRC 심리검사 결과 PDF S3 Key (DB 저장용, Presigned URL은 조회 시 생성)',
+    description: '첨부된 검사 결과들 (최대 3개: KPRC, CRTES-R, SDQ-A)',
+    required: false,
+    type: [AttachedAssessmentDto],
+  })
+  @ValidateNested({ each: true })
+  @Type(() => AttachedAssessmentDto)
+  @IsOptional()
+  attachedAssessments?: AttachedAssessmentDto[];
+
+  // ⚠️ 하위 호환성: 기존 필드 유지 (deprecated, 새 코드에서는 attachedAssessments 사용)
+
+  /** @deprecated Use attachedAssessments instead */
+  @ApiProperty({
+    description: '[Deprecated] Soul-E KPRC 심리검사 결과 PDF S3 Key',
     required: false,
     example: 'assessment-reports/KPRC_홍길동_abc12345_20240115.pdf',
+    deprecated: true,
   })
   @IsString()
   @IsOptional()
   assessmentReportS3Key?: string;
 
+  /** @deprecated Use attachedAssessments instead */
   @ApiProperty({
-    description: 'KPRC 검사소견 (yeirin-ai 생성)',
+    description: '[Deprecated] KPRC 검사소견 (yeirin-ai 생성)',
     required: false,
     type: KprcAssessmentSummaryDto,
+    deprecated: true,
   })
   @ValidateNested()
   @Type(() => KprcAssessmentSummaryDto)
