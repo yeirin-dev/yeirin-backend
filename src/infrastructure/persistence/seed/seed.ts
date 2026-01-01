@@ -23,6 +23,7 @@ const dataSource = new DataSource({
   database: process.env.DB_DATABASE || 'yeirin_dev',
   entities: [path.join(__dirname, '../typeorm/entity/*.entity.{ts,js}')],
   synchronize: false,
+  ssl: process.env.DB_HOST !== 'localhost' ? { rejectUnauthorized: false } : false,
 });
 
 async function seed() {
