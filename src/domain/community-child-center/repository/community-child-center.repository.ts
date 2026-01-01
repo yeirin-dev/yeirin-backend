@@ -47,4 +47,14 @@ export interface CommunityChildCenterRepository {
    * 기관명 중복 확인
    */
   existsByName(name: string): Promise<boolean>;
+
+  /**
+   * 구/군별 센터 목록 조회 (로그인용)
+   */
+  findActiveByDistrict(district: string): Promise<CommunityChildCenter[]>;
+
+  /**
+   * 중복 제거된 구/군 목록 조회 (로그인 드롭다운용)
+   */
+  getDistinctDistricts(): Promise<string[]>;
 }

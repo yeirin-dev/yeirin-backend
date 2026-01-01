@@ -24,6 +24,18 @@ export class CareFacilityEntity {
   @Column({ type: 'varchar', length: 100 })
   name: string;
 
+  /** 구/군 (예: "강남구", "서초구") - 로그인 시 필터링용 */
+  @Column({ type: 'varchar', length: 50 })
+  district: string;
+
+  /** 시설 비밀번호 (bcrypt 해시) */
+  @Column({ type: 'varchar', length: 255 })
+  password: string;
+
+  /** 첫 로그인 비밀번호 변경 여부 */
+  @Column({ type: 'boolean', default: false })
+  isPasswordChanged: boolean;
+
   /** 기본 주소 */
   @Column({ type: 'varchar', length: 200 })
   address: string;

@@ -88,4 +88,24 @@ export class CommunityChildCenterRepositoryImpl implements CommunityChildCenterR
     const count = await this.repository.count({ where: { name } });
     return count > 0;
   }
+
+  async findActiveByDistrict(district: string): Promise<CommunityChildCenter[]> {
+    const entities = await this.repository.find({
+      where: { district, isActive: true },
+      order: { name: 'ASC' },
+    });
+
+    return CommunityChildCenterMapper.toDomainList(entities);
+  }
+
+  async getDistinctDistricts(): Promise<string[]> {
+    const result = await this.repository
+      .createQueryBuilder('center')
+      .select('DISTINCT center.district', 'district')
+      .where('center.isActive = :isActive', { isActive: true })
+      .orderBy('center.district', 'ASC')
+      .getRawMany<{ district: string }>();
+
+    return result.map((r) => r.district);
+  }
 }

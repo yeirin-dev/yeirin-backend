@@ -47,4 +47,14 @@ export interface CareFacilityRepository {
    * 기관명 중복 확인
    */
   existsByName(name: string): Promise<boolean>;
+
+  /**
+   * 구/군별 시설 목록 조회 (로그인용)
+   */
+  findActiveByDistrict(district: string): Promise<CareFacility[]>;
+
+  /**
+   * 중복 제거된 구/군 목록 조회 (로그인 드롭다운용)
+   */
+  getDistinctDistricts(): Promise<string[]>;
 }

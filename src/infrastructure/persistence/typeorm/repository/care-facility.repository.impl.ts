@@ -88,4 +88,24 @@ export class CareFacilityRepositoryImpl implements CareFacilityRepository {
     const count = await this.repository.count({ where: { name } });
     return count > 0;
   }
+
+  async findActiveByDistrict(district: string): Promise<CareFacility[]> {
+    const entities = await this.repository.find({
+      where: { district, isActive: true },
+      order: { name: 'ASC' },
+    });
+
+    return CareFacilityMapper.toDomainList(entities);
+  }
+
+  async getDistinctDistricts(): Promise<string[]> {
+    const result = await this.repository
+      .createQueryBuilder('facility')
+      .select('DISTINCT facility.district', 'district')
+      .where('facility.isActive = :isActive', { isActive: true })
+      .orderBy('facility.district', 'ASC')
+      .getRawMany<{ district: string }>();
+
+    return result.map((r) => r.district);
+  }
 }
