@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as bcrypt from 'bcrypt';
+import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { CommunityChildCenterEntity } from '../typeorm/entity/community-child-center.entity';
 import { CounselorProfileEntity } from '../typeorm/entity/counselor-profile.entity';
@@ -10,13 +11,16 @@ import { ReviewEntity } from '../typeorm/entity/review.entity';
 import { UserEntity } from '../typeorm/entity/user.entity';
 import { VoucherInstitutionEntity } from '../typeorm/entity/voucher-institution.entity';
 
+// .env 파일 로드
+dotenv.config();
+
 const dataSource = new DataSource({
   type: 'postgres',
-  host: 'localhost',
-  port: 5433,
-  username: 'yeirin',
-  password: 'yeirin123',
-  database: 'yeirin_dev',
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '5433', 10),
+  username: process.env.DB_USERNAME || 'yeirin',
+  password: process.env.DB_PASSWORD || 'yeirin123',
+  database: process.env.DB_DATABASE || 'yeirin_dev',
   entities: [path.join(__dirname, '../typeorm/entity/*.entity.{ts,js}')],
   synchronize: false,
 });
