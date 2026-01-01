@@ -3,6 +3,10 @@ import { BirthDate } from './value-objects/birth-date.vo';
 import { ChildName } from './value-objects/child-name.vo';
 import { ChildType, ChildTypeValue } from './value-objects/child-type.vo';
 import { Gender, GenderType } from './value-objects/gender.vo';
+import {
+  PsychologicalStatus,
+  PsychologicalStatusValue,
+} from './value-objects/psychological-status.vo';
 
 describe('Child Aggregate Root', () => {
   // 공통 테스트 데이터
@@ -15,8 +19,8 @@ describe('Child Aggregate Root', () => {
     regularType: ChildType.create(ChildTypeValue.REGULAR).getValue(),
   });
 
-  describe('생성 - 양육시설 아동 (CARE_FACILITY, 고아)', () => {
-    it('양육시설과 연결된 고아를 생성한다', () => {
+  describe('생성 - 양육시설 아동 (CARE_FACILITY)', () => {
+    it('양육시설과 연결된 아동을 생성한다', () => {
       // Given
       const { childName, birthDate, gender, careFacilityType } = createTestData();
       const careFacilityId = 'care-facility-uuid-123';
@@ -29,7 +33,6 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId,
         communityChildCenterId: null,
-        guardianId: null,
       });
 
       // Then
@@ -38,7 +41,6 @@ describe('Child Aggregate Root', () => {
       expect(child.childType.value).toBe(ChildTypeValue.CARE_FACILITY);
       expect(child.careFacilityId).toBe(careFacilityId);
       expect(child.communityChildCenterId).toBeNull();
-      expect(child.guardianId).toBeNull();
       expect(child.isOrphan).toBe(true);
     });
 
@@ -54,7 +56,6 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: null,
         communityChildCenterId: null,
-        guardianId: null,
       });
 
       // Then
@@ -62,7 +63,7 @@ describe('Child Aggregate Root', () => {
       expect(result.getError().message).toContain('양육시설 ID가 필수');
     });
 
-    it('양육시설 아동에게 guardianId가 있으면 실패한다', () => {
+    it('양육시설 아동에게 communityChildCenterId가 있으면 실패한다', () => {
       // Given
       const { childName, birthDate, gender, careFacilityType } = createTestData();
 
@@ -73,22 +74,20 @@ describe('Child Aggregate Root', () => {
         birthDate,
         gender,
         careFacilityId: 'care-facility-123',
-        communityChildCenterId: null,
-        guardianId: 'guardian-123', // 양육시설 아동은 부모 보호자가 없어야 함
+        communityChildCenterId: 'center-123',
       });
 
       // Then
       expect(result.isFailure).toBe(true);
-      expect(result.getError().message).toContain('부모 보호자와 연결될 수 없습니다');
+      expect(result.getError().message).toContain('지역아동센터와 연결될 수 없습니다');
     });
   });
 
   describe('생성 - 지역아동센터 아동 (COMMUNITY_CENTER)', () => {
-    it('지역아동센터와 부모가 연결된 아동을 생성한다', () => {
+    it('지역아동센터와 연결된 아동을 생성한다', () => {
       // Given
       const { childName, birthDate, gender, communityCenterType } = createTestData();
       const communityChildCenterId = 'community-center-uuid-456';
-      const guardianId = 'guardian-uuid-789';
 
       // When
       const result = Child.create({
@@ -98,7 +97,6 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: null,
         communityChildCenterId,
-        guardianId,
       });
 
       // Then
@@ -107,7 +105,6 @@ describe('Child Aggregate Root', () => {
       expect(child.childType.value).toBe(ChildTypeValue.COMMUNITY_CENTER);
       expect(child.careFacilityId).toBeNull();
       expect(child.communityChildCenterId).toBe(communityChildCenterId);
-      expect(child.guardianId).toBe(guardianId);
       expect(child.isOrphan).toBe(false);
     });
 
@@ -123,7 +120,6 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: null,
         communityChildCenterId: null,
-        guardianId: 'guardian-123',
       });
 
       // Then
@@ -131,7 +127,7 @@ describe('Child Aggregate Root', () => {
       expect(result.getError().message).toContain('지역아동센터 ID가 필수');
     });
 
-    it('지역아동센터 아동에게 guardianId가 없으면 실패한다', () => {
+    it('지역아동센터 아동에게 careFacilityId가 있으면 실패한다', () => {
       // Given
       const { childName, birthDate, gender, communityCenterType } = createTestData();
 
@@ -141,82 +137,34 @@ describe('Child Aggregate Root', () => {
         name: childName,
         birthDate,
         gender,
-        careFacilityId: null,
-        communityChildCenterId: 'community-center-123',
-        guardianId: null,
-      });
-
-      // Then
-      expect(result.isFailure).toBe(true);
-      expect(result.getError().message).toContain('부모 보호자 ID가 필수');
-    });
-  });
-
-  describe('생성 - 일반 아동 (REGULAR, 부모 직접보호)', () => {
-    it('부모와 연결된 일반 아동을 생성한다', () => {
-      // Given
-      const { childName, birthDate, gender, regularType } = createTestData();
-      const guardianId = 'guardian-uuid-123';
-
-      // When
-      const result = Child.create({
-        childType: regularType,
-        name: childName,
-        birthDate,
-        gender,
-        careFacilityId: null,
-        communityChildCenterId: null,
-        guardianId,
-      });
-
-      // Then
-      expect(result.isSuccess).toBe(true);
-      const child = result.getValue();
-      expect(child.childType.value).toBe(ChildTypeValue.REGULAR);
-      expect(child.careFacilityId).toBeNull();
-      expect(child.communityChildCenterId).toBeNull();
-      expect(child.guardianId).toBe(guardianId);
-      expect(child.isOrphan).toBe(false);
-    });
-
-    it('일반 아동에게 guardianId가 없으면 실패한다', () => {
-      // Given
-      const { childName, birthDate, gender, regularType } = createTestData();
-
-      // When
-      const result = Child.create({
-        childType: regularType,
-        name: childName,
-        birthDate,
-        gender,
-        careFacilityId: null,
-        communityChildCenterId: null,
-        guardianId: null,
-      });
-
-      // Then
-      expect(result.isFailure).toBe(true);
-      expect(result.getError().message).toContain('부모 보호자 ID가 필수');
-    });
-
-    it('일반 아동에게 careFacilityId가 있으면 실패한다', () => {
-      // Given
-      const { childName, birthDate, gender, regularType } = createTestData();
-
-      // When
-      const result = Child.create({
-        childType: regularType,
-        name: childName,
-        birthDate,
-        gender,
         careFacilityId: 'care-facility-123',
-        communityChildCenterId: null,
-        guardianId: 'guardian-123',
+        communityChildCenterId: 'center-123',
       });
 
       // Then
       expect(result.isFailure).toBe(true);
       expect(result.getError().message).toContain('양육시설과 연결될 수 없습니다');
+    });
+  });
+
+  describe('일반 아동 유형 (REGULAR) - 더 이상 지원 안함', () => {
+    it('일반 아동 유형으로 생성하면 실패한다', () => {
+      // Given
+      const { childName, birthDate, gender, regularType } = createTestData();
+
+      // When
+      const result = Child.create({
+        childType: regularType,
+        name: childName,
+        birthDate,
+        gender,
+        careFacilityId: null,
+        communityChildCenterId: null,
+      });
+
+      // Then
+      expect(result.isFailure).toBe(true);
+      expect(result.getError().message).toContain('더 이상 지원되지 않습니다');
     });
   });
 
@@ -229,16 +177,15 @@ describe('Child Aggregate Root', () => {
       const childName = ChildName.create('김철수').getValue();
       const birthDate = BirthDate.create(tenYearsAgo).getValue();
       const gender = Gender.create(GenderType.MALE).getValue();
-      const regularType = ChildType.create(ChildTypeValue.REGULAR).getValue();
+      const careFacilityType = ChildType.create(ChildTypeValue.CARE_FACILITY).getValue();
 
       const child = Child.create({
-        childType: regularType,
+        childType: careFacilityType,
         name: childName,
         birthDate,
         gender,
-        careFacilityId: null,
+        careFacilityId: 'facility-123',
         communityChildCenterId: null,
-        guardianId: 'guardian-123',
       }).getValue();
 
       // When
@@ -249,137 +196,18 @@ describe('Child Aggregate Root', () => {
     });
   });
 
-  describe('보호자 변경', () => {
-    it('일반 아동의 보호자를 변경할 수 있다', () => {
-      // Given
-      const { childName, birthDate, gender, regularType } = createTestData();
-
-      const child = Child.create({
-        childType: regularType,
-        name: childName,
-        birthDate,
-        gender,
-        careFacilityId: null,
-        communityChildCenterId: null,
-        guardianId: 'old-guardian-123',
-      }).getValue();
-
-      // When
-      const result = child.changeGuardian('new-guardian-456');
-
-      // Then
-      expect(result.isSuccess).toBe(true);
-      expect(child.guardianId).toBe('new-guardian-456');
-    });
-
-    it('지역아동센터 아동의 보호자를 변경할 수 있다', () => {
-      // Given
-      const { childName, birthDate, gender, communityCenterType } = createTestData();
-
-      const child = Child.create({
-        childType: communityCenterType,
-        name: childName,
-        birthDate,
-        gender,
-        careFacilityId: null,
-        communityChildCenterId: 'center-123',
-        guardianId: 'old-guardian-123',
-      }).getValue();
-
-      // When
-      const result = child.changeGuardian('new-guardian-456');
-
-      // Then
-      expect(result.isSuccess).toBe(true);
-      expect(child.guardianId).toBe('new-guardian-456');
-    });
-
-    it('양육시설 아동은 보호자를 변경할 수 없다', () => {
-      // Given
-      const { childName, birthDate, gender, careFacilityType } = createTestData();
-
-      const child = Child.create({
-        childType: careFacilityType,
-        name: childName,
-        birthDate,
-        gender,
-        careFacilityId: 'facility-123',
-        communityChildCenterId: null,
-        guardianId: null,
-      }).getValue();
-
-      // When
-      const result = child.changeGuardian('new-guardian-456');
-
-      // Then
-      expect(result.isFailure).toBe(true);
-      expect(result.getError().message).toContain('입양 절차');
-    });
-  });
-
-  describe('입양 처리', () => {
-    it('양육시설 아동을 입양하면 일반 아동으로 전환된다', () => {
-      // Given
-      const { childName, birthDate, gender, careFacilityType } = createTestData();
-
-      const child = Child.create({
-        childType: careFacilityType,
-        name: childName,
-        birthDate,
-        gender,
-        careFacilityId: 'facility-123',
-        communityChildCenterId: null,
-        guardianId: null,
-      }).getValue();
-
-      // When
-      const result = child.processAdoption('new-parent-789');
-
-      // Then
-      expect(result.isSuccess).toBe(true);
-      const adoptedChild = result.getValue();
-      expect(adoptedChild.childType.value).toBe(ChildTypeValue.REGULAR);
-      expect(adoptedChild.guardianId).toBe('new-parent-789');
-      expect(adoptedChild.careFacilityId).toBeNull();
-      expect(adoptedChild.isOrphan).toBe(false);
-    });
-
-    it('양육시설 아동이 아닌 경우 입양 처리할 수 없다', () => {
-      // Given
-      const { childName, birthDate, gender, regularType } = createTestData();
-
-      const child = Child.create({
-        childType: regularType,
-        name: childName,
-        birthDate,
-        gender,
-        careFacilityId: null,
-        communityChildCenterId: null,
-        guardianId: 'guardian-123',
-      }).getValue();
-
-      // When
-      const result = child.processAdoption('new-parent-789');
-
-      // Then
-      expect(result.isFailure).toBe(true);
-      expect(result.getError().message).toContain('양육시설 아동만');
-    });
-  });
-
   describe('의료/특수요구사항 업데이트', () => {
     it('의료 정보를 업데이트한다', () => {
       // Given
-      const { childName, birthDate, gender, regularType } = createTestData();
+      const { childName, birthDate, gender, careFacilityType } = createTestData();
 
       const child = Child.create({
-        childType: regularType,
+        childType: careFacilityType,
         name: childName,
         birthDate,
         gender,
-        careFacilityId: null,
+        careFacilityId: 'facility-123',
         communityChildCenterId: null,
-        guardianId: 'guardian-123',
       }).getValue();
 
       // When
@@ -391,16 +219,15 @@ describe('Child Aggregate Root', () => {
 
     it('특수 요구사항을 업데이트한다', () => {
       // Given
-      const { childName, birthDate, gender, regularType } = createTestData();
+      const { childName, birthDate, gender, careFacilityType } = createTestData();
 
       const child = Child.create({
-        childType: regularType,
+        childType: careFacilityType,
         name: childName,
         birthDate,
         gender,
-        careFacilityId: null,
+        careFacilityId: 'facility-123',
         communityChildCenterId: null,
-        guardianId: 'guardian-123',
       }).getValue();
 
       // When
@@ -408,6 +235,121 @@ describe('Child Aggregate Root', () => {
 
       // Then
       expect(child.specialNeeds).toBe('감각 통합 치료 필요');
+    });
+  });
+
+  describe('심리 상태 업데이트', () => {
+    it('심리 상태를 업데이트하고 에스컬레이션 여부를 반환한다', () => {
+      // Given
+      const { childName, birthDate, gender, careFacilityType } = createTestData();
+
+      const child = Child.create({
+        childType: careFacilityType,
+        name: childName,
+        birthDate,
+        gender,
+        careFacilityId: 'facility-123',
+        communityChildCenterId: null,
+      }).getValue();
+
+      const atRiskStatus = PsychologicalStatus.create(PsychologicalStatusValue.AT_RISK).getValue();
+
+      // When
+      const result = child.updatePsychologicalStatus(atRiskStatus);
+
+      // Then
+      expect(result.isSuccess).toBe(true);
+      const { isEscalation, isDeescalation } = result.getValue();
+      expect(isEscalation).toBe(true);
+      expect(isDeescalation).toBe(false);
+      expect(child.psychologicalStatus.value).toBe(PsychologicalStatusValue.AT_RISK);
+    });
+
+    it('동일한 상태로 업데이트 시 변경 없음을 반환한다', () => {
+      // Given
+      const { childName, birthDate, gender, careFacilityType } = createTestData();
+
+      const child = Child.create({
+        childType: careFacilityType,
+        name: childName,
+        birthDate,
+        gender,
+        careFacilityId: 'facility-123',
+        communityChildCenterId: null,
+      }).getValue();
+
+      const normalStatus = PsychologicalStatus.create(PsychologicalStatusValue.NORMAL).getValue();
+
+      // When
+      const result = child.updatePsychologicalStatus(normalStatus);
+
+      // Then
+      expect(result.isSuccess).toBe(true);
+      const { isEscalation, isDeescalation } = result.getValue();
+      expect(isEscalation).toBe(false);
+      expect(isDeescalation).toBe(false);
+    });
+
+    it('위험 상태 확인 메서드가 동작한다', () => {
+      // Given
+      const { childName, birthDate, gender, careFacilityType } = createTestData();
+
+      const child = Child.create({
+        childType: careFacilityType,
+        name: childName,
+        birthDate,
+        gender,
+        careFacilityId: 'facility-123',
+        communityChildCenterId: null,
+      }).getValue();
+
+      // Initially NORMAL
+      expect(child.isAtRiskOrHigher()).toBe(false);
+      expect(child.isHighRisk()).toBe(false);
+
+      // Update to AT_RISK
+      const atRiskStatus = PsychologicalStatus.create(PsychologicalStatusValue.AT_RISK).getValue();
+      child.updatePsychologicalStatus(atRiskStatus);
+
+      expect(child.isAtRiskOrHigher()).toBe(true);
+      expect(child.isHighRisk()).toBe(false);
+
+      // Update to HIGH_RISK
+      const highRiskStatus = PsychologicalStatus.create(
+        PsychologicalStatusValue.HIGH_RISK,
+      ).getValue();
+      child.updatePsychologicalStatus(highRiskStatus);
+
+      expect(child.isAtRiskOrHigher()).toBe(true);
+      expect(child.isHighRisk()).toBe(true);
+    });
+  });
+
+  describe('DB 복원', () => {
+    it('restore 메서드로 아동을 복원한다', () => {
+      // Given
+      const id = 'existing-child-id';
+      const createdAt = new Date('2023-01-01');
+      const { childName, birthDate, gender, careFacilityType } = createTestData();
+
+      // When
+      const child = Child.restore(
+        {
+          childType: careFacilityType,
+          name: childName,
+          birthDate,
+          gender,
+          careFacilityId: 'facility-123',
+          communityChildCenterId: null,
+        },
+        id,
+        createdAt,
+      );
+
+      // Then
+      expect(child.id).toBe(id);
+      expect(child.createdAt).toBe(createdAt);
+      expect(child.careFacilityId).toBe('facility-123');
     });
   });
 });

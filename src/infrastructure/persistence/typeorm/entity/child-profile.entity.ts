@@ -12,15 +12,15 @@ import { CareFacilityEntity } from './care-facility.entity';
 import { CommunityChildCenterEntity } from './community-child-center.entity';
 import { ChildType } from './enums/child-type.enum';
 import { PsychologicalStatus } from './enums/psychological-status.enum';
-import { GuardianProfileEntity } from './guardian-profile.entity';
 
 /**
  * 아동 프로필 엔티티
  *
  * 아동 유형별 관계:
- * - CARE_FACILITY (양육시설 아동, 고아): careFacilityId만 연결
- * - COMMUNITY_CENTER (지역아동센터 아동): communityChildCenterId + guardianId(부모) 연결
- * - REGULAR (일반 아동, 부모 직접보호): guardianId(부모)만 연결
+ * - CARE_FACILITY (양육시설 아동): careFacilityId로 연결
+ * - COMMUNITY_CENTER (지역아동센터 아동): communityChildCenterId로 연결
+ *
+ * NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
  */
 @Entity('child_profiles')
 @Index('idx_child_profiles_type', ['childType'])
@@ -90,23 +90,6 @@ export class ChildProfileEntity {
   @ManyToOne(() => CommunityChildCenterEntity, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'communityChildCenterId' })
   communityChildCenter: CommunityChildCenterEntity | null;
-
-  // ========== 보호자(부모) 연결 ==========
-
-  /**
-   * 보호자(부모) ID (FK)
-   * - COMMUNITY_CENTER, REGULAR 유형만 필수
-   * - GuardianType.PARENT 유형의 보호자만 연결
-   */
-  @Column({ type: 'uuid', nullable: true })
-  guardianId: string | null;
-
-  /**
-   * 보호자(부모)와의 관계 (Many-to-One)
-   */
-  @ManyToOne(() => GuardianProfileEntity, { nullable: true, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'guardianId' })
-  guardian: GuardianProfileEntity | null;
 
   // ========== 추가 정보 ==========
 

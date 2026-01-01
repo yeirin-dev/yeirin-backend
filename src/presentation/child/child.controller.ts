@@ -9,25 +9,22 @@ import {
   Post,
   UseGuards,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChildRepository } from '@domain/child/repository/child.repository';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { ChildResponseDto } from '@application/child/dto/child-response.dto';
 import { RegisterChildDto } from '@application/child/dto/register-child.dto';
-import { GetChildrenByGuardianUseCase } from '@application/child/use-cases/get-children-by-guardian/get-children-by-guardian.use-case';
 import { RegisterChildUseCase } from '@application/child/use-cases/register-child/register-child.use-case';
-import { CurrentUser } from '@infrastructure/auth/decorators/current-user.decorator';
+import { CurrentUser, CurrentUserData } from '@infrastructure/auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 import { ChildType } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';
 
 /**
  * 아동 관리 Controller
  *
- * 아동 유형별 등록:
- * - CARE_FACILITY (양육시설 아동): 관리자/양육시설 선생님이 등록, guardianId 불필요
- * - COMMUNITY_CENTER (지역아동센터 아동): 부모가 등록, guardianId 자동 주입
- * - REGULAR (일반 아동): 부모가 등록, guardianId 자동 주입
+ * NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
+ * 시설 인증 후 해당 시설의 아동만 조회/관리할 수 있습니다.
  */
 @ApiTags('아동 관리')
 @Controller('api/v1/children')
@@ -36,58 +33,44 @@ import { ChildType } from '@infrastructure/persistence/typeorm/entity/enums/chil
 export class ChildController {
   constructor(
     private readonly registerChildUseCase: RegisterChildUseCase,
-    private readonly getChildrenByGuardianUseCase: GetChildrenByGuardianUseCase,
-    @Inject('GuardianProfileRepository')
-    private readonly guardianRepository: GuardianProfileRepository,
     @Inject('ChildRepository')
     private readonly childRepository: ChildRepository,
   ) {}
 
   @Get()
-  @ApiOperation({ summary: '내가 담당하는 아동 목록 조회 (로그인한 보호자)' })
+  @ApiOperation({ summary: '내 시설의 아동 목록 조회 (로그인한 시설)' })
   @ApiResponse({
     status: 200,
     description: '아동 목록',
     type: [ChildResponseDto],
   })
-  async getMyChildren(@CurrentUser('userId') userId: string): Promise<ChildResponseDto[]> {
-    // GuardianProfile 조회
-    const guardianProfile = await this.guardianRepository.findByUserId(userId);
-    if (!guardianProfile) {
-      throw new NotFoundException('보호자 프로필을 찾을 수 없습니다.');
+  async getMyChildren(@CurrentUser() user: CurrentUserData): Promise<ChildResponseDto[]> {
+    // 시설 인증인지 확인
+    if (user.role !== 'INSTITUTION' || !user.facilityType || !user.institutionId) {
+      throw new ForbiddenException('시설 로그인이 필요합니다.');
     }
 
-    // 보호자 유형에 따라 다른 조회 방식 사용
-    const guardianType = guardianProfile.guardianType;
-
-    // 양육시설 선생님: careFacilityId로 조회
-    if (guardianType === 'CARE_FACILITY_TEACHER' && guardianProfile.careFacilityId) {
-      const children = await this.childRepository.findByCareFacilityId(
-        guardianProfile.careFacilityId,
-      );
+    // 시설 유형에 따라 조회
+    if (user.facilityType === 'CARE_FACILITY') {
+      const children = await this.childRepository.findByCareFacilityId(user.institutionId);
       return children.map((child) => ChildResponseDto.fromDomain(child));
     }
 
-    // 지역아동센터 선생님: communityChildCenterId로 조회
-    if (guardianType === 'COMMUNITY_CENTER_TEACHER' && guardianProfile.communityChildCenterId) {
-      const children = await this.childRepository.findByCommunityChildCenterId(
-        guardianProfile.communityChildCenterId,
-      );
+    if (user.facilityType === 'COMMUNITY_CENTER') {
+      const children = await this.childRepository.findByCommunityChildCenterId(user.institutionId);
       return children.map((child) => ChildResponseDto.fromDomain(child));
     }
 
-    // 일반 보호자 (부모): guardianId로 조회
-    return await this.getChildrenByGuardianUseCase.execute(guardianProfile.id);
+    throw new BadRequestException('알 수 없는 시설 유형입니다.');
   }
 
   @Post()
   @ApiOperation({
     summary: '아동 등록',
     description: `
-아동 유형별 등록 방법:
-- CARE_FACILITY (양육시설 아동, 고아): careFacilityId 필수, guardianId 불필요
-- COMMUNITY_CENTER (지역아동센터 아동): communityChildCenterId 필수, guardianId 자동 주입 (로그인한 보호자)
-- REGULAR (일반 아동): guardianId 자동 주입 (로그인한 보호자)
+시설 로그인 후 아동을 등록합니다.
+- CARE_FACILITY (양육시설): 양육시설 ID가 자동으로 연결됩니다.
+- COMMUNITY_CENTER (지역아동센터): 지역아동센터 ID가 자동으로 연결됩니다.
     `,
   })
   @ApiResponse({
@@ -96,43 +79,40 @@ export class ChildController {
     type: ChildResponseDto,
   })
   @ApiResponse({ status: 400, description: '잘못된 요청' })
-  @ApiResponse({ status: 404, description: '보호자/기관을 찾을 수 없음' })
+  @ApiResponse({ status: 403, description: '시설 로그인 필요' })
   async registerChild(
-    @CurrentUser('userId') userId: string,
+    @CurrentUser() user: CurrentUserData,
     @Body() dto: RegisterChildDto,
   ): Promise<ChildResponseDto> {
-    // 1. 양육시설 아동(고아)이 아닌 경우에만 guardianId 자동 주입
-    if (dto.childType !== ChildType.CARE_FACILITY) {
-      // GuardianProfile 조회 (인증 컨텍스트를 도메인 식별자로 변환)
-      const guardianProfile = await this.guardianRepository.findByUserId(userId);
-      if (!guardianProfile) {
-        throw new NotFoundException(
-          '보호자 프로필을 찾을 수 없습니다. 먼저 보호자로 등록해주세요.',
-        );
-      }
+    // 시설 인증인지 확인
+    if (user.role !== 'INSTITUTION' || !user.facilityType || !user.institutionId) {
+      throw new ForbiddenException('시설 로그인이 필요합니다.');
+    }
 
-      // guardianId 주입하여 UseCase 실행
+    // 시설 유형과 요청 아동 유형 일치 여부 확인
+    if (user.facilityType === 'CARE_FACILITY') {
+      if (dto.childType !== ChildType.CARE_FACILITY) {
+        throw new BadRequestException('양육시설에서는 양육시설 아동만 등록할 수 있습니다.');
+      }
+      // 시설 ID 자동 주입
       return await this.registerChildUseCase.execute({
         ...dto,
-        guardianId: guardianProfile.id,
+        careFacilityId: user.institutionId,
       });
     }
 
-    // 2. 양육시설 아동(고아)의 경우 guardianId 없이 등록
-    return await this.registerChildUseCase.execute(dto);
-  }
+    if (user.facilityType === 'COMMUNITY_CENTER') {
+      if (dto.childType !== ChildType.COMMUNITY_CENTER) {
+        throw new BadRequestException('지역아동센터에서는 지역아동센터 아동만 등록할 수 있습니다.');
+      }
+      // 시설 ID 자동 주입
+      return await this.registerChildUseCase.execute({
+        ...dto,
+        communityChildCenterId: user.institutionId,
+      });
+    }
 
-  @Get('guardian/:guardianId')
-  @ApiOperation({ summary: '보호자 ID로 아동 목록 조회' })
-  @ApiResponse({
-    status: 200,
-    description: '아동 목록',
-    type: [ChildResponseDto],
-  })
-  async getChildrenByGuardian(
-    @Param('guardianId') guardianId: string,
-  ): Promise<ChildResponseDto[]> {
-    return await this.getChildrenByGuardianUseCase.execute(guardianId);
+    throw new BadRequestException('알 수 없는 시설 유형입니다.');
   }
 
   @Get(':id')
@@ -142,12 +122,28 @@ export class ChildController {
     description: '아동 상세 정보',
     type: ChildResponseDto,
   })
+  @ApiResponse({ status: 403, description: '조회 권한 없음' })
   @ApiResponse({ status: 404, description: '아동을 찾을 수 없음' })
-  async getChild(@Param('id') id: string): Promise<ChildResponseDto> {
+  async getChild(
+    @CurrentUser() user: CurrentUserData,
+    @Param('id') id: string,
+  ): Promise<ChildResponseDto> {
     const child = await this.childRepository.findById(id);
     if (!child) {
       throw new NotFoundException('아동을 찾을 수 없습니다.');
     }
+
+    // 권한 확인: 시설 인증인 경우 해당 시설의 아동인지 확인
+    if (user.role === 'INSTITUTION' && user.institutionId) {
+      const hasPermission =
+        (child.careFacilityId && child.careFacilityId === user.institutionId) ||
+        (child.communityChildCenterId && child.communityChildCenterId === user.institutionId);
+
+      if (!hasPermission) {
+        throw new ForbiddenException('이 아동을 조회할 권한이 없습니다.');
+      }
+    }
+
     return ChildResponseDto.fromDomain(child);
   }
 
@@ -157,7 +153,7 @@ export class ChildController {
   @ApiResponse({ status: 403, description: '삭제 권한 없음' })
   @ApiResponse({ status: 404, description: '아동을 찾을 수 없음' })
   async deleteChild(
-    @CurrentUser('userId') userId: string,
+    @CurrentUser() user: CurrentUserData,
     @Param('id') id: string,
   ): Promise<{ message: string }> {
     // 아동 존재 확인
@@ -166,18 +162,15 @@ export class ChildController {
       throw new NotFoundException('아동을 찾을 수 없습니다.');
     }
 
-    // 권한 확인: 해당 아동의 보호자인지 확인
-    const guardianProfile = await this.guardianRepository.findByUserId(userId);
-    if (!guardianProfile) {
-      throw new ForbiddenException('보호자 프로필을 찾을 수 없습니다.');
+    // 시설 인증인지 확인
+    if (user.role !== 'INSTITUTION' || !user.institutionId) {
+      throw new ForbiddenException('시설 로그인이 필요합니다.');
     }
 
-    // 보호자 ID 또는 기관 ID로 권한 확인
+    // 권한 확인: 해당 시설의 아동인지 확인
     const hasPermission =
-      child.guardianId === guardianProfile.id ||
-      (child.careFacilityId && child.careFacilityId === guardianProfile.careFacilityId) ||
-      (child.communityChildCenterId &&
-        child.communityChildCenterId === guardianProfile.communityChildCenterId);
+      (child.careFacilityId && child.careFacilityId === user.institutionId) ||
+      (child.communityChildCenterId && child.communityChildCenterId === user.institutionId);
 
     if (!hasPermission) {
       throw new ForbiddenException('이 아동을 삭제할 권한이 없습니다.');

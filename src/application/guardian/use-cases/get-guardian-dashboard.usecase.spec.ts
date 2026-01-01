@@ -19,15 +19,15 @@ describe('GetGuardianDashboardUseCase', () => {
   let mockGuardianProfileRepository: jest.Mocked<GuardianProfileRepository>;
 
   beforeEach(async () => {
+    // NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
+    //       findByGuardianId, countByGuardianId는 더 이상 사용되지 않습니다.
     mockChildRepository = {
       save: jest.fn(),
       findById: jest.fn(),
-      findByGuardianId: jest.fn(),
       findByCareFacilityId: jest.fn(),
       findByCommunityChildCenterId: jest.fn(),
       delete: jest.fn(),
       exists: jest.fn(),
-      countByGuardianId: jest.fn(),
       countByCareFacilityId: jest.fn(),
       countByCommunityChildCenterId: jest.fn(),
     };
@@ -124,8 +124,10 @@ describe('GetGuardianDashboardUseCase', () => {
   };
 
   describe('보호자 대시보드 조회', () => {
-    it('일반 보호자(부모)의 대시보드를 조회한다', async () => {
+    it('일반 보호자(부모)의 대시보드를 조회한다 - 아동 수는 0으로 반환 (더 이상 지원 안함)', async () => {
       // Given
+      // NOTE: 일반 보호자(부모) 유형은 더 이상 아동과 연결되지 않습니다.
+      //       시설 기반 인증으로 전환되었습니다.
       const userId = 'user-123';
       const guardianProfile = {
         id: 'guardian-123',
@@ -136,7 +138,7 @@ describe('GetGuardianDashboardUseCase', () => {
       };
 
       mockGuardianProfileRepository.findByUserId.mockResolvedValue(guardianProfile as any);
-      mockChildRepository.countByGuardianId.mockResolvedValue(2);
+      // countByGuardianId는 더 이상 사용되지 않음
       mockCounselRequestRepository.countByGuardianIdAndStatus.mockResolvedValue({
         total: 5,
         pending: 1,
@@ -155,7 +157,7 @@ describe('GetGuardianDashboardUseCase', () => {
       const result = await useCase.execute(userId);
 
       // Then
-      expect(result.childrenCount).toBe(2);
+      expect(result.childrenCount).toBe(0); // PARENT 유형은 더 이상 아동 수를 조회하지 않음
       expect(result.totalCounselRequests).toBe(5);
       expect(result.matchedCount).toBe(1);
       expect(result.inProgressCount).toBe(1);
@@ -258,9 +260,10 @@ describe('GetGuardianDashboardUseCase', () => {
       mockGuardianProfileRepository.findByUserId.mockResolvedValue({
         id: 'guardian-123',
         userId,
-        guardianType: 'PARENT',
+        guardianType: 'CARE_FACILITY_TEACHER',
+        careFacilityId: 'facility-123',
       } as any);
-      mockChildRepository.countByGuardianId.mockResolvedValue(1);
+      mockChildRepository.countByCareFacilityId.mockResolvedValue(1);
       mockCounselRequestRepository.countByGuardianIdAndStatus.mockResolvedValue({
         total: 3,
         pending: 1,
@@ -295,9 +298,10 @@ describe('GetGuardianDashboardUseCase', () => {
       mockGuardianProfileRepository.findByUserId.mockResolvedValue({
         id: 'guardian-123',
         userId,
-        guardianType: 'PARENT',
+        guardianType: 'CARE_FACILITY_TEACHER',
+        careFacilityId: 'facility-123',
       } as any);
-      mockChildRepository.countByGuardianId.mockResolvedValue(1);
+      mockChildRepository.countByCareFacilityId.mockResolvedValue(1);
       mockCounselRequestRepository.countByGuardianIdAndStatus.mockResolvedValue({
         total: 1,
         pending: 1,

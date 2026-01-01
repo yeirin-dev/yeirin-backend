@@ -7,7 +7,6 @@ import { ChildType, ChildTypeValue } from '@domain/child/model/value-objects/chi
 import { Gender } from '@domain/child/model/value-objects/gender.vo';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { ChildType as ChildTypeEnum } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';
 import { ChildResponseDto } from '../../dto/child-response.dto';
 import { RegisterChildDto } from '../../dto/register-child.dto';
@@ -17,16 +16,15 @@ import { RegisterChildDto } from '../../dto/register-child.dto';
  *
  * 아동 유형별 관계 비즈니스 규칙:
  * - CARE_FACILITY (양육시설 아동): careFacilityId 필수
- * - COMMUNITY_CENTER (지역아동센터 아동): communityChildCenterId + guardianId 필수
- * - REGULAR (일반 아동): guardianId 필수
+ * - COMMUNITY_CENTER (지역아동센터 아동): communityChildCenterId 필수
+ *
+ * NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
  */
 @Injectable()
 export class RegisterChildUseCase {
   constructor(
     @Inject('ChildRepository')
     private readonly childRepository: ChildRepository,
-    @Inject('GuardianProfileRepository')
-    private readonly guardianRepository: GuardianProfileRepository,
     @Inject('CareFacilityRepository')
     private readonly careFacilityRepository: CareFacilityRepository,
     @Inject('CommunityChildCenterRepository')
@@ -66,7 +64,6 @@ export class RegisterChildUseCase {
       gender: genderResult.getValue(),
       careFacilityId: dto.careFacilityId ?? null,
       communityChildCenterId: dto.communityChildCenterId ?? null,
-      guardianId: dto.guardianId ?? null,
       medicalInfo: dto.medicalInfo,
       specialNeeds: dto.specialNeeds,
     });
@@ -94,17 +91,18 @@ export class RegisterChildUseCase {
         await this.validateCommunityChildCenterChild(dto);
         break;
       case ChildTypeEnum.REGULAR:
-        await this.validateRegularChild(dto);
-        break;
+        throw new BadRequestException(
+          '일반 아동 유형은 더 이상 지원되지 않습니다. 시설에 연결된 아동만 등록 가능합니다.',
+        );
       default:
         throw new BadRequestException('유효하지 않은 아동 유형입니다');
     }
   }
 
   /**
-   * 양육시설 아동 (고아) 검증
+   * 양육시설 아동 검증
    * - careFacilityId 필수
-   * - communityChildCenterId, guardianId 없어야 함
+   * - communityChildCenterId 없어야 함
    */
   private async validateCareFacilityChild(dto: RegisterChildDto): Promise<void> {
     if (!dto.careFacilityId) {
@@ -113,10 +111,6 @@ export class RegisterChildUseCase {
 
     if (dto.communityChildCenterId) {
       throw new BadRequestException('양육시설 아동은 지역아동센터와 연결될 수 없습니다');
-    }
-
-    if (dto.guardianId) {
-      throw new BadRequestException('양육시설 아동(고아)은 부모 보호자와 연결될 수 없습니다');
     }
 
     // 양육시설 존재 확인
@@ -128,7 +122,7 @@ export class RegisterChildUseCase {
 
   /**
    * 지역아동센터 아동 검증
-   * - communityChildCenterId + guardianId 필수
+   * - communityChildCenterId 필수
    * - careFacilityId 없어야 함
    */
   private async validateCommunityChildCenterChild(dto: RegisterChildDto): Promise<void> {
@@ -140,47 +134,12 @@ export class RegisterChildUseCase {
       throw new BadRequestException('지역아동센터 아동은 지역아동센터 ID가 필수입니다');
     }
 
-    if (!dto.guardianId) {
-      throw new BadRequestException('지역아동센터 아동은 부모 보호자 ID가 필수입니다');
-    }
-
     // 지역아동센터 존재 확인
     const centerExists = await this.communityChildCenterRepository.exists(
       dto.communityChildCenterId,
     );
     if (!centerExists) {
       throw new NotFoundException(`지역아동센터를 찾을 수 없습니다: ${dto.communityChildCenterId}`);
-    }
-
-    // 부모 보호자 존재 확인
-    const guardianExists = await this.guardianRepository.exists(dto.guardianId);
-    if (!guardianExists) {
-      throw new NotFoundException(`보호자를 찾을 수 없습니다: ${dto.guardianId}`);
-    }
-  }
-
-  /**
-   * 일반 아동 (부모 직접보호) 검증
-   * - guardianId 필수
-   * - careFacilityId, communityChildCenterId 없어야 함
-   */
-  private async validateRegularChild(dto: RegisterChildDto): Promise<void> {
-    if (dto.careFacilityId) {
-      throw new BadRequestException('일반 아동은 양육시설과 연결될 수 없습니다');
-    }
-
-    if (dto.communityChildCenterId) {
-      throw new BadRequestException('일반 아동은 지역아동센터와 연결될 수 없습니다');
-    }
-
-    if (!dto.guardianId) {
-      throw new BadRequestException('일반 아동은 부모 보호자 ID가 필수입니다');
-    }
-
-    // 부모 보호자 존재 확인
-    const guardianExists = await this.guardianRepository.exists(dto.guardianId);
-    if (!guardianExists) {
-      throw new NotFoundException(`보호자를 찾을 수 없습니다: ${dto.guardianId}`);
     }
   }
 

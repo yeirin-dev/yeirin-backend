@@ -1,22 +1,23 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GetChildrenByGuardianUseCase } from '@application/child/use-cases/get-children-by-guardian/get-children-by-guardian.use-case';
 import { RegisterChildUseCase } from '@application/child/use-cases/register-child/register-child.use-case';
 import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
-import { GuardianProfileEntity } from '@infrastructure/persistence/typeorm/entity/guardian-profile.entity';
 import { CareFacilityRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/care-facility.repository.impl';
 import { ChildRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/child.repository.impl';
 import { CommunityChildCenterRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/community-child-center.repository.impl';
-import { GuardianProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/guardian-profile.repository.impl';
 import { ChildController } from './child.controller';
 
+/**
+ * 아동 관리 모듈
+ *
+ * NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
+ */
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       ChildProfileEntity,
-      GuardianProfileEntity,
       CareFacilityEntity,
       CommunityChildCenterEntity,
     ]),
@@ -29,10 +30,6 @@ import { ChildController } from './child.controller';
       useClass: ChildRepositoryImpl,
     },
     {
-      provide: 'GuardianProfileRepository',
-      useClass: GuardianProfileRepositoryImpl,
-    },
-    {
       provide: 'CareFacilityRepository',
       useClass: CareFacilityRepositoryImpl,
     },
@@ -42,7 +39,6 @@ import { ChildController } from './child.controller';
     },
     // Use Cases
     RegisterChildUseCase,
-    GetChildrenByGuardianUseCase,
   ],
   exports: ['ChildRepository'],
 })
