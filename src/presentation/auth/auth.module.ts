@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from '@application/auth/auth.service';
+import { InstitutionAuthService } from '@application/auth/institution-auth.service';
 import { RegisterCounselorUseCase } from '@application/auth/use-cases/register-counselor/register-counselor.use-case';
 import { RegisterGuardianUseCase } from '@application/auth/use-cases/register-guardian/register-guardian.use-case';
 import { RegisterInstitutionUseCase } from '@application/auth/use-cases/register-institution/register-institution.use-case';
@@ -49,8 +50,9 @@ import { AuthController } from './auth.controller';
   ],
   controllers: [AuthController],
   providers: [
-    // Application Service
+    // Application Services
     AuthService,
+    InstitutionAuthService,
 
     // Use Cases
     RegisterUserUseCase,
@@ -85,6 +87,6 @@ import { AuthController } from './auth.controller';
       useClass: CommunityChildCenterRepositoryImpl,
     },
   ],
-  exports: [AuthService, JwtStrategy],
+  exports: [AuthService, InstitutionAuthService, JwtStrategy],
 })
 export class AuthModule {}
