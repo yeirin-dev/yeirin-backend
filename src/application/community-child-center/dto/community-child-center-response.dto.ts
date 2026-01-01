@@ -37,28 +37,31 @@ export class CommunityChildCenterResponseDto {
   postalCode: string | null;
 
   @ApiProperty({
-    description: '대표자명',
+    description: '센터장명',
     example: '김영희',
   })
-  representativeName: string;
+  directorName: string;
 
   @ApiProperty({
     description: '연락처',
     example: '02-9876-5432',
+    nullable: true,
   })
-  phoneNumber: string;
+  phoneNumber: string | null;
 
   @ApiProperty({
     description: '정원',
     example: 30,
+    nullable: true,
   })
-  capacity: number;
+  capacity: number | null;
 
   @ApiProperty({
     description: '설립일',
     example: '2018-03-15',
+    nullable: true,
   })
-  establishedDate: string;
+  establishedDate: string | null;
 
   @ApiProperty({
     description: '기관 소개',

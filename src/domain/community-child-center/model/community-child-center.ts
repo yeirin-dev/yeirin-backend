@@ -11,14 +11,14 @@ export interface CreateCommunityChildCenterProps {
   name: InstitutionName;
   /** 주소 */
   address: Address;
-  /** 대표자명 */
-  representativeName: string;
-  /** 연락처 */
-  phoneNumber: string;
-  /** 정원 (수용 가능 아동 수) */
-  capacity: number;
-  /** 설립일 */
-  establishedDate: Date;
+  /** 센터장명 (대표자) */
+  directorName: string;
+  /** 기관 대표번호 (optional) */
+  phoneNumber?: string;
+  /** 정원 (optional) */
+  capacity?: number;
+  /** 설립일 (optional) */
+  establishedDate?: Date;
   /** 기관 소개 */
   introduction?: string;
   /** 운영 시간 (예: "평일 14:00-19:00") */
@@ -45,10 +45,10 @@ export class CommunityChildCenter {
     private readonly _id: string,
     private _name: InstitutionName,
     private _address: Address,
-    private _representativeName: string,
-    private _phoneNumber: string,
-    private _capacity: number,
-    private _establishedDate: Date,
+    private _directorName: string,
+    private _phoneNumber: string | null,
+    private _capacity: number | null,
+    private _establishedDate: Date | null,
     private _introduction: string | null,
     private _operatingHours: string | null,
     private _isActive: boolean,
@@ -60,40 +60,36 @@ export class CommunityChildCenter {
    * 지역아동센터 생성 (정적 팩토리 메서드)
    */
   static create(props: CreateCommunityChildCenterProps): Result<CommunityChildCenter, DomainError> {
-    // 대표자명 검증
-    if (!props.representativeName?.trim()) {
-      return Result.fail(new DomainError('대표자명은 필수입니다'));
+    // 센터장명 검증
+    if (!props.directorName?.trim()) {
+      return Result.fail(new DomainError('센터장명은 필수입니다'));
     }
 
-    if (props.representativeName.length > 50) {
-      return Result.fail(new DomainError('대표자명은 최대 50자까지 가능합니다'));
+    if (props.directorName.length > 50) {
+      return Result.fail(new DomainError('센터장명은 최대 50자까지 가능합니다'));
     }
 
-    // 연락처 검증
-    if (!props.phoneNumber?.trim()) {
-      return Result.fail(new DomainError('연락처는 필수입니다'));
+    // 연락처 검증 (optional)
+    if (props.phoneNumber) {
+      const phoneRegex = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
+      if (!phoneRegex.test(props.phoneNumber.replace(/-/g, ''))) {
+        return Result.fail(new DomainError('올바른 연락처 형식이 아닙니다'));
+      }
     }
 
-    const phoneRegex = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
-    if (!phoneRegex.test(props.phoneNumber.replace(/-/g, ''))) {
-      return Result.fail(new DomainError('올바른 연락처 형식이 아닙니다'));
+    // 정원 검증 (optional)
+    if (props.capacity !== undefined) {
+      if (props.capacity < 1) {
+        return Result.fail(new DomainError('정원은 1명 이상이어야 합니다'));
+      }
+
+      if (props.capacity > 300) {
+        return Result.fail(new DomainError('정원은 최대 300명까지 가능합니다'));
+      }
     }
 
-    // 정원 검증
-    if (props.capacity < 1) {
-      return Result.fail(new DomainError('정원은 1명 이상이어야 합니다'));
-    }
-
-    if (props.capacity > 300) {
-      return Result.fail(new DomainError('정원은 최대 300명까지 가능합니다'));
-    }
-
-    // 설립일 검증
-    if (!props.establishedDate) {
-      return Result.fail(new DomainError('설립일은 필수입니다'));
-    }
-
-    if (props.establishedDate > new Date()) {
+    // 설립일 검증 (optional)
+    if (props.establishedDate && props.establishedDate > new Date()) {
       return Result.fail(new DomainError('설립일은 미래 날짜일 수 없습니다'));
     }
 
@@ -113,10 +109,10 @@ export class CommunityChildCenter {
         uuidv4(),
         props.name,
         props.address,
-        props.representativeName.trim(),
-        props.phoneNumber.trim(),
-        props.capacity,
-        props.establishedDate,
+        props.directorName.trim(),
+        props.phoneNumber?.trim() || null,
+        props.capacity ?? null,
+        props.establishedDate ?? null,
         props.introduction?.trim() || null,
         props.operatingHours?.trim() || null,
         true, // isActive
@@ -134,10 +130,10 @@ export class CommunityChildCenter {
       props.id,
       props.name,
       props.address,
-      props.representativeName,
-      props.phoneNumber,
-      props.capacity,
-      props.establishedDate,
+      props.directorName,
+      props.phoneNumber ?? null,
+      props.capacity ?? null,
+      props.establishedDate ?? null,
       props.introduction || null,
       props.operatingHours || null,
       props.isActive,
@@ -159,19 +155,19 @@ export class CommunityChildCenter {
     return this._address;
   }
 
-  get representativeName(): string {
-    return this._representativeName;
+  get directorName(): string {
+    return this._directorName;
   }
 
-  get phoneNumber(): string {
+  get phoneNumber(): string | null {
     return this._phoneNumber;
   }
 
-  get capacity(): number {
+  get capacity(): number | null {
     return this._capacity;
   }
 
-  get establishedDate(): Date {
+  get establishedDate(): Date | null {
     return this._establishedDate;
   }
 
@@ -214,24 +210,26 @@ export class CommunityChildCenter {
   }
 
   /**
-   * 대표자 정보 변경
+   * 센터장 정보 변경
    */
-  changeRepresentative(name: string, phoneNumber: string): Result<void, DomainError> {
+  changeDirector(name: string, phoneNumber?: string): Result<void, DomainError> {
     if (!name?.trim()) {
-      return Result.fail(new DomainError('대표자명은 필수입니다'));
+      return Result.fail(new DomainError('센터장명은 필수입니다'));
     }
 
     if (name.length > 50) {
-      return Result.fail(new DomainError('대표자명은 최대 50자까지 가능합니다'));
+      return Result.fail(new DomainError('센터장명은 최대 50자까지 가능합니다'));
     }
 
-    const phoneRegex = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
-    if (!phoneRegex.test(phoneNumber.replace(/-/g, ''))) {
-      return Result.fail(new DomainError('올바른 연락처 형식이 아닙니다'));
+    if (phoneNumber) {
+      const phoneRegex = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
+      if (!phoneRegex.test(phoneNumber.replace(/-/g, ''))) {
+        return Result.fail(new DomainError('올바른 연락처 형식이 아닙니다'));
+      }
     }
 
-    this._representativeName = name.trim();
-    this._phoneNumber = phoneNumber.trim();
+    this._directorName = name.trim();
+    this._phoneNumber = phoneNumber?.trim() || null;
     this._updatedAt = new Date();
     return Result.ok(undefined);
   }

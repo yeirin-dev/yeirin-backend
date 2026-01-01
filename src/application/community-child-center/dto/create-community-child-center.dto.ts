@@ -60,7 +60,7 @@ export class CreateCommunityChildCenterDto {
   postalCode?: string;
 
   @ApiProperty({
-    description: '대표자명',
+    description: '센터장명',
     example: '김영희',
     minLength: 2,
     maxLength: 50,
@@ -69,36 +69,40 @@ export class CreateCommunityChildCenterDto {
   @IsNotEmpty()
   @MinLength(2)
   @MaxLength(50)
-  representativeName: string;
+  directorName: string;
 
   @ApiProperty({
-    description: '연락처',
+    description: '연락처 (선택)',
     example: '02-9876-5432',
     maxLength: 20,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(20)
-  phoneNumber: string;
+  phoneNumber?: string;
 
   @ApiProperty({
-    description: '정원 (수용 가능 아동 수)',
+    description: '정원 (수용 가능 아동 수, 선택)',
     example: 30,
     minimum: 1,
     maximum: 300,
+    required: false,
   })
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(300)
-  capacity: number;
+  capacity?: number;
 
   @ApiProperty({
-    description: '설립일 (YYYY-MM-DD)',
+    description: '설립일 (YYYY-MM-DD, 선택)',
     example: '2018-03-15',
+    required: false,
   })
+  @IsOptional()
   @IsDateString()
-  @IsNotEmpty()
-  establishedDate: string;
+  establishedDate?: string;
 
   @ApiProperty({
     description: '기관 소개 (선택)',

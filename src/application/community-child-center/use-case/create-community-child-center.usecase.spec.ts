@@ -69,7 +69,7 @@ describe('CreateCommunityChildCenterUseCase', () => {
       id,
       name: nameResult.getValue(),
       address: addressResult.getValue(),
-      representativeName: '김영희',
+      directorName: '김영희',
       phoneNumber: '02-9876-5432',
       capacity: 30,
       establishedDate: new Date('2018-03-15'),
@@ -89,7 +89,7 @@ describe('CreateCommunityChildCenterUseCase', () => {
         address: '서울시 마포구 상암로 123',
         addressDetail: '2층',
         postalCode: '03925',
-        representativeName: '김영희',
+        directorName: '김영희',
         phoneNumber: '02-9876-5432',
         capacity: 30,
         establishedDate: '2018-03-15',
@@ -109,7 +109,7 @@ describe('CreateCommunityChildCenterUseCase', () => {
       // Then
       expect(result.name).toBe('행복지역아동센터');
       expect(result.address).toBe('서울시 마포구 상암로 123');
-      expect(result.representativeName).toBe('김영희');
+      expect(result.directorName).toBe('김영희');
       expect(result.capacity).toBe(30);
       expect(result.operatingHours).toBe('평일 14:00-19:00');
       expect(result.isActive).toBe(true);
@@ -123,7 +123,7 @@ describe('CreateCommunityChildCenterUseCase', () => {
       const dto: CreateCommunityChildCenterDto = {
         name: '기존 센터',
         address: '서울시 강남구',
-        representativeName: '이영희',
+        directorName: '이영희',
         phoneNumber: '02-1111-2222',
         capacity: 20,
         establishedDate: '2020-01-01',
@@ -142,7 +142,7 @@ describe('CreateCommunityChildCenterUseCase', () => {
       const dto: CreateCommunityChildCenterDto = {
         name: '희망지역아동센터',
         address: '서울시 서초구 서초대로 456',
-        representativeName: '박영희',
+        directorName: '박영희',
         phoneNumber: '02-9999-8888',
         capacity: 25,
         establishedDate: '2019-06-01',
@@ -167,7 +167,7 @@ describe('CreateCommunityChildCenterUseCase', () => {
       const dto: CreateCommunityChildCenterDto = {
         name: '사랑지역아동센터',
         address: '서울시 종로구 종로 789',
-        representativeName: '최영희',
+        directorName: '최영희',
         phoneNumber: '02-5555-6666',
         capacity: 40,
         establishedDate: '2020-09-01',
@@ -198,7 +198,7 @@ describe('CreateCommunityChildCenterUseCase', () => {
         address: '서울시 동작구 상도로 123',
         addressDetail: '3층',
         postalCode: '06978',
-        representativeName: '정영희',
+        directorName: '정영희',
         phoneNumber: '02-7777-8888',
         capacity: 35,
         establishedDate: '2017-03-01',
@@ -221,7 +221,7 @@ describe('CreateCommunityChildCenterUseCase', () => {
       expect(result).toHaveProperty('address');
       expect(result).toHaveProperty('addressDetail');
       expect(result).toHaveProperty('postalCode');
-      expect(result).toHaveProperty('representativeName');
+      expect(result).toHaveProperty('directorName');
       expect(result).toHaveProperty('phoneNumber');
       expect(result).toHaveProperty('capacity');
       expect(result).toHaveProperty('establishedDate');

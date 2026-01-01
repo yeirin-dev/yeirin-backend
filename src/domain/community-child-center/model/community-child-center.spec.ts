@@ -10,7 +10,7 @@ describe('CommunityChildCenter Aggregate Root', () => {
       addressDetail: '2층',
       postalCode: '03925',
     }).getValue(),
-    representativeName: '김영희',
+    directorName: '김영희',
     phoneNumber: '02-9876-5432',
     capacity: 30,
     establishedDate: new Date('2018-03-15'),
@@ -31,7 +31,7 @@ describe('CommunityChildCenter Aggregate Root', () => {
       const center = result.getValue();
       expect(center.id).toBeDefined();
       expect(center.name.value).toBe('행복지역아동센터');
-      expect(center.representativeName).toBe('김영희');
+      expect(center.directorName).toBe('김영희');
       expect(center.phoneNumber).toBe('02-9876-5432');
       expect(center.capacity).toBe(30);
       expect(center.operatingHours).toBe('평일 14:00-19:00');
@@ -56,7 +56,7 @@ describe('CommunityChildCenter Aggregate Root', () => {
     it('대표자명이 없으면 실패한다', () => {
       // Given
       const props = createValidProps();
-      props.representativeName = '';
+      props.directorName = '';
 
       // When
       const result = CommunityChildCenter.create(props);
@@ -69,7 +69,7 @@ describe('CommunityChildCenter Aggregate Root', () => {
     it('대표자명이 50자 초과면 실패한다', () => {
       // Given
       const props = createValidProps();
-      props.representativeName = '가'.repeat(51);
+      props.directorName = '가'.repeat(51);
 
       // When
       const result = CommunityChildCenter.create(props);
@@ -178,7 +178,7 @@ describe('CommunityChildCenter Aggregate Root', () => {
         id: 'test-id',
         name: InstitutionName.restore('행복지역아동센터'),
         address: Address.restore('서울시 마포구', '2층', '03925'),
-        representativeName: '김영희',
+        directorName: '김영희',
         phoneNumber: '02-9876-5432',
         capacity: 30,
         establishedDate: new Date('2018-03-15'),
@@ -235,20 +235,20 @@ describe('CommunityChildCenter Aggregate Root', () => {
       });
     });
 
-    describe('changeRepresentative', () => {
+    describe('changeDirector', () => {
       it('대표자 정보를 변경한다', () => {
         // When
-        const result = center.changeRepresentative('박철수', '031-1234-5678');
+        const result = center.changeDirector('박철수', '031-1234-5678');
 
         // Then
         expect(result.isSuccess).toBe(true);
-        expect(center.representativeName).toBe('박철수');
+        expect(center.directorName).toBe('박철수');
         expect(center.phoneNumber).toBe('031-1234-5678');
       });
 
       it('빈 이름이면 실패한다', () => {
         // When
-        const result = center.changeRepresentative('', '031-1234-5678');
+        const result = center.changeDirector('', '031-1234-5678');
 
         // Then
         expect(result.isFailure).toBe(true);
@@ -256,7 +256,7 @@ describe('CommunityChildCenter Aggregate Root', () => {
 
       it('잘못된 연락처면 실패한다', () => {
         // When
-        const result = center.changeRepresentative('박철수', 'invalid');
+        const result = center.changeDirector('박철수', 'invalid');
 
         // Then
         expect(result.isFailure).toBe(true);

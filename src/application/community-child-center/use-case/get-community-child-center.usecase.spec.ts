@@ -68,7 +68,7 @@ describe('GetCommunityChildCenterUseCase', () => {
       id,
       name: nameResult.getValue(),
       address: addressResult.getValue(),
-      representativeName: '김영희',
+      directorName: '김영희',
       phoneNumber: '02-9876-5432',
       capacity: 30,
       establishedDate: new Date('2018-03-15'),
@@ -143,7 +143,7 @@ describe('GetCommunityChildCenterUseCase', () => {
       expect(result).toHaveProperty('address');
       expect(result).toHaveProperty('addressDetail');
       expect(result).toHaveProperty('postalCode');
-      expect(result).toHaveProperty('representativeName');
+      expect(result).toHaveProperty('directorName');
       expect(result).toHaveProperty('phoneNumber');
       expect(result).toHaveProperty('capacity');
       expect(result).toHaveProperty('establishedDate');

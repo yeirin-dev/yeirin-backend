@@ -61,7 +61,7 @@ export class UpdateCommunityChildCenterDto {
   postalCode?: string;
 
   @ApiProperty({
-    description: '대표자명',
+    description: '센터장명',
     example: '김영희',
     minLength: 2,
     maxLength: 50,
@@ -71,7 +71,7 @@ export class UpdateCommunityChildCenterDto {
   @IsString()
   @MinLength(2)
   @MaxLength(50)
-  representativeName?: string;
+  directorName?: string;
 
   @ApiProperty({
     description: '연락처',

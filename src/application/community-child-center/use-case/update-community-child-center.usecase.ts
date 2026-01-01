@@ -60,11 +60,11 @@ export class UpdateCommunityChildCenterUseCase {
       center.changeAddress(addressResult.getValue());
     }
 
-    // 대표자 정보 변경
-    if (dto.representativeName !== undefined || dto.phoneNumber !== undefined) {
-      const result = center.changeRepresentative(
-        dto.representativeName ?? center.representativeName,
-        dto.phoneNumber ?? center.phoneNumber,
+    // 센터장 정보 변경
+    if (dto.directorName !== undefined || dto.phoneNumber !== undefined) {
+      const result = center.changeDirector(
+        dto.directorName ?? center.directorName,
+        dto.phoneNumber ?? center.phoneNumber ?? undefined,
       );
       if (result.isFailure) {
         throw new BadRequestException(result.getError().message);
@@ -116,10 +116,10 @@ export class UpdateCommunityChildCenterUseCase {
       address: savedCenter.address.address,
       addressDetail: savedCenter.address.addressDetail,
       postalCode: savedCenter.address.postalCode,
-      representativeName: savedCenter.representativeName,
+      directorName: savedCenter.directorName,
       phoneNumber: savedCenter.phoneNumber,
       capacity: savedCenter.capacity,
-      establishedDate: savedCenter.establishedDate.toISOString().split('T')[0],
+      establishedDate: savedCenter.establishedDate?.toISOString().split('T')[0] ?? null,
       introduction: savedCenter.introduction,
       operatingHours: savedCenter.operatingHours,
       isActive: savedCenter.isActive,
