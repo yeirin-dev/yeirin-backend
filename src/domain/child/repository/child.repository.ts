@@ -3,6 +3,8 @@ import { Child } from '../model/child';
 /**
  * Child Repository 인터페이스
  * Domain 계층에서 정의 (의존성 역전)
+ *
+ * NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
  */
 export interface ChildRepository {
   /**
@@ -14,12 +16,6 @@ export interface ChildRepository {
    * ID로 아동 조회
    */
   findById(id: string): Promise<Child | null>;
-
-  /**
-   * 부모 보호자 ID로 아동 목록 조회
-   * - COMMUNITY_CENTER, REGULAR 유형 아동 조회
-   */
-  findByGuardianId(guardianId: string): Promise<Child[]>;
 
   /**
    * 양육시설 ID로 아동 목록 조회
@@ -42,11 +38,6 @@ export interface ChildRepository {
    * 아동 존재 여부 확인
    */
   exists(id: string): Promise<boolean>;
-
-  /**
-   * 부모 보호자별 아동 수 조회
-   */
-  countByGuardianId(guardianId: string): Promise<number>;
 
   /**
    * 양육시설별 아동 수 조회

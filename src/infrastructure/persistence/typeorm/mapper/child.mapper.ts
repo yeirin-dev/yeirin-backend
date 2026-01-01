@@ -50,7 +50,6 @@ export class ChildMapper {
         gender: genderResult.getValue(),
         careFacilityId: entity.careFacilityId,
         communityChildCenterId: entity.communityChildCenterId,
-        guardianId: entity.guardianId,
         medicalInfo: entity.medicalInfo ?? undefined,
         specialNeeds: entity.specialNeeds ?? undefined,
         psychologicalStatus: psychologicalStatusResult.getValue(),
@@ -72,7 +71,6 @@ export class ChildMapper {
     entity.gender = child.gender.value;
     entity.careFacilityId = child.careFacilityId;
     entity.communityChildCenterId = child.communityChildCenterId;
-    entity.guardianId = child.guardianId;
     entity.medicalInfo = child.medicalInfo;
     entity.specialNeeds = child.specialNeeds;
     entity.psychologicalStatus = ChildMapper.mapPsychologicalStatusDomainToEnum(

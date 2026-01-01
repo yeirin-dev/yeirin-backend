@@ -31,6 +31,8 @@ export class GetGuardianDashboardUseCase {
     const guardianType = guardianProfile?.guardianType;
 
     // 2. 보호자 유형에 따라 다른 방식으로 아동 수 조회
+    // NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
+    //       일반 보호자(부모) 유형은 더 이상 지원되지 않습니다.
     let childrenCount = 0;
     if (guardianProfile) {
       // 양육시설 선생님: careFacilityId로 조회
@@ -48,10 +50,7 @@ export class GetGuardianDashboardUseCase {
           guardianProfile.communityChildCenterId,
         );
       }
-      // 일반 보호자 (부모): guardianId로 조회
-      else if (guardianProfileId) {
-        childrenCount = await this.childRepository.countByGuardianId(guardianProfileId);
-      }
+      // 일반 보호자 (부모) 유형은 더 이상 지원되지 않음 - childrenCount는 0으로 유지
     }
 
     // 3. 상담의뢰 상태별 통계 조회 (userId 사용 - counsel_requests는 guardianId가 userId와 동일)

@@ -3,6 +3,8 @@ import { Child } from '@domain/child/model/child';
 
 /**
  * 아동 응답 DTO
+ *
+ * NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
  */
 export class ChildResponseDto {
   @ApiProperty({
@@ -13,8 +15,8 @@ export class ChildResponseDto {
 
   @ApiProperty({
     description: '아동 유형',
-    example: 'REGULAR',
-    enum: ['CARE_FACILITY', 'COMMUNITY_CENTER', 'REGULAR'],
+    example: 'CARE_FACILITY',
+    enum: ['CARE_FACILITY', 'COMMUNITY_CENTER'],
   })
   childType: string;
 
@@ -57,15 +59,6 @@ export class ChildResponseDto {
     nullable: true,
   })
   communityChildCenterId: string | null;
-
-  // ========== 부모(보호자) 연결 ==========
-
-  @ApiPropertyOptional({
-    description: '부모 보호자 ID (COMMUNITY_CENTER, REGULAR 유형만 해당)',
-    example: 'guardian-uuid-789',
-    nullable: true,
-  })
-  guardianId: string | null;
 
   @ApiProperty({
     description: '고아 여부 (CARE_FACILITY 유형이면 true)',
@@ -114,7 +107,6 @@ export class ChildResponseDto {
     dto.age = child.getAge();
     dto.careFacilityId = child.careFacilityId;
     dto.communityChildCenterId = child.communityChildCenterId;
-    dto.guardianId = child.guardianId;
     dto.isOrphan = child.isOrphan;
     dto.medicalInfo = child.medicalInfo;
     dto.specialNeeds = child.specialNeeds;

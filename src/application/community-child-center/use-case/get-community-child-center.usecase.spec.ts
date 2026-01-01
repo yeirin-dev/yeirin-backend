@@ -21,6 +21,8 @@ describe('GetCommunityChildCenterUseCase', () => {
       delete: jest.fn(),
       exists: jest.fn(),
       existsByName: jest.fn(),
+      findActiveByDistrict: jest.fn(),
+      getDistinctDistricts: jest.fn(),
     };
 
     mockGuardianProfileRepository = {

@@ -23,15 +23,14 @@ describe('UpdatePsychologicalStatusUseCase', () => {
   let mockLogRepository: jest.Mocked<Repository<PsychologicalStatusLogEntity>>;
 
   beforeEach(async () => {
+    // NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
     mockChildRepository = {
       save: jest.fn(),
       findById: jest.fn(),
-      findByGuardianId: jest.fn(),
       findByCareFacilityId: jest.fn(),
       findByCommunityChildCenterId: jest.fn(),
       delete: jest.fn(),
       exists: jest.fn(),
-      countByGuardianId: jest.fn(),
       countByCareFacilityId: jest.fn(),
       countByCommunityChildCenterId: jest.fn(),
     };
@@ -64,14 +63,14 @@ describe('UpdatePsychologicalStatusUseCase', () => {
     id: string,
     psychologicalStatusValue: PsychologicalStatusValue = PsychologicalStatusValue.NORMAL,
   ): Child => {
+    // NOTE: 모든 아동은 시설에 직접 연결됩니다. CARE_FACILITY 유형 사용.
     return Child.restore(
       {
-        childType: ChildType.create(ChildTypeValue.REGULAR).getValue(),
+        childType: ChildType.create(ChildTypeValue.CARE_FACILITY).getValue(),
         name: ChildName.create('홍길동').getValue(),
         birthDate: BirthDate.create(new Date('2015-05-10')).getValue(),
         gender: Gender.create(GenderType.MALE).getValue(),
-        guardianId: 'guardian-123',
-        careFacilityId: null,
+        careFacilityId: 'facility-123',
         communityChildCenterId: null,
         psychologicalStatus: PsychologicalStatus.create(psychologicalStatusValue).getValue(),
       },

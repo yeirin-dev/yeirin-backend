@@ -35,15 +35,6 @@ export class ChildRepositoryImpl implements ChildRepository {
     return ChildMapper.toDomain(entity);
   }
 
-  async findByGuardianId(guardianId: string): Promise<Child[]> {
-    const entities = await this.childRepository.find({
-      where: { guardianId },
-      order: { createdAt: 'DESC' },
-    });
-
-    return entities.map((entity) => ChildMapper.toDomain(entity));
-  }
-
   async findByCareFacilityId(careFacilityId: string): Promise<Child[]> {
     const entities = await this.childRepository.find({
       where: { careFacilityId },
@@ -72,12 +63,6 @@ export class ChildRepositoryImpl implements ChildRepository {
     });
 
     return count > 0;
-  }
-
-  async countByGuardianId(guardianId: string): Promise<number> {
-    return this.childRepository.count({
-      where: { guardianId },
-    });
   }
 
   async countByCareFacilityId(careFacilityId: string): Promise<number> {
