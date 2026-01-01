@@ -24,9 +24,13 @@ export class CommunityChildCenterEntity {
   @Column({ type: 'varchar', length: 100 })
   name: string;
 
-  /** 구/군 (예: "강남구", "서초구") - 로그인 시 필터링용 */
+  /** 구/군 (예: "영도구", "북구") - 로그인 시 필터링용 */
   @Column({ type: 'varchar', length: 50 })
   district: string;
+
+  /** 권역 (예: "원도심권", "서부산권") */
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  region: string | null;
 
   /** 시설 비밀번호 (bcrypt 해시) */
   @Column({ type: 'varchar', length: 255 })
@@ -48,21 +52,37 @@ export class CommunityChildCenterEntity {
   @Column({ type: 'varchar', length: 10, nullable: true })
   postalCode: string | null;
 
-  /** 대표자명 */
+  /** 센터장명 (대표자) */
   @Column({ type: 'varchar', length: 50 })
-  representativeName: string;
+  directorName: string;
 
-  /** 연락처 */
-  @Column({ type: 'varchar', length: 20 })
-  phoneNumber: string;
+  /** 담당자명 */
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  managerName: string | null;
+
+  /** 담당자 연락처 */
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  managerPhone: string | null;
+
+  /** 기관 대표번호 */
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  phoneNumber: string | null;
+
+  /** 기관 이메일 */
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  email: string | null;
+
+  /** 바우처 예상 아동 수 */
+  @Column({ type: 'int', nullable: true })
+  expectedChildCount: number | null;
 
   /** 정원 (수용 가능 아동 수) */
-  @Column({ type: 'int' })
-  capacity: number;
+  @Column({ type: 'int', nullable: true })
+  capacity: number | null;
 
   /** 설립일 */
-  @Column({ type: 'date' })
-  establishedDate: Date;
+  @Column({ type: 'date', nullable: true })
+  establishedDate: Date | null;
 
   /** 기관 소개 */
   @Column({ type: 'text', nullable: true })
