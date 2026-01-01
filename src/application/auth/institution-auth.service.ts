@@ -63,12 +63,18 @@ export class InstitutionAuthService {
     district: string,
     facilityType?: FacilityType,
   ): Promise<FacilityInfoDto[]> {
+    // district가 없거나 빈 문자열이면 빈 배열 반환
+    if (!district || district.trim() === '') {
+      return [];
+    }
+
+    const trimmedDistrict = district.trim();
     const facilities: FacilityInfoDto[] = [];
 
     // 양육시설 조회
     if (!facilityType || facilityType === FacilityType.CARE_FACILITY) {
       const careFacilities = await this.careFacilityRepository.find({
-        where: { district, isActive: true },
+        where: { district: trimmedDistrict, isActive: true },
         order: { name: 'ASC' },
       });
 
@@ -86,7 +92,7 @@ export class InstitutionAuthService {
     // 지역아동센터 조회
     if (!facilityType || facilityType === FacilityType.COMMUNITY_CENTER) {
       const communityChildCenters = await this.communityChildCenterRepository.find({
-        where: { district, isActive: true },
+        where: { district: trimmedDistrict, isActive: true },
         order: { name: 'ASC' },
       });
 
