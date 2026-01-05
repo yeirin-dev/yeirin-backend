@@ -1,0 +1,121 @@
+name: Deploy Yeirin Backend
+
+on:
+  push:
+    branches:
+      - deploy/dev
+  workflow_dispatch:
+
+env:
+  EC2_HOST: 3.38.162.252
+  EC2_USER: ec2-user
+  APP_DIR: /home/ec2-user/app/yeirin
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Add EC2 to known hosts
+        run: ssh-keyscan -H ${{ env.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy via Git Pull, build and restart with PM2
+        run: |
+          ssh ${{ env.EC2_USER }}@${{ env.EC2_HOST }} "bash -s '${{ secrets.GH_DEPLOY_TOKEN }}'" << 'ENDSSH'
+            set -e
+            GH_TOKEN="$1"
+
+            echo "=== Starting Yeirin Backend Deployment ==="
+
+            # Create app directory if not exists
+            mkdir -p /home/ec2-user/app/yeirin
+            cd /home/ec2-user/app/yeirin
+
+            # Clone or pull latest code using GitHub token
+            if [ -d ".git" ]; then
+              echo "Pulling latest changes..."
+              git remote set-url origin "https://${GH_TOKEN}@github.com/yeirin-dev/yeirin-backend.git"
+              git fetch origin deploy/dev
+              git reset --hard origin/deploy/dev
+            else
+              echo "Cloning repository..."
+              git clone -b deploy/dev "https://${GH_TOKEN}@github.com/yeirin-dev/yeirin-backend.git" .
+            fi
+
+            echo "Current commit:"
+            git log --oneline -1
+
+            # Install PM2 globally if not exists
+            if ! command -v pm2 &> /dev/null; then
+              echo "Installing PM2..."
+              sudo npm install -g pm2
+            fi
+
+            # Install dependencies
+            echo "Installing dependencies..."
+            yarn install --frozen-lockfile
+
+            # Build
+            echo "Building application..."
+            yarn build
+
+            # Load environment from SSM and create .env
+            echo "Loading environment from SSM Parameter Store..."
+            export AWS_DEFAULT_REGION=ap-northeast-2
+
+            # Generate .env file using separate commands
+            echo "NODE_ENV=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/node-env' --query 'Parameter.Value' --output text --region ap-northeast-2)" > .env
+            echo "PORT=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/port' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "DB_HOST=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/db-host' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "DB_PORT=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/db-port' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "DB_USERNAME=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/db-username' --with-decryption --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "DB_PASSWORD=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/db-password' --with-decryption --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "DB_DATABASE=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/db-database' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "JWT_SECRET=$(aws ssm get-parameter --name '/yeirin/dev/common/jwt-secret' --with-decryption --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "JWT_ACCESS_EXPIRATION=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/jwt-access-expiration' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "JWT_REFRESH_EXPIRATION=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/jwt-refresh-expiration' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "AI_RECOMMENDATION_SERVICE_URL=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/ai-recommendation-service-url' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "AI_SERVICE_TIMEOUT=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/ai-service-timeout' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "INTERNAL_API_SECRET=$(aws ssm get-parameter --name '/yeirin/dev/common/internal-api-secret' --with-decryption --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "SOUL_E_WEBHOOK_SECRET=$(aws ssm get-parameter --name '/yeirin/dev/common/webhook-secret' --with-decryption --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "SOUL_E_SERVICE_URL=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/soul-e-service-url' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "AWS_S3_BUCKET_NAME=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/s3-bucket-name' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "AWS_REGION=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/aws-region' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "LOG_LEVEL=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/log-level' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+
+            echo "Environment file created."
+            cat .env | head -5
+
+            # Stop existing systemd service if running
+            sudo systemctl stop yeirin 2>/dev/null || true
+            sudo systemctl disable yeirin 2>/dev/null || true
+
+            # Restart with PM2
+            echo "Restarting with PM2..."
+            pm2 delete yeirin 2>/dev/null || true
+            pm2 start ecosystem.config.js
+            pm2 save
+
+            # Setup PM2 startup
+            pm2 startup systemd -u ec2-user --hp /home/ec2-user 2>/dev/null || true
+
+            # Wait and check status
+            sleep 5
+            pm2 status
+            pm2 logs yeirin --lines 10 --nostream || true
+
+            echo "=== Deployment completed! ==="
+          ENDSSH
+
+      - name: Health Check
+        run: |
+          echo "Waiting for service to start..."
+          sleep 10
+          echo "Running health check..."
+          curl -f http://${{ env.EC2_HOST }}:3000/health || exit 1
+          echo "Health check passed!"
