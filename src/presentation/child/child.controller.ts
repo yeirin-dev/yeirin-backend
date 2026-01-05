@@ -16,7 +16,10 @@ import { ChildRepository } from '@domain/child/repository/child.repository';
 import { ChildResponseDto } from '@application/child/dto/child-response.dto';
 import { RegisterChildDto } from '@application/child/dto/register-child.dto';
 import { RegisterChildUseCase } from '@application/child/use-cases/register-child/register-child.use-case';
-import { CurrentUser, CurrentUserData } from '@infrastructure/auth/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  CurrentUserData,
+} from '@infrastructure/auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 import { ChildType } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';
 

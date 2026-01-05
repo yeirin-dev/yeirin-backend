@@ -8,12 +8,16 @@ import {
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
+import { SoulEClient } from '@infrastructure/external/soul-e.client';
+import { YeirinAIClient } from '@infrastructure/external/yeirin-ai.client';
 import { CreateCounselRequestDto } from '../dto/create-counsel-request.dto';
 import { CreateCounselRequestUseCase } from './create-counsel-request.usecase';
 
 describe('CreateCounselRequestUseCase', () => {
   let useCase: CreateCounselRequestUseCase;
   let mockRepository: jest.Mocked<CounselRequestRepository>;
+  let mockYeirinAIClient: jest.Mocked<YeirinAIClient>;
+  let mockSoulEClient: jest.Mocked<SoulEClient>;
 
   beforeEach(async () => {
     mockRepository = {
@@ -30,12 +34,28 @@ describe('CreateCounselRequestUseCase', () => {
       findRecentByGuardianId: jest.fn(),
     };
 
+    mockYeirinAIClient = {
+      requestIntegratedReport: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<YeirinAIClient>;
+
+    mockSoulEClient = {
+      getLatestAssessmentResult: jest.fn().mockResolvedValue(null),
+    } as unknown as jest.Mocked<SoulEClient>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateCounselRequestUseCase,
         {
           provide: 'CounselRequestRepository',
           useValue: mockRepository,
+        },
+        {
+          provide: YeirinAIClient,
+          useValue: mockYeirinAIClient,
+        },
+        {
+          provide: SoulEClient,
+          useValue: mockSoulEClient,
         },
       ],
     }).compile();
