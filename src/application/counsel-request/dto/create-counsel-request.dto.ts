@@ -17,6 +17,8 @@ import {
   ConsentStatus,
   Gender,
   PriorityReason,
+  ProtectedChildReason,
+  ProtectedChildType,
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import {
   AssessmentTypeValue,
@@ -109,6 +111,31 @@ export class ChildInfoDto {
   birthDate?: BirthDateDto;
 }
 
+/**
+ * 보호대상 아동 정보 DTO (새 문서 포맷)
+ */
+export class ProtectedChildInfoDto {
+  @ApiProperty({
+    description: '보호대상 아동 유형',
+    enum: ProtectedChildType,
+    example: ProtectedChildType.CHILD_FACILITY,
+    required: false,
+  })
+  @IsEnum(ProtectedChildType)
+  @IsOptional()
+  type?: ProtectedChildType;
+
+  @ApiProperty({
+    description: '보호 사유',
+    enum: ProtectedChildReason,
+    example: ProtectedChildReason.GUARDIAN_ABSENCE,
+    required: false,
+  })
+  @IsEnum(ProtectedChildReason)
+  @IsOptional()
+  reason?: ProtectedChildReason;
+}
+
 export class BasicInfoDto {
   @ApiProperty({ description: '아동 정보' })
   @ValidateNested()
@@ -127,6 +154,16 @@ export class BasicInfoDto {
   @IsEnum(PriorityReason)
   @IsOptional()
   priorityReason?: PriorityReason;
+
+  @ApiProperty({
+    description: '보호대상 아동 정보 (새 문서 포맷)',
+    type: ProtectedChildInfoDto,
+    required: false,
+  })
+  @ValidateNested()
+  @Type(() => ProtectedChildInfoDto)
+  @IsOptional()
+  protectedChildInfo?: ProtectedChildInfoDto;
 }
 
 export class PsychologicalInfoDto {
@@ -225,6 +262,196 @@ export class KprcAssessmentSummaryDto extends BaseAssessmentSummaryDto {
   @IsString()
   @IsOptional()
   assessmentType?: 'KPRC_CO_SG_E';
+}
+
+/**
+ * CRTES-R 검사소견 DTO (아동 외상 반응 척도)
+ */
+export class CrtesRAssessmentSummaryDto extends BaseAssessmentSummaryDto {
+  @ApiProperty({
+    description: '검사 유형',
+    example: 'CRTES_R',
+  })
+  @IsString()
+  assessmentType: 'CRTES_R';
+
+  @ApiProperty({
+    description: '총점 (0-115)',
+    example: 45,
+    required: false,
+  })
+  @IsOptional()
+  totalScore?: number;
+
+  @ApiProperty({
+    description: '위험 수준',
+    enum: ['normal', 'caution', 'high_risk'],
+    example: 'caution',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  riskLevel?: 'normal' | 'caution' | 'high_risk';
+
+  @ApiProperty({
+    description: '위험 수준 설명 (새 문서 포맷)',
+    example: '일부 외상 반응이 관찰되어 주의가 필요합니다.',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  riskLevelDescription?: string;
+}
+
+/**
+ * SDQ-A 검사소견 DTO (강점·난점 설문지)
+ * 새 문서 포맷에서는 강점/난점을 분리하여 표시
+ */
+export class SdqAAssessmentSummaryDto extends BaseAssessmentSummaryDto {
+  @ApiProperty({
+    description: '검사 유형',
+    example: 'SDQ_A',
+  })
+  @IsString()
+  assessmentType: 'SDQ_A';
+
+  // 강점 (사회지향 행동)
+  @ApiProperty({
+    description: '강점 총점 (0-10)',
+    example: 7,
+    required: false,
+  })
+  @IsOptional()
+  strengthsScore?: number;
+
+  @ApiProperty({
+    description: '강점 수준 (1-3)',
+    example: 2,
+    required: false,
+  })
+  @IsOptional()
+  strengthsLevel?: number;
+
+  @ApiProperty({
+    description: '강점 수준 설명',
+    example: '평균적인 수준의 사회지향 행동을 보입니다.',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  strengthsLevelDescription?: string;
+
+  // 난점 (외현화 + 내현화)
+  @ApiProperty({
+    description: '난점 총점 (0-40)',
+    example: 18,
+    required: false,
+  })
+  @IsOptional()
+  difficultiesScore?: number;
+
+  @ApiProperty({
+    description: '난점 수준 (1-3)',
+    example: 2,
+    required: false,
+  })
+  @IsOptional()
+  difficultiesLevel?: number;
+
+  @ApiProperty({
+    description: '난점 수준 설명',
+    example: '일부 영역에서 어려움이 관찰됩니다.',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  difficultiesLevelDescription?: string;
+}
+
+/**
+ * AI 대화 분석 결과 DTO (Soul-E 대화 기반)
+ * 새 문서 포맷의 '4.2 AI 기반 아동 마음건강 대화 분석 요약' 섹션
+ */
+export class ConversationAnalysisDto {
+  @ApiProperty({
+    description: '3줄 요약 (긍정적 특성/관심 영역/기대 성장)',
+    example: [
+      '아동은 밝고 긍정적인 태도를 유지합니다.',
+      '친구 관계에서 관심과 기대가 높습니다.',
+      '자기 조절 능력의 성장이 기대됩니다.',
+    ],
+    type: [String],
+    required: false,
+  })
+  @IsString({ each: true })
+  @IsOptional()
+  summaryLines?: string[];
+
+  @ApiProperty({
+    description: '전문가 종합 분석 (3-4문장)',
+    example:
+      '본 아동은 AI 대화 분석 결과, 전반적으로 밝고 긍정적인 태도를 보이며 친구 관계에 대한 관심이 높은 것으로 나타났습니다.',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  expertAnalysis?: string;
+
+  @ApiProperty({
+    description: '주요 관찰 사항 (2-3가지)',
+    example: ['또래 관계에 대한 관심 높음', '자기 표현 능력 양호'],
+    type: [String],
+    required: false,
+  })
+  @IsString({ each: true })
+  @IsOptional()
+  keyObservations?: string[];
+
+  @ApiProperty({
+    description: '정서 상태 키워드',
+    example: ['밝음', '호기심', '불안'],
+    type: [String],
+    required: false,
+  })
+  @IsString({ each: true })
+  @IsOptional()
+  emotionalKeywords?: string[];
+
+  @ApiProperty({
+    description: '권장 상담 영역',
+    example: ['또래 관계', '자기 조절'],
+    type: [String],
+    required: false,
+  })
+  @IsString({ each: true })
+  @IsOptional()
+  recommendedFocusAreas?: string[];
+
+  @ApiProperty({
+    description: '분석 신뢰도 (0.0 ~ 1.0)',
+    example: 0.85,
+    minimum: 0,
+    maximum: 1,
+    required: false,
+  })
+  @IsOptional()
+  confidenceScore?: number;
+
+  @ApiProperty({
+    description: '대화 세션 수',
+    example: 5,
+    required: false,
+  })
+  @IsOptional()
+  sessionCount?: number;
+
+  @ApiProperty({
+    description: '대화 메시지 수',
+    example: 42,
+    required: false,
+  })
+  @IsOptional()
+  messageCount?: number;
 }
 
 /**

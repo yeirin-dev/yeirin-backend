@@ -174,7 +174,9 @@ export class Child extends AggregateRoot {
     // REGULAR 유형은 더 이상 지원되지 않음 (시설 연결 필수)
     if (childTypeValue === ChildTypeValue.REGULAR) {
       return Result.fail(
-        new DomainError('일반 아동 유형은 더 이상 지원되지 않습니다. 시설에 연결된 아동만 등록 가능합니다.'),
+        new DomainError(
+          '일반 아동 유형은 더 이상 지원되지 않습니다. 시설에 연결된 아동만 등록 가능합니다.',
+        ),
       );
     }
 

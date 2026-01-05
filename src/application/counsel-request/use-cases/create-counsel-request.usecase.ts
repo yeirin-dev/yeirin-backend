@@ -196,6 +196,7 @@ export class CreateCounselRequestUseCase {
           },
           careType: dto.basicInfo.careType,
           priorityReason: dto.basicInfo.priorityReason,
+          protectedChildInfo: dto.basicInfo.protectedChildInfo, // 보호대상 아동 정보
         },
         psychological_info: {
           medicalHistory: dto.psychologicalInfo.medicalHistory,

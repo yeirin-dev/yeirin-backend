@@ -72,6 +72,43 @@ export interface InstitutionInfo {
 /**
  * 통합 보고서 생성 요청 DTO
  */
+/**
+ * 보호대상 아동 유형
+ */
+export type ProtectedChildType = 'CHILD_FACILITY' | 'GROUP_HOME';
+
+/**
+ * 보호대상 아동 보호 사유
+ */
+export type ProtectedChildReason =
+  | 'GUARDIAN_ABSENCE'
+  | 'ABUSE'
+  | 'ILLNESS_RUNAWAY'
+  | 'LOCAL_GOVERNMENT';
+
+/**
+ * 보호대상 아동 정보 (새 문서 포맷)
+ */
+export interface ProtectedChildInfo {
+  type?: ProtectedChildType;
+  reason?: ProtectedChildReason;
+}
+
+/**
+ * AI 대화 분석 결과 DTO (Soul-E 대화 기반)
+ * 새 문서 포맷의 '4.2 AI 기반 아동 마음건강 대화 분석 요약' 섹션
+ */
+export interface ConversationAnalysisDto {
+  summaryLines?: string[];
+  expertAnalysis?: string;
+  keyObservations?: string[];
+  emotionalKeywords?: string[];
+  recommendedFocusAreas?: string[];
+  confidenceScore?: number;
+  sessionCount?: number;
+  messageCount?: number;
+}
+
 export interface IntegratedReportRequestDto {
   counsel_request_id: string;
   child_id: string;
@@ -91,6 +128,7 @@ export interface IntegratedReportRequestDto {
     };
     careType: string;
     priorityReason?: string;
+    protectedChildInfo?: ProtectedChildInfo; // 보호대상 아동 정보 (새 문서 포맷)
   };
   psychological_info: {
     medicalHistory: string;
@@ -115,6 +153,9 @@ export interface IntegratedReportRequestDto {
   // 사회서비스 이용 추천서 (Government Doc) 데이터 - Optional
   guardian_info?: GuardianInfo;
   institution_info?: InstitutionInfo;
+
+  // Soul-E AI 대화 분석 결과 (새 문서 포맷)
+  conversationAnalysis?: ConversationAnalysisDto;
 }
 
 /**
