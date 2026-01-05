@@ -1,4 +1,11 @@
-import { CareType, ConsentStatus, Gender, PriorityReason } from './counsel-request-enums';
+import {
+  CareType,
+  ConsentStatus,
+  Gender,
+  PriorityReason,
+  ProtectedChildReason,
+  ProtectedChildType,
+} from './counsel-request-enums';
 
 /**
  * 의뢰 일자
@@ -29,12 +36,21 @@ export interface ChildInfo {
 }
 
 /**
+ * 보호대상 아동 정보 (새 문서 포맷)
+ */
+export interface ProtectedChildInfo {
+  type?: ProtectedChildType; // 아동양육시설 / 공동생활가정
+  reason?: ProtectedChildReason; // 보호 사유
+}
+
+/**
  * 기본 정보
  */
 export interface BasicInfo {
   childInfo: ChildInfo;
   careType: CareType;
   priorityReason?: PriorityReason; // careType === 'PRIORITY'일 때만
+  protectedChildInfo?: ProtectedChildInfo; // 보호대상 아동 정보 (새 문서 포맷)
 }
 
 /**
@@ -94,17 +110,24 @@ export interface CrtesRAssessmentSummary extends BaseAssessmentSummary {
   assessmentType: 'CRTES_R';
   totalScore?: number; // 총점 (0-115)
   riskLevel?: 'normal' | 'caution' | 'high_risk'; // 정상/주의/고위험
+  riskLevelDescription?: string; // 위험 수준 설명 (새 문서 포맷)
 }
 
 /**
  * SDQ-A 검사소견 (강점·난점 설문지)
+ * 새 문서 포맷에서는 강점/난점을 분리하여 표시
  */
 export interface SdqAAssessmentSummary extends BaseAssessmentSummary {
   assessmentType: 'SDQ_A';
-  difficultiesScore?: number; // 난점 총점 (0-40)
+  // 강점 (사회지향 행동)
   strengthsScore?: number; // 강점 총점 (0-10)
-  difficultiesLevel?: 'normal' | 'borderline' | 'abnormal';
-  strengthsLevel?: 'normal' | 'borderline' | 'abnormal';
+  strengthsLevel?: number; // 강점 수준 (1-3)
+  strengthsLevelDescription?: string; // 강점 수준 설명
+
+  // 난점 (외현화 + 내현화)
+  difficultiesScore?: number; // 난점 총점 (0-40)
+  difficultiesLevel?: number; // 난점 수준 (1-3)
+  difficultiesLevelDescription?: string; // 난점 수준 설명
 }
 
 /**
@@ -148,6 +171,25 @@ export interface TestResults {
   assessmentReportS3Key?: string; // Soul-E KPRC 심리검사 결과 PDF S3 Key
   /** @deprecated Use attachedAssessments instead */
   kprcSummary?: KprcAssessmentSummary; // KPRC 검사소견 (yeirin-ai 생성)
+}
+
+// =============================================================================
+// AI 대화 분석 결과 (새 문서 포맷)
+// =============================================================================
+
+/**
+ * Soul-E AI 대화 분석 결과
+ * 새 문서 포맷의 '4.2 AI 기반 아동 마음건강 대화 분석 요약' 섹션에서 사용
+ */
+export interface ConversationAnalysis {
+  summaryLines?: string[]; // 3줄 요약 (긍정적 특성/관심 영역/기대 성장)
+  expertAnalysis?: string; // 전문가 종합 분석 (3-4문장)
+  keyObservations?: string[]; // 주요 관찰 사항 (2-3가지)
+  emotionalKeywords?: string[]; // 정서 상태 키워드
+  recommendedFocusAreas?: string[]; // 권장 상담 영역
+  confidenceScore?: number; // 분석 신뢰도 (0.0 ~ 1.0)
+  sessionCount?: number; // 대화 세션 수
+  messageCount?: number; // 대화 메시지 수
 }
 
 /**

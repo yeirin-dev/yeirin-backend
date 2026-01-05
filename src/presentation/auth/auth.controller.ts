@@ -20,12 +20,12 @@ import {
   InstitutionAuthResponseDto,
   InstitutionLoginDto,
 } from '@application/auth/dto/institution-auth.dto';
-import { InstitutionAuthService } from '@application/auth/institution-auth.service';
 import { LoginDto } from '@application/auth/dto/login.dto';
 import { RegisterCounselorDto } from '@application/auth/dto/register-counselor.dto';
 import { RegisterGuardianDto } from '@application/auth/dto/register-guardian.dto';
 import { RegisterInstitutionDto } from '@application/auth/dto/register-institution.dto';
 import { RegisterDto } from '@application/auth/dto/register.dto';
+import { InstitutionAuthService } from '@application/auth/institution-auth.service';
 import {
   CurrentUser,
   CurrentUserData,
@@ -180,9 +180,7 @@ export class AuthController {
   @ApiOperation({ summary: '시설 로그인 (비밀번호 인증)' })
   @ApiResponse({ status: 200, description: '시설 로그인 성공', type: InstitutionAuthResponseDto })
   @ApiResponse({ status: 401, description: '인증 실패' })
-  async institutionLogin(
-    @Body() dto: InstitutionLoginDto,
-  ): Promise<InstitutionAuthResponseDto> {
+  async institutionLogin(@Body() dto: InstitutionLoginDto): Promise<InstitutionAuthResponseDto> {
     return await this.institutionAuthService.login(dto);
   }
 

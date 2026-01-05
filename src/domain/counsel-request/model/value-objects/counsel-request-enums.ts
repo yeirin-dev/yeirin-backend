@@ -53,3 +53,21 @@ export enum ConsentStatus {
   AGREED = 'AGREED', // 동의
   DISAGREED = 'DISAGREED', // 미동의
 }
+
+/**
+ * 보호대상 아동 유형 (새 문서 포맷)
+ */
+export enum ProtectedChildType {
+  CHILD_FACILITY = 'CHILD_FACILITY', // 아동 양육시설
+  GROUP_HOME = 'GROUP_HOME', // 공동생활가정(그룹홈)
+}
+
+/**
+ * 보호대상 아동 사유 (새 문서 포맷)
+ */
+export enum ProtectedChildReason {
+  GUARDIAN_ABSENCE = 'GUARDIAN_ABSENCE', // 보호자가 없거나 보호자로부터 이탈
+  ABUSE = 'ABUSE', // 아동을 학대하는 경우
+  ILLNESS_RUNAWAY = 'ILLNESS_RUNAWAY', // 보호자의 질병, 가출 등
+  LOCAL_GOVERNMENT = 'LOCAL_GOVERNMENT', // 지방자치단체장이 보호가 필요하다고 인정한 자
+}

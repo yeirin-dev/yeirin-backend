@@ -16,11 +16,7 @@ import { ChildController } from './child.controller';
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      ChildProfileEntity,
-      CareFacilityEntity,
-      CommunityChildCenterEntity,
-    ]),
+    TypeOrmModule.forFeature([ChildProfileEntity, CareFacilityEntity, CommunityChildCenterEntity]),
   ],
   controllers: [ChildController],
   providers: [
