@@ -6,10 +6,10 @@ import { CounselRequestStatus } from '@domain/counsel-request/model/value-object
  */
 export class RecentActivityDto {
   @ApiProperty({
-    description: '활동 ID',
+    description: '상담의뢰 ID',
     example: '93dfda2d-6cd3-4e86-8259-ee1c098234f7',
   })
-  id: string;
+  counselRequestId: string;
 
   @ApiProperty({
     description: '아동명',
