@@ -99,7 +99,7 @@ export class GetInstitutionDashboardUseCase {
     const recent = sorted.slice(0, 10);
 
     return recent.map((cr) => ({
-      id: cr.id,
+      counselRequestId: cr.id,
       childName: childMap.get(cr.childId) || '알 수 없음',
       activityType: cr.status,
       description: this.getActivityDescription(cr.status),
