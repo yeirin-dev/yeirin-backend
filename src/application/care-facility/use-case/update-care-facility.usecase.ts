@@ -2,20 +2,19 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { CareFacilityRepository } from '@domain/care-facility/repository/care-facility.repository';
 import { Address } from '@domain/common/value-objects/address.vo';
 import { InstitutionName } from '@domain/common/value-objects/institution-name.vo';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { CareFacilityResponseDto } from '../dto/care-facility-response.dto';
 import { UpdateCareFacilityDto } from '../dto/update-care-facility.dto';
 
 /**
  * 양육시설 수정 유스케이스
+ *
+ * NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
  */
 @Injectable()
 export class UpdateCareFacilityUseCase {
   constructor(
     @Inject('CareFacilityRepository')
     private readonly careFacilityRepository: CareFacilityRepository,
-    @Inject('GuardianProfileRepository')
-    private readonly guardianProfileRepository: GuardianProfileRepository,
   ) {}
 
   async execute(id: string, dto: UpdateCareFacilityDto): Promise<CareFacilityResponseDto> {
@@ -96,8 +95,8 @@ export class UpdateCareFacilityUseCase {
     // 저장
     const savedFacility = await this.careFacilityRepository.save(facility);
 
-    // 소속 선생님 수 조회
-    const teacherCount = await this.guardianProfileRepository.countByCareFacilityId(id);
+    // NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
+    const teacherCount = 0;
 
     return {
       id: savedFacility.id,

@@ -12,7 +12,7 @@ describe('User Aggregate Root', () => {
       password: await Password.create('Test1234!@#').getValue().hash(),
       realName: RealName.create('홍길동').getValue(),
       phoneNumber: PhoneNumber.create('010-1234-5678').getValue(),
-      role: UserRole.create('GUARDIAN').getValue(),
+      role: UserRole.create('INSTITUTION_ADMIN').getValue(),
     };
   };
 
@@ -197,8 +197,8 @@ describe('User Aggregate Root', () => {
       const user = User.create(props).getValue();
 
       // When & Then
-      expect(user.hasPermission('view:own-children')).toBe(true);
-      expect(user.hasPermission('manage:institution')).toBe(false);
+      expect(user.hasPermission('manage:institution')).toBe(true);
+      expect(user.hasPermission('manage:users')).toBe(false);
     });
 
     it('ADMIN은 모든 권한을 가진다', async () => {

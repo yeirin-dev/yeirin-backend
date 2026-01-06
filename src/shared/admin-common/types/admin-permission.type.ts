@@ -13,7 +13,6 @@ export type AdminResource =
   | 'institution'
   | 'counselor'
   | 'child'
-  | 'guardian'
   | 'review'
   | 'audit-log'
   | 'statistics'
@@ -81,10 +80,6 @@ export const ADMIN_PERMISSIONS = {
   CHILD_READ: 'child:read' as AdminPermission,
   CHILD_UPDATE: 'child:update' as AdminPermission,
 
-  // Guardian Management
-  GUARDIAN_READ: 'guardian:read' as AdminPermission,
-  GUARDIAN_UPDATE: 'guardian:update' as AdminPermission,
-
   // Review Management
   REVIEW_READ: 'review:read' as AdminPermission,
   REVIEW_DELETE: 'review:delete' as AdminPermission,
@@ -121,7 +116,6 @@ export const ROLE_PERMISSIONS: Record<string, AdminPermission[]> = {
     ADMIN_PERMISSIONS.COUNSEL_REPORT_READ,
     ADMIN_PERMISSIONS.CHILD_READ,
   ],
-  GUARDIAN: [],
 };
 
 /**

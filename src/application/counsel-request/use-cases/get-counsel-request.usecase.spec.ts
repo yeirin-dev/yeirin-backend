@@ -9,26 +9,31 @@ import {
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
+import { S3Service } from '@infrastructure/storage/s3.service';
 import { GetCounselRequestUseCase } from './get-counsel-request.usecase';
 
 describe('GetCounselRequestUseCase', () => {
   let useCase: GetCounselRequestUseCase;
   let mockRepository: jest.Mocked<CounselRequestRepository>;
+  let mockS3Service: jest.Mocked<S3Service>;
 
   beforeEach(async () => {
     mockRepository = {
       save: jest.fn(),
       findById: jest.fn(),
       findByChildId: jest.fn(),
-      findByGuardianId: jest.fn(),
       findByStatus: jest.fn(),
       findByInstitutionId: jest.fn(),
       findByCounselorId: jest.fn(),
       findAll: jest.fn(),
       delete: jest.fn(),
-      countByGuardianIdAndStatus: jest.fn(),
-      findRecentByGuardianId: jest.fn(),
     };
+
+    mockS3Service = {
+      getPresignedUrl: jest.fn(),
+      uploadFile: jest.fn(),
+      deleteFile: jest.fn(),
+    } as unknown as jest.Mocked<S3Service>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -36,6 +41,10 @@ describe('GetCounselRequestUseCase', () => {
         {
           provide: 'CounselRequestRepository',
           useValue: mockRepository,
+        },
+        {
+          provide: S3Service,
+          useValue: mockS3Service,
         },
       ],
     }).compile();
@@ -74,7 +83,6 @@ describe('GetCounselRequestUseCase', () => {
     return CounselRequest.restore({
       id,
       childId: 'child-123',
-      guardianId: 'guardian-123',
       status: CounselRequestStatus.PENDING,
       formData: createMockFormData(),
       centerName: '행복한 지역아동센터',
@@ -98,7 +106,6 @@ describe('GetCounselRequestUseCase', () => {
       // Then
       expect(result.id).toBe(requestId);
       expect(result.childId).toBe('child-123');
-      expect(result.guardianId).toBe('guardian-123');
       expect(result.status).toBe(CounselRequestStatus.PENDING);
       expect(mockRepository.findById).toHaveBeenCalledWith(requestId);
     });
@@ -127,7 +134,6 @@ describe('GetCounselRequestUseCase', () => {
       // Then
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('childId');
-      expect(result).toHaveProperty('guardianId');
       expect(result).toHaveProperty('status');
       expect(result).toHaveProperty('formData');
       expect(result).toHaveProperty('centerName');

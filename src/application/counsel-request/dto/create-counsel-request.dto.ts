@@ -664,10 +664,6 @@ export class CreateCounselRequestDto {
   @IsUUID()
   childId: string;
 
-  @ApiProperty({ description: '보호자 ID (UUID)' })
-  @IsUUID()
-  guardianId: string;
-
   @ApiProperty({ description: '표지 정보' })
   @IsObject()
   @ValidateNested()

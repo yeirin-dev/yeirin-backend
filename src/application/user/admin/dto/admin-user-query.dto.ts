@@ -7,7 +7,6 @@ import { AdminPaginationQueryDto } from '@yeirin/admin-common';
  * 사용자 역할 (필터용)
  */
 export enum UserRoleFilter {
-  GUARDIAN = 'GUARDIAN',
   INSTITUTION_ADMIN = 'INSTITUTION_ADMIN',
   COUNSELOR = 'COUNSELOR',
   ADMIN = 'ADMIN',

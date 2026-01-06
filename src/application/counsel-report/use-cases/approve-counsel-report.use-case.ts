@@ -21,7 +21,7 @@ export class ApproveCounselReportUseCase {
   async execute(
     reportId: string,
     dto: ApproveCounselReportDto,
-    guardianId: string,
+    userId: string,
   ): Promise<Result<CounselReportResponseDto, DomainError>> {
     // 1. 면담결과지 조회
     const counselReport = await this.counselReportRepository.findById(reportId);

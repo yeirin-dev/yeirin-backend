@@ -6,20 +6,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from '@application/auth/auth.service';
 import { InstitutionAuthService } from '@application/auth/institution-auth.service';
 import { RegisterCounselorUseCase } from '@application/auth/use-cases/register-counselor/register-counselor.use-case';
-import { RegisterGuardianUseCase } from '@application/auth/use-cases/register-guardian/register-guardian.use-case';
 import { RegisterInstitutionUseCase } from '@application/auth/use-cases/register-institution/register-institution.use-case';
 import { RegisterUserUseCase } from '@application/auth/use-cases/register-user/register-user.use-case';
 import { JwtStrategy } from '@infrastructure/auth/strategies/jwt.strategy';
 import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
 import { CounselorProfileEntity } from '@infrastructure/persistence/typeorm/entity/counselor-profile.entity';
-import { GuardianProfileEntity } from '@infrastructure/persistence/typeorm/entity/guardian-profile.entity';
 import { UserEntity } from '@infrastructure/persistence/typeorm/entity/user.entity';
 import { VoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/voucher-institution.entity';
 import { CareFacilityRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/care-facility.repository.impl';
 import { CommunityChildCenterRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/community-child-center.repository.impl';
 import { CounselorProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counselor-profile.repository.impl';
-import { GuardianProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/guardian-profile.repository.impl';
 import { InstitutionRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/institution.repository.impl';
 import { UserRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/user.repository.impl';
 import { AuthController } from './auth.controller';
@@ -33,7 +30,6 @@ import { AuthController } from './auth.controller';
   imports: [
     TypeOrmModule.forFeature([
       UserEntity,
-      GuardianProfileEntity,
       VoucherInstitutionEntity,
       CounselorProfileEntity,
       CareFacilityEntity,
@@ -56,7 +52,6 @@ import { AuthController } from './auth.controller';
 
     // Use Cases
     RegisterUserUseCase,
-    RegisterGuardianUseCase,
     RegisterInstitutionUseCase,
     RegisterCounselorUseCase,
 
@@ -65,10 +60,6 @@ import { AuthController } from './auth.controller';
     {
       provide: 'UserRepository',
       useClass: UserRepositoryImpl,
-    },
-    {
-      provide: 'GuardianProfileRepository',
-      useClass: GuardianProfileRepositoryImpl,
     },
     {
       provide: 'InstitutionRepository',

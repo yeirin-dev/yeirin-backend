@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CareFacilityRepository } from '@domain/care-facility/repository/care-facility.repository';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import {
   CareFacilityListResponseDto,
   CareFacilityResponseDto,
@@ -8,14 +7,14 @@ import {
 
 /**
  * 양육시설 목록 조회 유스케이스
+ *
+ * NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
  */
 @Injectable()
 export class GetCareFacilitiesUseCase {
   constructor(
     @Inject('CareFacilityRepository')
     private readonly careFacilityRepository: CareFacilityRepository,
-    @Inject('GuardianProfileRepository')
-    private readonly guardianProfileRepository: GuardianProfileRepository,
   ) {}
 
   async execute(
@@ -29,31 +28,27 @@ export class GetCareFacilitiesUseCase {
       isActive,
     });
 
-    // 각 시설의 선생님 수를 조회
-    const facilities: CareFacilityResponseDto[] = await Promise.all(
-      data.map(async (facility) => {
-        const teacherCount = await this.guardianProfileRepository.countByCareFacilityId(
-          facility.id,
-        );
+    // NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
+    const facilities: CareFacilityResponseDto[] = data.map((facility) => {
+      const teacherCount = 0;
 
-        return {
-          id: facility.id,
-          name: facility.name.value,
-          address: facility.address.address,
-          addressDetail: facility.address.addressDetail,
-          postalCode: facility.address.postalCode,
-          representativeName: facility.representativeName,
-          phoneNumber: facility.phoneNumber,
-          capacity: facility.capacity,
-          establishedDate: facility.establishedDate.toISOString().split('T')[0],
-          introduction: facility.introduction,
-          isActive: facility.isActive,
-          teacherCount,
-          createdAt: facility.createdAt,
-          updatedAt: facility.updatedAt,
-        };
-      }),
-    );
+      return {
+        id: facility.id,
+        name: facility.name.value,
+        address: facility.address.address,
+        addressDetail: facility.address.addressDetail,
+        postalCode: facility.address.postalCode,
+        representativeName: facility.representativeName,
+        phoneNumber: facility.phoneNumber,
+        capacity: facility.capacity,
+        establishedDate: facility.establishedDate.toISOString().split('T')[0],
+        introduction: facility.introduction,
+        isActive: facility.isActive,
+        teacherCount,
+        createdAt: facility.createdAt,
+        updatedAt: facility.updatedAt,
+      };
+    });
 
     return {
       facilities,

@@ -34,7 +34,6 @@ import { GetChildAssessmentResultsUseCase } from '@application/counsel-request/u
 import { GetCounselRequestRecommendationsUseCase } from '@application/counsel-request/use-cases/get-counsel-request-recommendations.usecase';
 import { GetCounselRequestUseCase } from '@application/counsel-request/use-cases/get-counsel-request.usecase';
 import { GetCounselRequestsByChildUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-by-child.usecase';
-import { GetCounselRequestsByGuardianUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-by-guardian.usecase';
 import { GetCounselRequestsPaginatedUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-paginated.usecase';
 import { RequestCounselRequestRecommendationUseCase } from '@application/counsel-request/use-cases/request-counsel-request-recommendation.usecase';
 import { SelectRecommendedInstitutionUseCase } from '@application/counsel-request/use-cases/select-recommended-institution.usecase';
@@ -53,7 +52,6 @@ export class CounselRequestController {
     private readonly createCounselRequestFromSouliUseCase: CreateCounselRequestFromSouliUseCase,
     private readonly getCounselRequestUseCase: GetCounselRequestUseCase,
     private readonly getCounselRequestsByChildUseCase: GetCounselRequestsByChildUseCase,
-    private readonly getCounselRequestsByGuardianUseCase: GetCounselRequestsByGuardianUseCase,
     private readonly getCounselRequestsPaginatedUseCase: GetCounselRequestsPaginatedUseCase,
     private readonly updateCounselRequestUseCase: UpdateCounselRequestUseCase,
     private readonly deleteCounselRequestUseCase: DeleteCounselRequestUseCase,
@@ -143,21 +141,6 @@ export class CounselRequestController {
     @Param('childId') childId: string,
   ): Promise<CounselRequestResponseDto[]> {
     return await this.getCounselRequestsByChildUseCase.execute(childId);
-  }
-
-  @Get('guardian/:guardianId')
-  @ApiOperation({ summary: '보호자 ID로 상담의뢰지 목록 조회' })
-  @ApiParam({ name: 'guardianId', description: '보호자 ID (UUID)' })
-  @ApiResponse({
-    status: 200,
-    description: '조회 성공',
-    type: [CounselRequestResponseDto],
-  })
-  @ApiResponse({ status: 404, description: '상담의뢰지를 찾을 수 없음' })
-  async getCounselRequestsByGuardian(
-    @Param('guardianId') guardianId: string,
-  ): Promise<CounselRequestResponseDto[]> {
-    return await this.getCounselRequestsByGuardianUseCase.execute(guardianId);
   }
 
   @Patch(':id')

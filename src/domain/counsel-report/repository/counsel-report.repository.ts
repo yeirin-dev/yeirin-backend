@@ -70,12 +70,6 @@ export interface CounselReportRepository {
   ): Promise<{ reports: CounselReport[]; total: number }>;
 
   /**
-   * 보호자 ID로 면담결과지 조회 (아동을 통한 간접 조회)
-   * - 보호자가 확인할 수 있는 모든 면담결과지 (자녀들의 결과지)
-   */
-  findByGuardianId(guardianId: string): Promise<CounselReport[]>;
-
-  /**
    * 면담결과지 삭제
    */
   delete(id: string): Promise<void>;

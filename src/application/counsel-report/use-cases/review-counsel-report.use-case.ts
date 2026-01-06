@@ -19,7 +19,7 @@ export class ReviewCounselReportUseCase {
 
   async execute(
     reportId: string,
-    guardianId: string,
+    userId: string,
   ): Promise<Result<CounselReportResponseDto, DomainError>> {
     // 1. 면담결과지 조회
     const counselReport = await this.counselReportRepository.findById(reportId);

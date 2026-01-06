@@ -33,11 +33,11 @@ export class RegisterDto {
   phoneNumber: string;
 
   @ApiProperty({
-    example: 'GUARDIAN',
+    example: 'INSTITUTION_ADMIN',
     description: '사용자 역할',
-    enum: ['GUARDIAN', 'INSTITUTION_ADMIN', 'COUNSELOR', 'ADMIN'],
+    enum: ['INSTITUTION_ADMIN', 'COUNSELOR', 'ADMIN'],
   })
-  @IsEnum(['GUARDIAN', 'INSTITUTION_ADMIN', 'COUNSELOR', 'ADMIN'], {
+  @IsEnum(['INSTITUTION_ADMIN', 'COUNSELOR', 'ADMIN'], {
     message: '유효하지 않은 역할입니다',
   })
   role: UserRoleType;

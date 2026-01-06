@@ -15,7 +15,6 @@ export class CounselRequest {
   private constructor(
     private readonly _id: string,
     private readonly _childId: string,
-    private readonly _guardianId: string,
     private _status: CounselRequestStatus,
     private _formData: CounselRequestFormData,
     private _centerName: string,
@@ -39,10 +38,6 @@ export class CounselRequest {
 
   get childId(): string {
     return this._childId;
-  }
-
-  get guardianId(): string {
-    return this._guardianId;
   }
 
   get status(): CounselRequestStatus {
@@ -99,10 +94,9 @@ export class CounselRequest {
   static create(props: {
     id: string;
     childId: string;
-    guardianId: string;
     formData: CounselRequestFormData;
   }): Result<CounselRequest, DomainError> {
-    const { id, childId, guardianId, formData } = props;
+    const { id, childId, formData } = props;
 
     // 유효성 검증
     const validationResult = this.validate(formData);
@@ -130,7 +124,6 @@ export class CounselRequest {
       new CounselRequest(
         id,
         childId,
-        guardianId,
         CounselRequestStatus.PENDING,
         formData,
         centerName,
@@ -150,7 +143,6 @@ export class CounselRequest {
   static restore(props: {
     id: string;
     childId: string;
-    guardianId: string;
     status: CounselRequestStatus;
     formData: CounselRequestFormData;
     centerName: string;
@@ -166,7 +158,6 @@ export class CounselRequest {
     return new CounselRequest(
       props.id,
       props.childId,
-      props.guardianId,
       props.status,
       props.formData,
       props.centerName,

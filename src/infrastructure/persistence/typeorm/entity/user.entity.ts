@@ -8,7 +8,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { CounselorProfileEntity } from './counselor-profile.entity';
-import { GuardianProfileEntity } from './guardian-profile.entity';
 import { VoucherInstitutionEntity } from './voucher-institution.entity';
 
 /**
@@ -44,10 +43,9 @@ export class UserEntity {
   /** 사용자 역할 */
   @Column({
     type: 'enum',
-    enum: ['GUARDIAN', 'INSTITUTION_ADMIN', 'COUNSELOR', 'ADMIN'],
-    default: 'GUARDIAN',
+    enum: ['INSTITUTION_ADMIN', 'COUNSELOR', 'ADMIN'],
   })
-  role: 'GUARDIAN' | 'INSTITUTION_ADMIN' | 'COUNSELOR' | 'ADMIN';
+  role: 'INSTITUTION_ADMIN' | 'COUNSELOR' | 'ADMIN';
 
   /** 리프레시 토큰 (로그아웃 처리용) */
   @Column({ type: 'text', nullable: true })
@@ -76,14 +74,6 @@ export class UserEntity {
   /** 마지막 로그인 시간 */
   @Column({ type: 'timestamp', nullable: true })
   lastLoginAt: Date | null;
-
-  /**
-   * 보호자 프로필 (GUARDIAN 역할일 때만 존재)
-   */
-  @OneToOne(() => GuardianProfileEntity, (profile) => profile.user, {
-    nullable: true,
-  })
-  guardianProfile?: GuardianProfileEntity;
 
   /**
    * 바우처 기관 정보 (INSTITUTION_ADMIN 역할일 때만 존재)

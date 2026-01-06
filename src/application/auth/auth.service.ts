@@ -6,11 +6,9 @@ import { UserRepository } from '@domain/user/repository/user.repository';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterCounselorDto } from './dto/register-counselor.dto';
-import { RegisterGuardianDto } from './dto/register-guardian.dto';
 import { RegisterInstitutionDto } from './dto/register-institution.dto';
 import { RegisterDto } from './dto/register.dto';
 import { RegisterCounselorUseCase } from './use-cases/register-counselor/register-counselor.use-case';
-import { RegisterGuardianUseCase } from './use-cases/register-guardian/register-guardian.use-case';
 import { RegisterInstitutionUseCase } from './use-cases/register-institution/register-institution.use-case';
 import { RegisterUserUseCase } from './use-cases/register-user/register-user.use-case';
 
@@ -27,7 +25,6 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly registerUserUseCase: RegisterUserUseCase,
-    private readonly registerGuardianUseCase: RegisterGuardianUseCase,
     private readonly registerInstitutionUseCase: RegisterInstitutionUseCase,
     private readonly registerCounselorUseCase: RegisterCounselorUseCase,
   ) {}
@@ -50,54 +47,6 @@ export class AuthService {
     }
 
     const user = result.getValue();
-
-    // JWT 토큰 생성
-    const { accessToken, refreshToken } = await this.generateTokens(
-      user.id,
-      user.email.value,
-      user.role.value,
-    );
-
-    // Refresh Token 저장
-    user.updateRefreshToken(refreshToken);
-    await this.userRepository.save(user);
-
-    return {
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        email: user.email.value,
-        realName: user.realName.value,
-        role: user.role.value,
-      },
-    };
-  }
-
-  /**
-   * 보호자 회원가입
-   */
-  async registerGuardian(dto: RegisterGuardianDto): Promise<AuthResponseDto> {
-    const result = await this.registerGuardianUseCase.execute({
-      email: dto.email,
-      password: dto.password,
-      realName: dto.realName,
-      phoneNumber: dto.phoneNumber,
-      guardianType: dto.guardianType,
-      careFacilityId: dto.careFacilityId,
-      communityChildCenterId: dto.communityChildCenterId,
-      numberOfChildren: dto.numberOfChildren,
-      address: dto.address,
-      addressDetail: dto.addressDetail,
-      postalCode: dto.postalCode,
-      notes: dto.notes,
-    });
-
-    if (result.isFailure) {
-      throw new ConflictException(result.getError().message);
-    }
-
-    const { user } = result.getValue();
 
     // JWT 토큰 생성
     const { accessToken, refreshToken } = await this.generateTokens(

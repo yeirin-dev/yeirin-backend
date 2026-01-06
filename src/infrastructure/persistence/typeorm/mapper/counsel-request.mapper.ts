@@ -16,7 +16,6 @@ export class CounselRequestMapper {
     return CounselRequest.restore({
       id: entity.id,
       childId: entity.childId,
-      guardianId: entity.guardianId,
       status: entity.status,
       formData: entity.formData,
       centerName: entity.centerName,
@@ -38,7 +37,6 @@ export class CounselRequestMapper {
     const entity = new CounselRequestEntity();
     entity.id = domain.id;
     entity.childId = domain.childId;
-    entity.guardianId = domain.guardianId;
     entity.status = domain.status;
     entity.formData = domain.formData;
     entity.centerName = domain.centerName;

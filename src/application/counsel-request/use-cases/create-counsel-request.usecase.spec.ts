@@ -24,14 +24,11 @@ describe('CreateCounselRequestUseCase', () => {
       save: jest.fn(),
       findById: jest.fn(),
       findByChildId: jest.fn(),
-      findByGuardianId: jest.fn(),
       findByStatus: jest.fn(),
       findByInstitutionId: jest.fn(),
       findByCounselorId: jest.fn(),
       findAll: jest.fn(),
       delete: jest.fn(),
-      countByGuardianIdAndStatus: jest.fn(),
-      findRecentByGuardianId: jest.fn(),
     };
 
     mockYeirinAIClient = {
@@ -92,7 +89,6 @@ describe('CreateCounselRequestUseCase', () => {
 
   const createValidDto = (): CreateCounselRequestDto => ({
     childId: '123e4567-e89b-12d3-a456-426614174001',
-    guardianId: '123e4567-e89b-12d3-a456-426614174002',
     ...createValidFormData(),
   });
 
@@ -108,7 +104,6 @@ describe('CreateCounselRequestUseCase', () => {
       // Then
       expect(result).toBeDefined();
       expect(result.childId).toBe(dto.childId);
-      expect(result.guardianId).toBe(dto.guardianId);
       expect(result.status).toBe(CounselRequestStatus.PENDING);
       expect(result.centerName).toBe('행복한 지역아동센터');
       expect(result.careType).toBe(CareType.GENERAL);
@@ -203,7 +198,6 @@ describe('CreateCounselRequestUseCase', () => {
       // Then
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('childId');
-      expect(result).toHaveProperty('guardianId');
       expect(result).toHaveProperty('status');
       expect(result).toHaveProperty('formData');
       expect(result).toHaveProperty('centerName');

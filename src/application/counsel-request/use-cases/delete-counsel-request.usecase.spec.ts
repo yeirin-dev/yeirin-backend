@@ -20,14 +20,11 @@ describe('DeleteCounselRequestUseCase', () => {
       save: jest.fn(),
       findById: jest.fn(),
       findByChildId: jest.fn(),
-      findByGuardianId: jest.fn(),
       findByStatus: jest.fn(),
       findByInstitutionId: jest.fn(),
       findByCounselorId: jest.fn(),
       findAll: jest.fn(),
       delete: jest.fn(),
-      countByGuardianIdAndStatus: jest.fn(),
-      findRecentByGuardianId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -74,7 +71,6 @@ describe('DeleteCounselRequestUseCase', () => {
     return CounselRequest.restore({
       id,
       childId: 'child-123',
-      guardianId: 'guardian-123',
       status: CounselRequestStatus.PENDING,
       formData: createMockFormData(),
       centerName: '행복한 지역아동센터',

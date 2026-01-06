@@ -114,18 +114,6 @@ export class CounselReportRepositoryImpl implements CounselReportRepository {
     };
   }
 
-  async findByGuardianId(guardianId: string): Promise<CounselReport[]> {
-    // Child를 통한 간접 조회 (Join 필요)
-    const entities = await this.repository
-      .createQueryBuilder('report')
-      .innerJoin('report.child', 'child')
-      .where('child.guardianId = :guardianId', { guardianId })
-      .orderBy('report.reportDate', 'DESC')
-      .getMany();
-
-    return CounselReportMapper.toDomainList(entities);
-  }
-
   async delete(id: string): Promise<void> {
     await this.repository.delete(id);
   }

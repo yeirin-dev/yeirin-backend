@@ -41,7 +41,6 @@ export class CreateCounselRequestUseCase {
     const result = CounselRequest.create({
       id: uuidv4(),
       childId: dto.childId,
-      guardianId: dto.guardianId,
       formData,
     });
 
@@ -230,7 +229,6 @@ export class CreateCounselRequestUseCase {
     return {
       id: counselRequest.id,
       childId: counselRequest.childId,
-      guardianId: counselRequest.guardianId,
       status: counselRequest.status,
       formData: counselRequest.formData,
       centerName: counselRequest.centerName,

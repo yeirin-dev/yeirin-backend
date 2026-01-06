@@ -8,7 +8,6 @@ import { GetUsersAdminUseCase } from '@application/user/admin/get-users.admin.us
 import { UnbanUserAdminUseCase } from '@application/user/admin/unban-user.admin.usecase';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { CounselorProfileEntity } from '@infrastructure/persistence/typeorm/entity/counselor-profile.entity';
-import { GuardianProfileEntity } from '@infrastructure/persistence/typeorm/entity/guardian-profile.entity';
 import { UserEntity } from '@infrastructure/persistence/typeorm/entity/user.entity';
 import { UserRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/user.repository.impl';
 import { AdminUserController } from './admin-user.controller';
@@ -23,7 +22,6 @@ import { AdminUserController } from './admin-user.controller';
   imports: [
     TypeOrmModule.forFeature([
       UserEntity,
-      GuardianProfileEntity,
       CounselorProfileEntity,
       CounselRequestEntity,
     ]),

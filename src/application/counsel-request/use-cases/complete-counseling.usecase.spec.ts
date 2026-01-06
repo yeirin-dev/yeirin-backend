@@ -20,14 +20,11 @@ describe('CompleteCounselingUseCase', () => {
       save: jest.fn(),
       findById: jest.fn(),
       findByChildId: jest.fn(),
-      findByGuardianId: jest.fn(),
       findByStatus: jest.fn(),
       findByInstitutionId: jest.fn(),
       findByCounselorId: jest.fn(),
       findAll: jest.fn(),
       delete: jest.fn(),
-      countByGuardianIdAndStatus: jest.fn(),
-      findRecentByGuardianId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -74,7 +71,6 @@ describe('CompleteCounselingUseCase', () => {
     return CounselRequest.restore({
       id,
       childId: 'child-123',
-      guardianId: 'guardian-123',
       status: CounselRequestStatus.IN_PROGRESS,
       formData: createMockFormData(),
       centerName: '행복한 지역아동센터',
@@ -91,7 +87,6 @@ describe('CompleteCounselingUseCase', () => {
     return CounselRequest.restore({
       id,
       childId: 'child-123',
-      guardianId: 'guardian-123',
       status: CounselRequestStatus.MATCHED,
       formData: createMockFormData(),
       centerName: '행복한 지역아동센터',
@@ -108,7 +103,6 @@ describe('CompleteCounselingUseCase', () => {
     return CounselRequest.restore({
       id,
       childId: 'child-123',
-      guardianId: 'guardian-123',
       status: CounselRequestStatus.COMPLETED,
       formData: createMockFormData(),
       centerName: '행복한 지역아동센터',
@@ -188,7 +182,6 @@ describe('CompleteCounselingUseCase', () => {
       // Then
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('childId');
-      expect(result).toHaveProperty('guardianId');
       expect(result).toHaveProperty('status');
       expect(result.status).toBe(CounselRequestStatus.COMPLETED);
       expect(result).toHaveProperty('matchedInstitutionId');

@@ -43,7 +43,7 @@ describe('BanUserAdminUseCase', () => {
       // Given
       const userId = 'user-123';
       const dto = { reason: '서비스 이용 약관 위반으로 인한 계정 정지 처리입니다.' };
-      const mockUser = createMockUser(userId, 'GUARDIAN');
+      const mockUser = createMockUser(userId, 'COUNSELOR');
 
       mockUserRepository.findById.mockResolvedValue(mockUser as any);
       mockUserRepository.save.mockResolvedValue(mockUser as any);
@@ -93,7 +93,7 @@ describe('BanUserAdminUseCase', () => {
       // Given
       const userId = 'banned-user-123';
       const dto = { reason: '이미 정지된 사용자 다시 정지 시도' };
-      const mockUser = createMockUser(userId, 'GUARDIAN', true);
+      const mockUser = createMockUser(userId, 'COUNSELOR', true);
 
       mockUser.ban.mockReturnValue(Result.fail(new DomainError('이미 정지된 계정입니다')));
 
@@ -109,7 +109,7 @@ describe('BanUserAdminUseCase', () => {
       // Given
       const userId = 'user-123';
       const dto = { reason: '짧은 사유' };
-      const mockUser = createMockUser(userId, 'GUARDIAN');
+      const mockUser = createMockUser(userId, 'COUNSELOR');
 
       mockUser.ban.mockReturnValue(
         Result.fail(new DomainError('정지 사유는 최소 10자 이상이어야 합니다')),

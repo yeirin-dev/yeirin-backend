@@ -25,7 +25,6 @@ export class GetCounselRequestsAdminUseCase {
       search,
       status,
       careType,
-      guardianId,
       institutionId,
       counselorId,
       startDate,
@@ -37,9 +36,7 @@ export class GetCounselRequestsAdminUseCase {
     // 쿼리 빌더
     const queryBuilder = this.counselRequestRepository
       .createQueryBuilder('cr')
-      .leftJoinAndSelect('cr.child', 'child')
-      .leftJoinAndSelect('cr.guardian', 'guardian')
-      .leftJoinAndSelect('guardian.user', 'guardianUser');
+      .leftJoinAndSelect('cr.child', 'child');
 
     // 상태 필터
     if (status) {
@@ -49,11 +46,6 @@ export class GetCounselRequestsAdminUseCase {
     // 돌봄 유형 필터
     if (careType) {
       queryBuilder.andWhere('cr.careType = :careType', { careType });
-    }
-
-    // 보호자 ID 필터
-    if (guardianId) {
-      queryBuilder.andWhere('cr.guardianId = :guardianId', { guardianId });
     }
 
     // 기관 ID 필터
@@ -103,8 +95,6 @@ export class GetCounselRequestsAdminUseCase {
       id: cr.id,
       childId: cr.childId,
       childName: cr.child?.name || '',
-      guardianId: cr.guardianId,
-      guardianName: cr.guardian?.user?.realName || '',
       status: cr.status,
       centerName: cr.centerName,
       careType: cr.careType,
