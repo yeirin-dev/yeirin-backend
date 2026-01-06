@@ -65,6 +65,21 @@ export class CreateCounselRequestUseCase {
   }
 
   /**
+   * overallLevel 값을 yeirin-ai 호환 형식으로 변환
+   * - 허용 값: 'normal', 'caution', 'clinical'
+   * - 그 외 값(SDQ_A: 'strengths_1_difficulties_3', CRTES_R: 'level_3' 등)은 null로 변환
+   */
+  private normalizeOverallLevel(
+    level: string | null | undefined,
+  ): 'normal' | 'caution' | 'clinical' | null {
+    const validLevels = ['normal', 'caution', 'clinical'];
+    if (level && validLevels.includes(level)) {
+      return level as 'normal' | 'caution' | 'clinical';
+    }
+    return null;
+  }
+
+  /**
    * 통합 보고서 생성 요청 (Fire-and-forget)
    * 검사 결과가 있으면 yeirin-ai에 통합 보고서 생성 요청
    * - KPRC, CRTES-R, SDQ-A 중 하나라도 있으면 생성
@@ -138,7 +153,8 @@ export class CreateCounselRequestUseCase {
         // Pydantic int 타입 호환성: number → int 변환
         totalScore: a.totalScore != null ? Math.round(a.totalScore) : null,
         maxScore: a.maxScore != null ? Math.round(a.maxScore) : null,
-        overallLevel: a.overallLevel,
+        // overallLevel 정규화: 'normal'|'caution'|'clinical' 외의 값은 null로 변환
+        overallLevel: this.normalizeOverallLevel(a.overallLevel),
         scoredAt: a.scoredAt,
         summary: a.summary
           ? {
