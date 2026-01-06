@@ -9,6 +9,7 @@ import {
 
 /**
  * 대시보드 개요 조회 Use Case
+ * NOTE: User 통계 기능 제거됨. 기관 기반 인증으로 전환.
  */
 @Injectable()
 export class GetDashboardOverviewUseCase {
@@ -31,48 +32,31 @@ export class GetDashboardOverviewUseCase {
 
     // 병렬 조회
     const [
-      usersByRole,
-      activeUsers,
       counselRequestsByStatus,
       totalInstitutions,
       activeInstitutions,
       totalChildren,
-      currentRegistrations,
-      previousRegistrations,
       currentCounselRequests,
       previousCounselRequests,
     ] = await Promise.all([
-      this.statisticsRepository.countUsersByRole(),
-      this.statisticsRepository.countActiveUsers(30),
       this.statisticsRepository.countCounselRequestsByStatus(),
       this.statisticsRepository.countInstitutions(),
       this.statisticsRepository.countActiveInstitutions(),
       this.statisticsRepository.countChildren(),
-      this.statisticsRepository.getRegistrationTrend(startDate, endDate, 'day'),
-      this.statisticsRepository.getRegistrationTrend(previousStartDate, previousEndDate, 'day'),
       this.statisticsRepository.getCounselRequestTrend(startDate, endDate, 'day'),
       this.statisticsRepository.getCounselRequestTrend(previousStartDate, previousEndDate, 'day'),
     ]);
-
-    // 전체 사용자 수 계산
-    const totalUsers = Object.values(usersByRole).reduce((sum, count) => sum + count, 0);
 
     // 상담의뢰 상태별 수 계산
     const pendingCounselRequests = counselRequestsByStatus['PENDING'] || 0;
     const inProgressCounselRequests = counselRequestsByStatus['IN_PROGRESS'] || 0;
     const completedCounselRequests = counselRequestsByStatus['COMPLETED'] || 0;
     const totalCounselRequests = Object.values(counselRequestsByStatus).reduce(
-      (sum, count) => sum + count,
+      (sum: number, count: number) => sum + count,
       0,
     );
 
     // 트렌드 계산
-    const userRegistrationTrend = this.calculateTrend(
-      currentRegistrations,
-      previousRegistrations,
-      '신규 가입',
-    );
-
     const counselRequestTrend = this.calculateCounselRequestTrend(
       currentCounselRequests,
       previousCounselRequests,
@@ -94,8 +78,6 @@ export class GetDashboardOverviewUseCase {
     });
 
     return {
-      totalUsers,
-      activeUsers,
       totalCounselRequests,
       pendingCounselRequests,
       inProgressCounselRequests,
@@ -103,28 +85,9 @@ export class GetDashboardOverviewUseCase {
       totalInstitutions,
       activeInstitutions,
       totalChildren,
-      userRegistrationTrend,
       counselRequestTrend,
       counselRequestsByStatus: counselRequestsByStatusDto,
       alerts,
-    };
-  }
-
-  private calculateTrend(
-    current: { period: string; count: number }[],
-    previous: { period: string; count: number }[],
-    label: string,
-  ): TrendDataDto {
-    const currentTotal = current.reduce((sum, item) => sum + item.count, 0);
-    const previousTotal = previous.reduce((sum, item) => sum + item.count, 0);
-    const changeRate =
-      previousTotal > 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0;
-
-    return {
-      period: label,
-      current: currentTotal,
-      previous: previousTotal,
-      changeRate: Math.round(changeRate * 10) / 10,
     };
   }
 

@@ -10,8 +10,6 @@ import {
 import { ReportStatus } from '@domain/counsel-report/model/value-objects/report-status';
 import { ChildProfileEntity } from './child-profile.entity';
 import { CounselRequestEntity } from './counsel-request.entity';
-import { CounselorProfileEntity } from './counselor-profile.entity';
-import { VoucherInstitutionEntity } from './voucher-institution.entity';
 
 /**
  * 면담결과지 Entity (Infrastructure Layer)
@@ -41,19 +39,13 @@ export class CounselReportEntity {
   @JoinColumn({ name: 'child_id' })
   child: ChildProfileEntity;
 
-  @Column('uuid', { name: 'counselor_id' })
-  counselorId: string;
+  /** 상담사 ID (레거시 - VoucherInstitution 시스템용, 현재 사용 안함) */
+  @Column('uuid', { name: 'counselor_id', nullable: true })
+  counselorId: string | null;
 
-  @ManyToOne(() => CounselorProfileEntity, (counselor) => counselor.userId)
-  @JoinColumn({ name: 'counselor_id' })
-  counselor: CounselorProfileEntity;
-
-  @Column('uuid', { name: 'institution_id' })
-  institutionId: string;
-
-  @ManyToOne(() => VoucherInstitutionEntity, (institution) => institution.userId)
-  @JoinColumn({ name: 'institution_id' })
-  institution: VoucherInstitutionEntity;
+  /** 기관 ID (레거시 - VoucherInstitution 시스템용, 현재 사용 안함) */
+  @Column('uuid', { name: 'institution_id', nullable: true })
+  institutionId: string | null;
 
   // ==================== Report Data ====================
 

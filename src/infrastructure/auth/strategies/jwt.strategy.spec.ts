@@ -1,6 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtStrategy } from './jwt.strategy';
+import { JwtStrategy, InstitutionJwtPayload } from './jwt.strategy';
 
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
@@ -29,12 +29,15 @@ describe('JwtStrategy', () => {
   });
 
   describe('validate', () => {
-    it('유효한 JWT 페이로드를 사용자 객체로 변환해야 함', async () => {
+    it('유효한 기관 JWT 페이로드를 사용자 객체로 변환해야 함', async () => {
       // Given
-      const payload = {
-        sub: 'test-user-id',
-        email: 'test@example.com',
-        role: 'USER',
+      const payload: InstitutionJwtPayload = {
+        sub: 'test-institution-id',
+        role: 'INSTITUTION',
+        facilityType: 'CARE_FACILITY',
+        facilityName: '테스트 기관',
+        district: '서울특별시 강남구',
+        isPasswordChanged: true,
         iat: Date.now(),
         exp: Date.now() + 900000, // 15분 후
       };
@@ -44,18 +47,25 @@ describe('JwtStrategy', () => {
 
       // Then
       expect(result).toEqual({
-        userId: 'test-user-id',
-        email: 'test@example.com',
-        role: 'USER',
+        userId: 'test-institution-id',
+        institutionId: 'test-institution-id',
+        facilityType: 'CARE_FACILITY',
+        facilityName: '테스트 기관',
+        district: '서울특별시 강남구',
+        role: 'INSTITUTION',
+        isPasswordChanged: true,
       });
     });
 
-    it('ADMIN 역할을 가진 사용자를 검증해야 함', async () => {
+    it('COMMUNITY_CENTER 타입 기관을 검증해야 함', async () => {
       // Given
-      const payload = {
-        sub: 'admin-user-id',
-        email: 'admin@example.com',
-        role: 'ADMIN',
+      const payload: InstitutionJwtPayload = {
+        sub: 'community-center-id',
+        role: 'INSTITUTION',
+        facilityType: 'COMMUNITY_CENTER',
+        facilityName: '지역아동센터',
+        district: '경기도 성남시',
+        isPasswordChanged: false,
         iat: Date.now(),
         exp: Date.now() + 900000,
       };
@@ -65,18 +75,25 @@ describe('JwtStrategy', () => {
 
       // Then
       expect(result).toEqual({
-        userId: 'admin-user-id',
-        email: 'admin@example.com',
-        role: 'ADMIN',
+        userId: 'community-center-id',
+        institutionId: 'community-center-id',
+        facilityType: 'COMMUNITY_CENTER',
+        facilityName: '지역아동센터',
+        district: '경기도 성남시',
+        role: 'INSTITUTION',
+        isPasswordChanged: false,
       });
     });
 
-    it('페이로드의 sub를 userId로 매핑해야 함', async () => {
+    it('페이로드의 sub를 userId와 institutionId로 매핑해야 함', async () => {
       // Given
-      const payload = {
-        sub: 'unique-user-id',
-        email: 'user@example.com',
-        role: 'USER',
+      const payload: InstitutionJwtPayload = {
+        sub: 'unique-institution-id',
+        role: 'INSTITUTION',
+        facilityType: 'CARE_FACILITY',
+        facilityName: '시설명',
+        district: '지역명',
+        isPasswordChanged: true,
       };
 
       // When
@@ -84,22 +101,27 @@ describe('JwtStrategy', () => {
 
       // Then
       expect(result.userId).toBe(payload.sub);
+      expect(result.institutionId).toBe(payload.sub);
     });
 
-    it('이메일과 역할을 그대로 반환해야 함', async () => {
+    it('기관 정보를 그대로 반환해야 함', async () => {
       // Given
-      const payload = {
+      const payload: InstitutionJwtPayload = {
         sub: 'test-id',
-        email: 'specific@example.com',
-        role: 'USER',
+        role: 'INSTITUTION',
+        facilityType: 'CARE_FACILITY',
+        facilityName: '특정 기관명',
+        district: '특정 지역',
+        isPasswordChanged: false,
       };
 
       // When
       const result = await strategy.validate(payload);
 
       // Then
-      expect(result.email).toBe(payload.email);
-      expect(result.role).toBe(payload.role);
+      expect(result.facilityName).toBe(payload.facilityName);
+      expect(result.district).toBe(payload.district);
+      expect(result.role).toBe('INSTITUTION');
     });
   });
 

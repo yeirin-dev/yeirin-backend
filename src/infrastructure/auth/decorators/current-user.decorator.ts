@@ -1,19 +1,17 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 /**
- * JWT 인증된 사용자 정보
- * - 사용자 기반 인증: userId, email, role
+ * JWT 인증된 시설 정보
  * - 시설 기반 인증: userId (=facilityId), role='INSTITUTION', facilityType, facilityName, district
  */
 export interface CurrentUserData {
-  userId: string;
-  email?: string; // 사용자 기반 인증에서만 존재
-  role: string;
-  institutionId?: string; // 시설 ID (시설 기반 인증에서 사용)
-  facilityType?: 'CARE_FACILITY' | 'COMMUNITY_CENTER'; // 시설 기반 인증
-  facilityName?: string; // 시설명 (시설 기반 인증)
-  district?: string; // 구/군 (시설 기반 인증)
-  isPasswordChanged?: boolean; // 첫 로그인 비밀번호 변경 여부 (시설 기반 인증)
+  userId: string; // facilityId와 동일 (기존 API 호환)
+  institutionId: string; // 시설 ID
+  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER';
+  facilityName: string;
+  district: string;
+  role: 'INSTITUTION';
+  isPasswordChanged: boolean;
 }
 
 /**

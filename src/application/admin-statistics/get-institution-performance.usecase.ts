@@ -7,6 +7,7 @@ import {
 
 /**
  * 기관 성과 통계 조회 Use Case
+ * NOTE: VoucherInstitution → CareFacility/CommunityChildCenter 전환
  */
 @Injectable()
 export class GetInstitutionPerformanceUseCase {
@@ -26,63 +27,41 @@ export class GetInstitutionPerformanceUseCase {
     const startDate = query?.startDate ? new Date(query.startDate) : undefined;
 
     // 병렬 조회
-    const [totalInstitutions, activeInstitutions, performanceMetrics] = await Promise.all([
+    const [totalInstitutions, activeInstitutions, childMetrics] = await Promise.all([
       this.statisticsRepository.countInstitutions(),
       this.statisticsRepository.countActiveInstitutions(),
-      this.statisticsRepository.getInstitutionPerformanceMetrics(
-        startDate,
-        endDate,
-        query?.sortBy || 'totalCounsel',
-        query?.limit || 20,
-      ),
+      this.statisticsRepository.getInstitutionChildMetrics(startDate, endDate, query?.limit || 20),
     ]);
 
-    // 기관별 성과 변환
-    const institutions: InstitutionPerformanceItemDto[] = performanceMetrics.map((item) => {
-      const completionRate =
-        item.totalCounselCount > 0
-          ? Math.round((item.completedCounselCount / item.totalCounselCount) * 1000) / 10
+    // 기관별 현황 변환
+    const institutions: InstitutionPerformanceItemDto[] = childMetrics.map((item) => {
+      const counselRequestRate =
+        item.totalChildCount > 0
+          ? Math.round((item.counselRequestCount / item.totalChildCount) * 1000) / 10
           : 0;
 
       return {
         institutionId: item.institutionId,
         institutionName: item.institutionName,
-        totalCounselCount: item.totalCounselCount,
-        completedCounselCount: item.completedCounselCount,
-        inProgressCounselCount: item.inProgressCounselCount,
-        averageRating: Math.round(item.averageRating * 10) / 10,
-        reviewCount: item.reviewCount,
-        completionRate,
-        averageProcessingDays: 0, // 추후 계산 로직 추가 필요
+        institutionType: item.institutionType,
+        totalChildCount: item.totalChildCount,
+        counselRequestCount: item.counselRequestCount,
+        counselRequestRate,
       };
     });
 
-    // 평균 완료율 계산
-    const averageCompletionRate =
-      institutions.length > 0
-        ? Math.round(
-            (institutions.reduce((sum, item) => sum + item.completionRate, 0) /
-              institutions.length) *
-              10,
-          ) / 10
-        : 0;
-
-    // 평균 평점 계산
-    const institutionsWithRating = institutions.filter((item) => item.averageRating > 0);
-    const averageRating =
-      institutionsWithRating.length > 0
-        ? Math.round(
-            (institutionsWithRating.reduce((sum, item) => sum + item.averageRating, 0) /
-              institutionsWithRating.length) *
-              10,
-          ) / 10
-        : 0;
+    // 총 아동 수, 총 상담의뢰 수 계산
+    const totalChildren = institutions.reduce((sum, item) => sum + item.totalChildCount, 0);
+    const totalCounselRequests = institutions.reduce(
+      (sum, item) => sum + item.counselRequestCount,
+      0,
+    );
 
     return {
       totalInstitutions,
       activeInstitutions,
-      averageCompletionRate,
-      averageRating,
+      totalChildren,
+      totalCounselRequests,
       institutions,
     };
   }

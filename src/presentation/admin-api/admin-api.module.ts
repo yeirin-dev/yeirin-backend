@@ -8,7 +8,6 @@ import { AdminCounselRequestModule } from './counsel-request/admin-counsel-reque
 import { AdminDashboardModule } from './dashboard/admin-dashboard.module';
 import { AdminInstitutionModule } from './institution/admin-institution.module';
 import { AdminStatisticsModule } from './statistics/admin-statistics.module';
-import { AdminUserModule } from './user/admin-user.module';
 
 /**
  * Admin API Module
@@ -30,7 +29,6 @@ import { AdminUserModule } from './user/admin-user.module';
     }),
 
     // Admin Sub-Modules
-    AdminUserModule,
     AdminCounselRequestModule,
     AdminInstitutionModule,
     AdminStatisticsModule,

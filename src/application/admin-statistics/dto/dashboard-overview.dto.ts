@@ -47,14 +47,9 @@ export class AlertItemDto {
 
 /**
  * 대시보드 개요 응답 DTO
+ * NOTE: User 통계 필드 제거됨. 기관 기반 인증으로 전환.
  */
 export class DashboardOverviewDto {
-  @ApiProperty({ description: '전체 사용자 수' })
-  totalUsers: number;
-
-  @ApiProperty({ description: '활성 사용자 수 (최근 30일)' })
-  activeUsers: number;
-
   @ApiProperty({ description: '전체 상담의뢰 수' })
   totalCounselRequests: number;
 
@@ -75,9 +70,6 @@ export class DashboardOverviewDto {
 
   @ApiProperty({ description: '전체 아동 수' })
   totalChildren: number;
-
-  @ApiProperty({ description: '사용자 등록 트렌드', type: TrendDataDto })
-  userRegistrationTrend: TrendDataDto;
 
   @ApiProperty({ description: '상담의뢰 트렌드', type: TrendDataDto })
   counselRequestTrend: TrendDataDto;

@@ -1,20 +1,21 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
  * 리뷰 응답 DTO
+ * NOTE: institutionId, userId는 레거시 필드 (VoucherInstitution, User 제거됨)
  */
 export class ReviewResponseDto {
   @ApiProperty({ description: '리뷰 ID' })
   id: string;
 
-  @ApiProperty({ description: '리뷰 대상 기관 ID' })
-  institutionId: string;
+  @ApiPropertyOptional({ description: '리뷰 대상 기관 ID (레거시)' })
+  institutionId: string | null;
 
-  @ApiProperty({ description: '기관명' })
-  institutionName: string;
+  @ApiPropertyOptional({ description: '기관명' })
+  institutionName: string | null;
 
-  @ApiProperty({ description: '작성자 ID' })
-  userId: string;
+  @ApiPropertyOptional({ description: '작성자 ID (레거시)' })
+  userId: string | null;
 
   @ApiProperty({ description: '별점 (1-5)' })
   rating: number;

@@ -3,29 +3,26 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GetChildDemographicsUseCase } from '@application/admin-statistics/get-child-demographics.usecase';
 import { GetCounselRequestStatisticsUseCase } from '@application/admin-statistics/get-counsel-request-statistics.usecase';
 import { GetInstitutionPerformanceUseCase } from '@application/admin-statistics/get-institution-performance.usecase';
-import { GetUserStatisticsUseCase } from '@application/admin-statistics/get-user-statistics.usecase';
+import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
+import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
-import { UserEntity } from '@infrastructure/persistence/typeorm/entity/user.entity';
-import { VoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/voucher-institution.entity';
 import { AdminStatisticsRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/admin-statistics.repository.impl';
 import { AdminStatisticsController } from './admin-statistics.controller';
-
-// Use Cases
-
-// Repository
 
 /**
  * Admin Statistics Module
  * 통계 조회 Admin API
+ *
+ * NOTE: User 통계 기능 제거됨. 기관 기반 인증으로 전환.
  */
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      UserEntity,
       CounselRequestEntity,
       ChildProfileEntity,
-      VoucherInstitutionEntity,
+      CareFacilityEntity,
+      CommunityChildCenterEntity,
     ]),
   ],
   controllers: [AdminStatisticsController],
@@ -36,7 +33,6 @@ import { AdminStatisticsController } from './admin-statistics.controller';
       useClass: AdminStatisticsRepositoryImpl,
     },
     // Use Cases
-    GetUserStatisticsUseCase,
     GetCounselRequestStatisticsUseCase,
     GetInstitutionPerformanceUseCase,
     GetChildDemographicsUseCase,

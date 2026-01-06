@@ -9,11 +9,14 @@ import { ReportStatus, canTransitionTo, isCounselorEditable } from './value-obje
  * - 하나의 상담의뢰지(CounselRequest)에 여러 회차의 면담결과지가 작성됨
  * - 상담사가 작성 → 제출 → 보호자 확인 → 보호자 피드백 흐름
  */
+/**
+ * NOTE: counselorId, institutionId는 레거시 필드 (VoucherInstitution 제거됨)
+ */
 export interface CounselReportProps {
   counselRequestId: string; // 상담의뢰지 ID
   childId: string; // 아동 ID
-  counselorId: string; // 상담사 ID
-  institutionId: string; // 기관 ID
+  counselorId: string | null; // 상담사 ID (레거시)
+  institutionId: string | null; // 기관 ID (레거시)
   sessionNumber: number; // 회차 (1, 2, 3, ...)
   reportDate: Date; // 의뢰(작성)일자
   centerName: string; // 센터명
@@ -44,8 +47,8 @@ export class CounselReport {
   private readonly _id: string;
   private _counselRequestId: string;
   private _childId: string;
-  private _counselorId: string;
-  private _institutionId: string;
+  private _counselorId: string | null;
+  private _institutionId: string | null;
   private _sessionNumber: number;
   private _reportDate: Date;
   private _centerName: string;
@@ -99,11 +102,11 @@ export class CounselReport {
     return this._childId;
   }
 
-  get counselorId(): string {
+  get counselorId(): string | null {
     return this._counselorId;
   }
 
-  get institutionId(): string {
+  get institutionId(): string | null {
     return this._institutionId;
   }
 
@@ -181,8 +184,8 @@ export class CounselReport {
       return Result.fail(new DomainError('회차는 1 이상이어야 합니다.', 'INVALID_SESSION_NUMBER'));
     }
 
-    // 검증: 필수 필드
-    if (!props.counselRequestId || !props.childId || !props.counselorId || !props.institutionId) {
+    // 검증: 필수 필드 (counselorId, institutionId는 레거시로 nullable 허용)
+    if (!props.counselRequestId || !props.childId) {
       return Result.fail(new DomainError('필수 필드가 누락되었습니다.', 'MISSING_REQUIRED_FIELDS'));
     }
 
