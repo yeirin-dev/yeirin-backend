@@ -3,9 +3,12 @@ import { Result } from '@domain/shared/result';
 import { Rating } from './value-objects/rating.vo';
 import { ReviewContent } from './value-objects/review-content.vo';
 
+/**
+ * NOTE: institutionId, userId는 레거시 필드 (VoucherInstitution, User 제거됨)
+ */
 interface ReviewProps {
-  institutionId: string;
-  userId: string;
+  institutionId: string | null;
+  userId: string | null;
   rating: Rating;
   content: ReviewContent;
   helpfulCount: number;
@@ -35,11 +38,11 @@ export class Review extends AggregateRoot<ReviewProps> {
   }
 
   // Getters
-  get institutionId(): string {
+  get institutionId(): string | null {
     return this.props.institutionId;
   }
 
-  get userId(): string {
+  get userId(): string | null {
     return this.props.userId;
   }
 
@@ -139,16 +142,18 @@ export class Review extends AggregateRoot<ReviewProps> {
   /**
    * 수정 권한 검증
    * @param userId 수정을 시도하는 사용자 ID
+   * NOTE: 레거시 - userId가 null이면 권한 없음
    */
   public canModify(userId: string): boolean {
-    return this.props.userId === userId;
+    return this.props.userId !== null && this.props.userId === userId;
   }
 
   /**
    * 삭제 권한 검증
    * @param userId 삭제를 시도하는 사용자 ID
+   * NOTE: 레거시 - userId가 null이면 권한 없음
    */
   public canDelete(userId: string): boolean {
-    return this.props.userId === userId;
+    return this.props.userId !== null && this.props.userId === userId;
   }
 }

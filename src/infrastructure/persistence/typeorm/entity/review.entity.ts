@@ -2,28 +2,26 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { VoucherInstitutionEntity } from './voucher-institution.entity';
 
 /**
  * 리뷰 Entity
+ * NOTE: VoucherInstitution 시스템 제거로 FK 관계 해제됨. 컬럼만 유지.
  */
 @Entity('reviews')
 export class ReviewEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  /** 리뷰 대상 기관 ID */
-  @Column({ type: 'uuid' })
-  institutionId: string;
-
-  /** 작성자 ID (추후 User 엔티티 연결 예정) */
+  /** 리뷰 대상 기관 ID (레거시 - VoucherInstitution용, 현재 사용 안함) */
   @Column({ type: 'uuid', nullable: true })
-  userId: string;
+  institutionId: string | null;
+
+  /** 작성자 ID (레거시) */
+  @Column({ type: 'uuid', nullable: true })
+  userId: string | null;
 
   /** 작성자 닉네임 (비회원 또는 익명) */
   @Column({ type: 'varchar', length: 50 })
@@ -40,13 +38,6 @@ export class ReviewEntity {
   /** 도움이 됨 카운트 */
   @Column({ type: 'int', default: 0 })
   helpfulCount: number;
-
-  /** 리뷰 대상 기관 관계 */
-  @ManyToOne(() => VoucherInstitutionEntity, (institution) => institution.reviews, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'institutionId' })
-  institution: VoucherInstitutionEntity;
 
   @CreateDateColumn()
   createdAt: Date;

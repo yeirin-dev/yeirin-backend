@@ -6,6 +6,7 @@ import {
   Inject,
   NotFoundException,
   Param,
+  Patch,
   Post,
   UseGuards,
   ForbiddenException,
@@ -15,6 +16,10 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { ChildResponseDto } from '@application/child/dto/child-response.dto';
 import { RegisterChildDto } from '@application/child/dto/register-child.dto';
+import { UpdateChildDto } from '@application/child/dto/update-child.dto';
+import { BirthDate } from '@domain/child/model/value-objects/birth-date.vo';
+import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
+import { Gender } from '@domain/child/model/value-objects/gender.vo';
 import { RegisterChildUseCase } from '@application/child/use-cases/register-child/register-child.use-case';
 import {
   CurrentUser,
@@ -148,6 +153,84 @@ export class ChildController {
     }
 
     return ChildResponseDto.fromDomain(child);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: '아동 정보 수정' })
+  @ApiResponse({
+    status: 200,
+    description: '아동 정보 수정 성공',
+    type: ChildResponseDto,
+  })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  @ApiResponse({ status: 403, description: '수정 권한 없음' })
+  @ApiResponse({ status: 404, description: '아동을 찾을 수 없음' })
+  async updateChild(
+    @CurrentUser() user: CurrentUserData,
+    @Param('id') id: string,
+    @Body() dto: UpdateChildDto,
+  ): Promise<ChildResponseDto> {
+    // 아동 존재 확인
+    const child = await this.childRepository.findById(id);
+    if (!child) {
+      throw new NotFoundException('아동을 찾을 수 없습니다.');
+    }
+
+    // 시설 인증인지 확인
+    if (user.role !== 'INSTITUTION' || !user.institutionId) {
+      throw new ForbiddenException('시설 로그인이 필요합니다.');
+    }
+
+    // 권한 확인: 해당 시설의 아동인지 확인
+    const hasPermission =
+      (child.careFacilityId && child.careFacilityId === user.institutionId) ||
+      (child.communityChildCenterId && child.communityChildCenterId === user.institutionId);
+
+    if (!hasPermission) {
+      throw new ForbiddenException('이 아동을 수정할 권한이 없습니다.');
+    }
+
+    // 이름 업데이트
+    if (dto.name !== undefined) {
+      const nameResult = ChildName.create(dto.name);
+      if (nameResult.isFailure) {
+        throw new BadRequestException(nameResult.getError().message);
+      }
+      child.updateName(nameResult.getValue());
+    }
+
+    // 생년월일 업데이트
+    if (dto.birthDate !== undefined) {
+      const birthDateResult = BirthDate.create(new Date(dto.birthDate));
+      if (birthDateResult.isFailure) {
+        throw new BadRequestException(birthDateResult.getError().message);
+      }
+      child.updateBirthDate(birthDateResult.getValue());
+    }
+
+    // 성별 업데이트
+    if (dto.gender !== undefined) {
+      const genderResult = Gender.create(dto.gender);
+      if (genderResult.isFailure) {
+        throw new BadRequestException(genderResult.getError().message);
+      }
+      child.updateGender(genderResult.getValue());
+    }
+
+    // 의료 정보 업데이트
+    if (dto.medicalInfo !== undefined) {
+      child.updateMedicalInfo(dto.medicalInfo);
+    }
+
+    // 특수 요구사항 업데이트
+    if (dto.specialNeeds !== undefined) {
+      child.updateSpecialNeeds(dto.specialNeeds);
+    }
+
+    // 저장
+    const updatedChild = await this.childRepository.save(child);
+
+    return ChildResponseDto.fromDomain(updatedChild);
   }
 
   @Delete(':id')

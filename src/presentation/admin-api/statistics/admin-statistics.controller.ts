@@ -3,7 +3,6 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { GetChildDemographicsUseCase } from '@application/admin-statistics/get-child-demographics.usecase';
 import { GetCounselRequestStatisticsUseCase } from '@application/admin-statistics/get-counsel-request-statistics.usecase';
 import { GetInstitutionPerformanceUseCase } from '@application/admin-statistics/get-institution-performance.usecase';
-import { GetUserStatisticsUseCase } from '@application/admin-statistics/get-user-statistics.usecase';
 import { Roles } from '@infrastructure/auth/decorators/roles.decorator';
 import {
   AdminPermissions,
@@ -14,11 +13,11 @@ import {
   AdminDateRangeQueryDto,
 } from '@yeirin/admin-common';
 
-// Use Cases
-
 /**
  * Admin Statistics Controller
  * 통계 조회 Admin API
+ *
+ * NOTE: User 통계 기능 제거됨. 기관 기반 인증으로 전환.
  *
  * @route /admin/statistics
  */
@@ -30,26 +29,10 @@ import {
 @ApiBearerAuth()
 export class AdminStatisticsController {
   constructor(
-    private readonly getUserStatisticsUseCase: GetUserStatisticsUseCase,
     private readonly getCounselRequestStatisticsUseCase: GetCounselRequestStatisticsUseCase,
     private readonly getInstitutionPerformanceUseCase: GetInstitutionPerformanceUseCase,
     private readonly getChildDemographicsUseCase: GetChildDemographicsUseCase,
   ) {}
-
-  /**
-   * 사용자 통계 조회
-   */
-  @Get('users')
-  @AdminPermissions(ADMIN_PERMISSIONS.STATISTICS_READ)
-  @SkipAdminAudit()
-  @ApiOperation({
-    summary: '사용자 통계 조회',
-    description: '역할별 분포, 가입 추이, 활동 현황 등 사용자 관련 통계를 조회합니다.',
-  })
-  @ApiResponse({ status: 200, description: '조회 성공' })
-  async getUserStatistics(@Query() query: AdminDateRangeQueryDto) {
-    return this.getUserStatisticsUseCase.execute(query);
-  }
 
   /**
    * 상담의뢰 통계 조회

@@ -47,9 +47,9 @@ export interface ChildProps {
 export class Child extends AggregateRoot {
   private readonly _id: string;
   private readonly _childType: ChildType;
-  private readonly _name: ChildName;
-  private readonly _birthDate: BirthDate;
-  private readonly _gender: Gender;
+  private _name: ChildName;
+  private _birthDate: BirthDate;
+  private _gender: Gender;
 
   // 기관 연결 (아동 유형에 따라 선택적)
   private _careFacilityId: string | null;
@@ -195,6 +195,30 @@ export class Child extends AggregateRoot {
    */
   public getAge(): number {
     return this._birthDate.getAge();
+  }
+
+  /**
+   * 이름 업데이트
+   */
+  public updateName(name: ChildName): void {
+    this._name = name;
+    this._updatedAt = new Date();
+  }
+
+  /**
+   * 생년월일 업데이트
+   */
+  public updateBirthDate(birthDate: BirthDate): void {
+    this._birthDate = birthDate;
+    this._updatedAt = new Date();
+  }
+
+  /**
+   * 성별 업데이트
+   */
+  public updateGender(gender: Gender): void {
+    this._gender = gender;
+    this._updatedAt = new Date();
   }
 
   /**

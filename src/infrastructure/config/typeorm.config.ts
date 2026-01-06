@@ -7,11 +7,8 @@ import { CommunityChildCenterEntity } from '../persistence/typeorm/entity/commun
 import { CounselReportEntity } from '../persistence/typeorm/entity/counsel-report.entity';
 import { CounselRequestRecommendationEntity } from '../persistence/typeorm/entity/counsel-request-recommendation.entity';
 import { CounselRequestEntity } from '../persistence/typeorm/entity/counsel-request.entity';
-import { CounselorProfileEntity } from '../persistence/typeorm/entity/counselor-profile.entity';
 import { PsychologicalStatusLogEntity } from '../persistence/typeorm/entity/psychological-status-log.entity';
 import { ReviewEntity } from '../persistence/typeorm/entity/review.entity';
-import { UserEntity } from '../persistence/typeorm/entity/user.entity';
-import { VoucherInstitutionEntity } from '../persistence/typeorm/entity/voucher-institution.entity';
 
 export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => {
   const isDevelopment = configService.get<string>('NODE_ENV') !== 'production';
@@ -29,11 +26,7 @@ export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOpt
     // RDS 연결 시 SSL 필수 (로컬 DB는 SSL 불필요)
     ssl: isLocalDb ? false : { rejectUnauthorized: false },
     entities: [
-      // Core User & Profile
-      UserEntity,
-      VoucherInstitutionEntity,
-      CounselorProfileEntity,
-      // Child & Care
+      // Child & Care Facilities
       ChildProfileEntity,
       CareFacilityEntity,
       CommunityChildCenterEntity,

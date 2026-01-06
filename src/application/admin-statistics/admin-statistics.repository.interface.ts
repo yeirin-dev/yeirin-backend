@@ -2,53 +2,10 @@
  * Admin Statistics Repository Interface
  * 관리자 통계 조회를 위한 읽기 전용 Repository
  * (Application Layer - 통계 집계용 쿼리 전용)
+ *
+ * NOTE: 이메일 기반 User 통계 기능 제거됨. 기관 기반 인증으로 전환.
  */
 export interface AdminStatisticsRepository {
-  // ============ User Statistics ============
-
-  /**
-   * 역할별 사용자 수 조회
-   */
-  countUsersByRole(): Promise<Record<string, number>>;
-
-  /**
-   * 활성 사용자 수 조회 (최근 N일간 로그인)
-   */
-  countActiveUsers(days: number): Promise<number>;
-
-  /**
-   * 비활성 사용자 수 조회
-   */
-  countInactiveUsers(): Promise<number>;
-
-  /**
-   * 정지된 사용자 수 조회
-   */
-  countBannedUsers(): Promise<number>;
-
-  /**
-   * 이메일 인증 완료 사용자 수 조회
-   */
-  countEmailVerifiedUsers(): Promise<number>;
-
-  /**
-   * 기간별 신규 가입 수 조회
-   */
-  getRegistrationTrend(
-    startDate: Date,
-    endDate: Date,
-    period: 'day' | 'week' | 'month',
-  ): Promise<{ period: string; count: number }[]>;
-
-  /**
-   * 기간별 로그인 활동 조회
-   */
-  getLoginActivityTrend(
-    startDate: Date,
-    endDate: Date,
-    period: 'day' | 'week' | 'month',
-  ): Promise<{ period: string; count: number }[]>;
-
   // ============ Counsel Request Statistics ============
 
   /**
@@ -83,35 +40,32 @@ export interface AdminStatisticsRepository {
    */
   getAverageMatchingHours(startDate?: Date, endDate?: Date): Promise<number>;
 
-  // ============ Institution Statistics ============
+  // ============ Institution Statistics (CareFacility + CommunityChildCenter) ============
 
   /**
-   * 전체 기관 수 조회
+   * 전체 시설 수 조회 (양육시설 + 지역아동센터)
    */
   countInstitutions(): Promise<number>;
 
   /**
-   * 활성 기관 수 조회
+   * 활성 시설 수 조회
    */
   countActiveInstitutions(): Promise<number>;
 
   /**
-   * 기관별 성과 메트릭 조회
+   * 시설별 아동 현황 조회
    */
-  getInstitutionPerformanceMetrics(
+  getInstitutionChildMetrics(
     startDate?: Date,
     endDate?: Date,
-    sortBy?: 'totalCounsel' | 'completionRate' | 'rating',
     limit?: number,
   ): Promise<
     {
       institutionId: string;
       institutionName: string;
-      totalCounselCount: number;
-      completedCounselCount: number;
-      inProgressCounselCount: number;
-      averageRating: number;
-      reviewCount: number;
+      institutionType: 'CARE_FACILITY' | 'COMMUNITY_CENTER';
+      totalChildCount: number;
+      counselRequestCount: number;
     }[]
   >;
 

@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * 기관별 성과 데이터
+ * 기관별 아동 현황 데이터
+ * NOTE: VoucherInstitution → CareFacility/CommunityChildCenter 전환
  */
 export class InstitutionPerformanceItemDto {
   @ApiProperty({ description: '기관 ID' })
@@ -10,30 +11,22 @@ export class InstitutionPerformanceItemDto {
   @ApiProperty({ description: '기관명' })
   institutionName: string;
 
-  @ApiProperty({ description: '총 상담 수' })
-  totalCounselCount: number;
+  @ApiProperty({ description: '기관 유형', enum: ['CARE_FACILITY', 'COMMUNITY_CENTER'] })
+  institutionType: 'CARE_FACILITY' | 'COMMUNITY_CENTER';
 
-  @ApiProperty({ description: '완료 상담 수' })
-  completedCounselCount: number;
+  @ApiProperty({ description: '등록 아동 수' })
+  totalChildCount: number;
 
-  @ApiProperty({ description: '진행 중 상담 수' })
-  inProgressCounselCount: number;
+  @ApiProperty({ description: '상담의뢰 수' })
+  counselRequestCount: number;
 
-  @ApiProperty({ description: '평균 평점' })
-  averageRating: number;
-
-  @ApiProperty({ description: '리뷰 수' })
-  reviewCount: number;
-
-  @ApiProperty({ description: '완료율 (%)' })
-  completionRate: number;
-
-  @ApiProperty({ description: '평균 처리 시간 (일)' })
-  averageProcessingDays: number;
+  @ApiProperty({ description: '상담의뢰 비율 (%)' })
+  counselRequestRate: number;
 }
 
 /**
  * 기관 성과 통계 응답 DTO
+ * NOTE: VoucherInstitution → CareFacility/CommunityChildCenter 전환
  */
 export class InstitutionPerformanceDto {
   @ApiProperty({ description: '전체 기관 수' })
@@ -42,12 +35,12 @@ export class InstitutionPerformanceDto {
   @ApiProperty({ description: '활성 기관 수' })
   activeInstitutions: number;
 
-  @ApiProperty({ description: '평균 완료율 (%)' })
-  averageCompletionRate: number;
+  @ApiProperty({ description: '총 아동 수' })
+  totalChildren: number;
 
-  @ApiProperty({ description: '평균 평점' })
-  averageRating: number;
+  @ApiProperty({ description: '총 상담의뢰 수' })
+  totalCounselRequests: number;
 
-  @ApiProperty({ description: '기관별 성과 목록', type: [InstitutionPerformanceItemDto] })
+  @ApiProperty({ description: '기관별 현황 목록', type: [InstitutionPerformanceItemDto] })
   institutions: InstitutionPerformanceItemDto[];
 }

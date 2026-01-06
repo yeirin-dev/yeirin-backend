@@ -26,17 +26,17 @@ export class CounselReportResponseDto {
   })
   childId: string;
 
-  @ApiProperty({
-    description: '상담사 ID',
+  @ApiPropertyOptional({
+    description: '상담사 ID (레거시)',
     example: '123e4567-e89b-12d3-a456-426614174003',
   })
-  counselorId: string;
+  counselorId: string | null;
 
-  @ApiProperty({
-    description: '기관 ID',
+  @ApiPropertyOptional({
+    description: '기관 ID (레거시)',
     example: '123e4567-e89b-12d3-a456-426614174004',
   })
-  institutionId: string;
+  institutionId: string | null;
 
   @ApiProperty({
     description: '회차 (1회차, 2회차, ...)',

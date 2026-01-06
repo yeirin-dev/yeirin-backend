@@ -1,123 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AdminStatisticsRepository } from '@application/admin-statistics/admin-statistics.repository.interface';
+import { CareFacilityEntity } from '../entity/care-facility.entity';
 import { ChildProfileEntity } from '../entity/child-profile.entity';
+import { CommunityChildCenterEntity } from '../entity/community-child-center.entity';
 import { CounselRequestEntity } from '../entity/counsel-request.entity';
-import { ReviewEntity } from '../entity/review.entity';
-import { UserEntity } from '../entity/user.entity';
-import { VoucherInstitutionEntity } from '../entity/voucher-institution.entity';
 
 /**
  * Admin Statistics Repository 구현체
  * 관리자 통계 조회를 위한 읽기 전용 Repository
+ *
+ * NOTE: 기관 기반 인증으로 전환됨. User 통계 기능 제거됨.
  */
 @Injectable()
 export class AdminStatisticsRepositoryImpl implements AdminStatisticsRepository {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(CounselRequestEntity)
     private readonly counselRequestRepository: Repository<CounselRequestEntity>,
     @InjectRepository(ChildProfileEntity)
     private readonly childProfileRepository: Repository<ChildProfileEntity>,
-    @InjectRepository(VoucherInstitutionEntity)
-    private readonly institutionRepository: Repository<VoucherInstitutionEntity>,
+    @InjectRepository(CareFacilityEntity)
+    private readonly careFacilityRepository: Repository<CareFacilityEntity>,
+    @InjectRepository(CommunityChildCenterEntity)
+    private readonly communityChildCenterRepository: Repository<CommunityChildCenterEntity>,
   ) {}
-
-  // ============ User Statistics ============
-
-  async countUsersByRole(): Promise<Record<string, number>> {
-    const result = await this.userRepository
-      .createQueryBuilder('user')
-      .select('user.role', 'role')
-      .addSelect('COUNT(*)', 'count')
-      .groupBy('user.role')
-      .getRawMany();
-
-    return result.reduce(
-      (acc, item) => {
-        acc[item.role] = parseInt(item.count, 10);
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-  }
-
-  async countActiveUsers(days: number): Promise<number> {
-    const dateThreshold = new Date();
-    dateThreshold.setDate(dateThreshold.getDate() - days);
-
-    return this.userRepository.count({
-      where: {
-        lastLoginAt: MoreThanOrEqual(dateThreshold),
-        isActive: true,
-        isBanned: false,
-      },
-    });
-  }
-
-  async countInactiveUsers(): Promise<number> {
-    return this.userRepository.count({
-      where: { isActive: false },
-    });
-  }
-
-  async countBannedUsers(): Promise<number> {
-    return this.userRepository.count({
-      where: { isBanned: true },
-    });
-  }
-
-  async countEmailVerifiedUsers(): Promise<number> {
-    return this.userRepository.count({
-      where: { isEmailVerified: true },
-    });
-  }
-
-  async getRegistrationTrend(
-    startDate: Date,
-    endDate: Date,
-    period: 'day' | 'week' | 'month',
-  ): Promise<{ period: string; count: number }[]> {
-    const format = this.getDateFormat(period);
-
-    const result = await this.userRepository
-      .createQueryBuilder('user')
-      .select(`TO_CHAR(user.createdAt, '${format}')`, 'period')
-      .addSelect('COUNT(*)', 'count')
-      .where('user.createdAt BETWEEN :startDate AND :endDate', { startDate, endDate })
-      .groupBy(`TO_CHAR(user.createdAt, '${format}')`)
-      .orderBy(`TO_CHAR(user.createdAt, '${format}')`, 'ASC')
-      .getRawMany();
-
-    return result.map((item) => ({
-      period: item.period,
-      count: parseInt(item.count, 10),
-    }));
-  }
-
-  async getLoginActivityTrend(
-    startDate: Date,
-    endDate: Date,
-    period: 'day' | 'week' | 'month',
-  ): Promise<{ period: string; count: number }[]> {
-    const format = this.getDateFormat(period);
-
-    const result = await this.userRepository
-      .createQueryBuilder('user')
-      .select(`TO_CHAR(user.lastLoginAt, '${format}')`, 'period')
-      .addSelect('COUNT(*)', 'count')
-      .where('user.lastLoginAt BETWEEN :startDate AND :endDate', { startDate, endDate })
-      .groupBy(`TO_CHAR(user.lastLoginAt, '${format}')`)
-      .orderBy(`TO_CHAR(user.lastLoginAt, '${format}')`, 'ASC')
-      .getRawMany();
-
-    return result.map((item) => ({
-      period: item.period,
-      count: parseInt(item.count, 10),
-    }));
-  }
 
   // ============ Counsel Request Statistics ============
 
@@ -211,8 +118,6 @@ export class AdminStatisticsRepositoryImpl implements AdminStatisticsRepository 
   }
 
   async getAverageMatchingHours(startDate?: Date, endDate?: Date): Promise<number> {
-    // 매칭 시간: PENDING → MATCHED로 전환된 시간 (정확한 계산을 위해서는 상태 변경 로그가 필요)
-    // 간단히 MATCHED 상태의 평균 처리 시간으로 대체
     const queryBuilder = this.counselRequestRepository
       .createQueryBuilder('cr')
       .select('AVG(EXTRACT(EPOCH FROM (cr.updatedAt - cr.createdAt)) / 3600)', 'avgHours')
@@ -226,99 +131,93 @@ export class AdminStatisticsRepositoryImpl implements AdminStatisticsRepository 
     return result?.avgHours ? parseFloat(result.avgHours) : 0;
   }
 
-  // ============ Institution Statistics ============
+  // ============ Institution Statistics (CareFacility + CommunityChildCenter) ============
 
   async countInstitutions(): Promise<number> {
-    return this.institutionRepository.count();
+    const careFacilityCount = await this.careFacilityRepository.count();
+    const communityChildCenterCount = await this.communityChildCenterRepository.count();
+    return careFacilityCount + communityChildCenterCount;
   }
 
   async countActiveInstitutions(): Promise<number> {
-    // VoucherInstitutionEntity에 isActive 필드가 없으므로
-    // 연결된 User의 isActive를 통해 확인
-    return this.institutionRepository
-      .createQueryBuilder('inst')
-      .innerJoin('inst.user', 'user')
-      .where('user.isActive = :isActive', { isActive: true })
-      .andWhere('user.isBanned = :isBanned', { isBanned: false })
-      .getCount();
+    const careFacilityCount = await this.careFacilityRepository.count({
+      where: { isActive: true },
+    });
+    const communityChildCenterCount = await this.communityChildCenterRepository.count({
+      where: { isActive: true },
+    });
+    return careFacilityCount + communityChildCenterCount;
   }
 
-  async getInstitutionPerformanceMetrics(
+  async getInstitutionChildMetrics(
     startDate?: Date,
     endDate?: Date,
-    sortBy?: 'totalCounsel' | 'completionRate' | 'rating',
     limit?: number,
   ): Promise<
     {
       institutionId: string;
       institutionName: string;
-      totalCounselCount: number;
-      completedCounselCount: number;
-      inProgressCounselCount: number;
-      averageRating: number;
-      reviewCount: number;
+      institutionType: 'CARE_FACILITY' | 'COMMUNITY_CENTER';
+      totalChildCount: number;
+      counselRequestCount: number;
     }[]
   > {
-    const queryBuilder = this.institutionRepository
-      .createQueryBuilder('inst')
-      .leftJoin('counsel_requests', 'cr', 'cr.matchedInstitutionId = inst.id')
-      .leftJoin('reviews', 'review', 'review.institutionId = inst.id')
-      .select('inst.id', 'institutionId')
-      .addSelect('inst.name', 'institutionName')
-      .addSelect('COUNT(DISTINCT cr.id)', 'totalCounselCount')
-      .addSelect(
-        "COUNT(DISTINCT CASE WHEN cr.status = 'COMPLETED' THEN cr.id END)",
-        'completedCounselCount',
-      )
-      .addSelect(
-        "COUNT(DISTINCT CASE WHEN cr.status = 'IN_PROGRESS' THEN cr.id END)",
-        'inProgressCounselCount',
-      )
-      .addSelect('COALESCE(AVG(review.rating), 0)', 'averageRating')
-      .addSelect('COUNT(DISTINCT review.id)', 'reviewCount')
-      .groupBy('inst.id')
-      .addGroupBy('inst.name');
+    // CareFacility 통계
+    const careFacilityQuery = this.careFacilityRepository
+      .createQueryBuilder('cf')
+      .leftJoin('child_profiles', 'child', 'child.careFacilityId = cf.id')
+      .leftJoin('counsel_requests', 'cr', 'cr.childId = child.id')
+      .select('cf.id', 'institutionId')
+      .addSelect('cf.name', 'institutionName')
+      .addSelect("'CARE_FACILITY'", 'institutionType')
+      .addSelect('COUNT(DISTINCT child.id)', 'totalChildCount')
+      .addSelect('COUNT(DISTINCT cr.id)', 'counselRequestCount')
+      .groupBy('cf.id')
+      .addGroupBy('cf.name');
 
     if (startDate && endDate) {
-      queryBuilder.andWhere(
+      careFacilityQuery.andWhere(
         '(cr.createdAt IS NULL OR cr.createdAt BETWEEN :startDate AND :endDate)',
-        {
-          startDate,
-          endDate,
-        },
+        { startDate, endDate },
       );
     }
 
-    // 정렬
-    switch (sortBy) {
-      case 'completionRate':
-        queryBuilder.orderBy(
-          "COUNT(DISTINCT CASE WHEN cr.status = 'COMPLETED' THEN cr.id END)",
-          'DESC',
-        );
-        break;
-      case 'rating':
-        queryBuilder.orderBy('COALESCE(AVG(review.rating), 0)', 'DESC');
-        break;
-      default:
-        queryBuilder.orderBy('COUNT(DISTINCT cr.id)', 'DESC');
+    // CommunityChildCenter 통계
+    const communityChildCenterQuery = this.communityChildCenterRepository
+      .createQueryBuilder('ccc')
+      .leftJoin('child_profiles', 'child', 'child.communityChildCenterId = ccc.id')
+      .leftJoin('counsel_requests', 'cr', 'cr.childId = child.id')
+      .select('ccc.id', 'institutionId')
+      .addSelect('ccc.name', 'institutionName')
+      .addSelect("'COMMUNITY_CENTER'", 'institutionType')
+      .addSelect('COUNT(DISTINCT child.id)', 'totalChildCount')
+      .addSelect('COUNT(DISTINCT cr.id)', 'counselRequestCount')
+      .groupBy('ccc.id')
+      .addGroupBy('ccc.name');
+
+    if (startDate && endDate) {
+      communityChildCenterQuery.andWhere(
+        '(cr.createdAt IS NULL OR cr.createdAt BETWEEN :startDate AND :endDate)',
+        { startDate, endDate },
+      );
     }
 
-    if (limit) {
-      queryBuilder.limit(limit);
-    }
+    const [careFacilityResults, communityChildCenterResults] = await Promise.all([
+      careFacilityQuery.getRawMany(),
+      communityChildCenterQuery.getRawMany(),
+    ]);
 
-    const result = await queryBuilder.getRawMany();
+    const combined = [...careFacilityResults, ...communityChildCenterResults]
+      .map((item) => ({
+        institutionId: item.institutionId,
+        institutionName: item.institutionName,
+        institutionType: item.institutionType as 'CARE_FACILITY' | 'COMMUNITY_CENTER',
+        totalChildCount: parseInt(item.totalChildCount, 10),
+        counselRequestCount: parseInt(item.counselRequestCount, 10),
+      }))
+      .sort((a, b) => b.totalChildCount - a.totalChildCount);
 
-    return result.map((item) => ({
-      institutionId: item.institutionId,
-      institutionName: item.institutionName,
-      totalCounselCount: parseInt(item.totalCounselCount, 10),
-      completedCounselCount: parseInt(item.completedCounselCount, 10),
-      inProgressCounselCount: parseInt(item.inProgressCounselCount, 10),
-      averageRating: parseFloat(item.averageRating) || 0,
-      reviewCount: parseInt(item.reviewCount, 10),
-    }));
+    return limit ? combined.slice(0, limit) : combined;
   }
 
   // ============ Child Statistics ============
@@ -362,7 +261,6 @@ export class AdminStatisticsRepositoryImpl implements AdminStatisticsRepository 
   }
 
   async countChildrenByAgeGroup(): Promise<Record<string, number>> {
-    // 연령대별 분류: 0-6, 7-12, 13-18
     const result = await this.childProfileRepository
       .createQueryBuilder('child')
       .select(
