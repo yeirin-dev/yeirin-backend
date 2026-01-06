@@ -91,7 +91,9 @@ describe('GetUsersAdminUseCase', () => {
     it('페이지와 limit을 지정하여 조회한다', async () => {
       // Given
       const query = createQuery({ page: 2, limit: 10 });
-      const mockUsers = [createMockUserEntity('user-11', 'user11@example.com', 'INSTITUTION_ADMIN')];
+      const mockUsers = [
+        createMockUserEntity('user-11', 'user11@example.com', 'INSTITUTION_ADMIN'),
+      ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 15]);
 
@@ -167,7 +169,13 @@ describe('GetUsersAdminUseCase', () => {
       // Given
       const query = createQuery({ status: UserStatusFilter.INACTIVE });
       const mockUsers = [
-        createMockUserEntity('inactive-user', 'inactive@example.com', 'INSTITUTION_ADMIN', false, false),
+        createMockUserEntity(
+          'inactive-user',
+          'inactive@example.com',
+          'INSTITUTION_ADMIN',
+          false,
+          false,
+        ),
       ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 1]);
@@ -184,7 +192,9 @@ describe('GetUsersAdminUseCase', () => {
     it('검색어로 이메일과 이름을 검색한다', async () => {
       // Given
       const query = createQuery({ search: 'test' });
-      const mockUsers = [createMockUserEntity('test-user', 'test@example.com', 'INSTITUTION_ADMIN')];
+      const mockUsers = [
+        createMockUserEntity('test-user', 'test@example.com', 'INSTITUTION_ADMIN'),
+      ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 1]);
 
@@ -202,7 +212,9 @@ describe('GetUsersAdminUseCase', () => {
     it('이메일 인증 여부로 필터링한다', async () => {
       // Given
       const query = createQuery({ isEmailVerified: true });
-      const mockUsers = [createMockUserEntity('verified-user', 'verified@example.com', 'INSTITUTION_ADMIN')];
+      const mockUsers = [
+        createMockUserEntity('verified-user', 'verified@example.com', 'INSTITUTION_ADMIN'),
+      ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 1]);
 

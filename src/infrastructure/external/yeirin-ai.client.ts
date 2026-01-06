@@ -230,9 +230,14 @@ export class YeirinAIClient {
       // Fire-and-forget 패턴이므로 에러 로깅만 하고 throw하지 않음
       // 상담의뢰지 생성 자체는 실패하지 않아야 함
       if (axios.isAxiosError(error)) {
+        const responseData = error.response?.data;
         this.logger.error(
           `통합 보고서 생성 요청 실패 - status: ${error.response?.status}, message: ${error.message}, counselRequestId: ${dto.counsel_request_id}`,
         );
+        // Pydantic 유효성 검사 오류 상세 내용 로깅 (422 에러의 경우)
+        if (responseData) {
+          this.logger.error(`에러 응답 상세: ${JSON.stringify(responseData, null, 2)}`);
+        }
       } else {
         this.logger.error(
           `통합 보고서 생성 요청 예상치 못한 에러 - counselRequestId: ${dto.counsel_request_id}`,

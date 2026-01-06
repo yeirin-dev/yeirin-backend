@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ChildRepository } from '@domain/child/repository/child.repository';
-import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { CounselRequestStatus } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
+import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import {
   InstitutionDashboardResponseDto,
   RecentActivityDto,
@@ -89,7 +89,12 @@ export class GetInstitutionDashboardUseCase {
   }
 
   private getRecentActivities(
-    counselRequests: { id: string; childId: string; status: CounselRequestStatus; updatedAt: Date }[],
+    counselRequests: {
+      id: string;
+      childId: string;
+      status: CounselRequestStatus;
+      updatedAt: Date;
+    }[],
     childMap: Map<string, string>,
   ): RecentActivityDto[] {
     // 최신순 정렬 후 10개 추출
