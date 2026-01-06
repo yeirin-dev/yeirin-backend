@@ -19,13 +19,7 @@ import { AdminUserController } from './admin-user.controller';
  * 사용자 관리 Admin API
  */
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      UserEntity,
-      CounselorProfileEntity,
-      CounselRequestEntity,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([UserEntity, CounselorProfileEntity, CounselRequestEntity])],
   controllers: [AdminUserController],
   providers: [
     // Repository

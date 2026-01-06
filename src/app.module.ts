@@ -20,11 +20,11 @@ import { CounselReportModule } from '@presentation/counsel-report/counsel-report
 import { CounselRequestModule } from '@presentation/counsel-request/counsel-request.module';
 import { CounselorProfileModule } from '@presentation/counselor/counselor-profile.module';
 import { InstitutionModule } from '@presentation/institution/institution.module';
+import { InstitutionDashboardModule } from '@presentation/institution-dashboard/institution-dashboard.module';
 import { MatchingModule } from '@presentation/matching/matching.module';
 import { ReviewModule } from '@presentation/review/review.module';
 import { UploadModule } from '@presentation/upload/upload.module';
 import { WebhookModule } from '@presentation/webhook/webhook.module';
-import { InstitutionDashboardModule } from '@presentation/institution-dashboard/institution-dashboard.module';
 
 @Module({
   imports: [

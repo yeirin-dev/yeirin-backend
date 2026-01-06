@@ -1,12 +1,12 @@
 import { Controller, Get, UseGuards, ForbiddenException } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
+import { InstitutionDashboardResponseDto } from '@application/institution-dashboard/dto/institution-dashboard-response.dto';
+import { GetInstitutionDashboardUseCase } from '@application/institution-dashboard/use-case/get-institution-dashboard.usecase';
 import {
   CurrentUser,
   CurrentUserData,
 } from '@infrastructure/auth/decorators/current-user.decorator';
-import { GetInstitutionDashboardUseCase } from '@application/institution-dashboard/use-case/get-institution-dashboard.usecase';
-import { InstitutionDashboardResponseDto } from '@application/institution-dashboard/dto/institution-dashboard-response.dto';
+import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 
 /**
  * 시설 대시보드 Controller
@@ -18,9 +18,7 @@ import { InstitutionDashboardResponseDto } from '@application/institution-dashbo
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class InstitutionDashboardController {
-  constructor(
-    private readonly getInstitutionDashboardUseCase: GetInstitutionDashboardUseCase,
-  ) {}
+  constructor(private readonly getInstitutionDashboardUseCase: GetInstitutionDashboardUseCase) {}
 
   @Get()
   @ApiOperation({

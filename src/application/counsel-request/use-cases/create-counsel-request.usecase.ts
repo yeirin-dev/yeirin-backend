@@ -128,14 +128,16 @@ export class CreateCounselRequestUseCase {
     );
 
     // 5. attached_assessments를 yeirin-ai 형식으로 변환
+    // NOTE: Pydantic은 int 타입에 float(예: 85.0)을 허용하지 않으므로 정수로 변환
     const attachedAssessmentsForReport: YeirinAIAttachedAssessmentDto[] = attachedAssessments.map(
       (a) => ({
         assessmentType: a.assessmentType,
         assessmentName: a.assessmentName,
         reportS3Key: a.reportS3Key,
         resultId: a.resultId,
-        totalScore: a.totalScore,
-        maxScore: a.maxScore,
+        // Pydantic int 타입 호환성: number → int 변환
+        totalScore: a.totalScore != null ? Math.round(a.totalScore) : null,
+        maxScore: a.maxScore != null ? Math.round(a.maxScore) : null,
         overallLevel: a.overallLevel,
         scoredAt: a.scoredAt,
         summary: a.summary

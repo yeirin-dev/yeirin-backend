@@ -16,11 +16,7 @@ type Permission = string;
  * - 각 역할별 권한 정의
  */
 export class UserRole {
-  private static readonly VALID_ROLES: UserRoleType[] = [
-    'INSTITUTION_ADMIN',
-    'COUNSELOR',
-    'ADMIN',
-  ];
+  private static readonly VALID_ROLES: UserRoleType[] = ['INSTITUTION_ADMIN', 'COUNSELOR', 'ADMIN'];
 
   /**
    * 역할별 권한 매핑 (Enterprise RBAC)
