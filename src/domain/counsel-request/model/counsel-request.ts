@@ -113,10 +113,16 @@ export class CounselRequest {
       formData.coverInfo.requestDate.day,
     );
 
-    // KPRC 검사 결과가 있으면 통합 보고서 생성 대기 상태로 설정
-    const hasKprcResult =
+    // 심리검사 결과가 있으면 통합 보고서 생성 대기 상태로 설정
+    // 새 포맷: attachedAssessments 확인
+    // 구 포맷(deprecated): assessmentReportS3Key + kprcSummary 확인
+    const hasNewFormatAssessments =
+      formData.testResults?.attachedAssessments &&
+      formData.testResults.attachedAssessments.length > 0;
+    const hasLegacyKprcResult =
       formData.testResults?.assessmentReportS3Key && formData.testResults?.kprcSummary;
-    const integratedReportStatus: IntegratedReportStatus | undefined = hasKprcResult
+    const hasAssessmentResults = hasNewFormatAssessments || hasLegacyKprcResult;
+    const integratedReportStatus: IntegratedReportStatus | undefined = hasAssessmentResults
       ? 'pending'
       : undefined;
 
