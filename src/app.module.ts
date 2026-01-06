@@ -19,7 +19,6 @@ import { CommunityChildCenterModule } from '@presentation/community-child-center
 import { CounselReportModule } from '@presentation/counsel-report/counsel-report.module';
 import { CounselRequestModule } from '@presentation/counsel-request/counsel-request.module';
 import { CounselorProfileModule } from '@presentation/counselor/counselor-profile.module';
-import { GuardianModule } from '@presentation/guardian/guardian.module';
 import { InstitutionModule } from '@presentation/institution/institution.module';
 import { MatchingModule } from '@presentation/matching/matching.module';
 import { ReviewModule } from '@presentation/review/review.module';
@@ -58,7 +57,6 @@ import { WebhookModule } from '@presentation/webhook/webhook.module';
     MatchingModule,
     ReviewModule,
     UploadModule,
-    GuardianModule,
     WebhookModule,
     // Admin API Module
     AdminApiModule,

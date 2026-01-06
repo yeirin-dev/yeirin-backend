@@ -194,9 +194,9 @@ export class CounselReportController {
   })
   async reviewCounselReport(
     @Param('id') id: string,
-    @CurrentUser('userId') guardianId: string,
+    @CurrentUser('userId') userId: string,
   ): Promise<CounselReportResponseDto> {
-    const result = await this.reviewCounselReportUseCase.execute(id, guardianId);
+    const result = await this.reviewCounselReportUseCase.execute(id, userId);
 
     if (result.isFailure) {
       throw new HttpException(
@@ -225,9 +225,9 @@ export class CounselReportController {
   async approveCounselReport(
     @Param('id') id: string,
     @Body() dto: ApproveCounselReportDto,
-    @CurrentUser('userId') guardianId: string,
+    @CurrentUser('userId') userId: string,
   ): Promise<CounselReportResponseDto> {
-    const result = await this.approveCounselReportUseCase.execute(id, dto, guardianId);
+    const result = await this.approveCounselReportUseCase.execute(id, dto, userId);
 
     if (result.isFailure) {
       throw new HttpException(

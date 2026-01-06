@@ -8,7 +8,6 @@ import { CounselReportEntity } from '../persistence/typeorm/entity/counsel-repor
 import { CounselRequestRecommendationEntity } from '../persistence/typeorm/entity/counsel-request-recommendation.entity';
 import { CounselRequestEntity } from '../persistence/typeorm/entity/counsel-request.entity';
 import { CounselorProfileEntity } from '../persistence/typeorm/entity/counselor-profile.entity';
-import { GuardianProfileEntity } from '../persistence/typeorm/entity/guardian-profile.entity';
 import { PsychologicalStatusLogEntity } from '../persistence/typeorm/entity/psychological-status-log.entity';
 import { ReviewEntity } from '../persistence/typeorm/entity/review.entity';
 import { UserEntity } from '../persistence/typeorm/entity/user.entity';
@@ -32,7 +31,6 @@ export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOpt
     entities: [
       // Core User & Profile
       UserEntity,
-      GuardianProfileEntity,
       VoucherInstitutionEntity,
       CounselorProfileEntity,
       // Child & Care

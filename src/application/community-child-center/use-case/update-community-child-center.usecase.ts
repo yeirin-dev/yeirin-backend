@@ -2,20 +2,19 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { Address } from '@domain/common/value-objects/address.vo';
 import { InstitutionName } from '@domain/common/value-objects/institution-name.vo';
 import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { CommunityChildCenterResponseDto } from '../dto/community-child-center-response.dto';
 import { UpdateCommunityChildCenterDto } from '../dto/update-community-child-center.dto';
 
 /**
  * 지역아동센터 수정 유스케이스
+ *
+ * NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
  */
 @Injectable()
 export class UpdateCommunityChildCenterUseCase {
   constructor(
     @Inject('CommunityChildCenterRepository')
     private readonly communityChildCenterRepository: CommunityChildCenterRepository,
-    @Inject('GuardianProfileRepository')
-    private readonly guardianProfileRepository: GuardianProfileRepository,
   ) {}
 
   async execute(
@@ -107,8 +106,8 @@ export class UpdateCommunityChildCenterUseCase {
     // 저장
     const savedCenter = await this.communityChildCenterRepository.save(center);
 
-    // 소속 선생님 수 조회
-    const teacherCount = await this.guardianProfileRepository.countByCommunityChildCenterId(id);
+    // NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
+    const teacherCount = 0;
 
     return {
       id: savedCenter.id,

@@ -3,13 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Address } from '@domain/common/value-objects/address.vo';
 import { InstitutionName } from '@domain/common/value-objects/institution-name.vo';
 import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { GetCommunityChildCenterUseCase } from './get-community-child-center.usecase';
 
 describe('GetCommunityChildCenterUseCase', () => {
   let useCase: GetCommunityChildCenterUseCase;
   let mockCenterRepository: jest.Mocked<CommunityChildCenterRepository>;
-  let mockGuardianProfileRepository: jest.Mocked<GuardianProfileRepository>;
 
   beforeEach(async () => {
     mockCenterRepository = {
@@ -25,30 +23,12 @@ describe('GetCommunityChildCenterUseCase', () => {
       getDistinctDistricts: jest.fn(),
     };
 
-    mockGuardianProfileRepository = {
-      findById: jest.fn(),
-      findByUserId: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      findByGuardianType: jest.fn(),
-      findByCareFacilityId: jest.fn(),
-      findByCommunityChildCenterId: jest.fn(),
-      exists: jest.fn(),
-      countByCareFacilityId: jest.fn(),
-      countByCommunityChildCenterId: jest.fn(),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetCommunityChildCenterUseCase,
         {
           provide: 'CommunityChildCenterRepository',
           useValue: mockCenterRepository,
-        },
-        {
-          provide: 'GuardianProfileRepository',
-          useValue: mockGuardianProfileRepository,
         },
       ],
     }).compile();
@@ -86,7 +66,6 @@ describe('GetCommunityChildCenterUseCase', () => {
       const centerId = 'center-123';
       const mockCenter = createMockCenter(centerId);
       mockCenterRepository.findById.mockResolvedValue(mockCenter as any);
-      mockGuardianProfileRepository.countByCommunityChildCenterId.mockResolvedValue(3);
 
       // When
       const result = await useCase.execute(centerId);
@@ -94,7 +73,8 @@ describe('GetCommunityChildCenterUseCase', () => {
       // Then
       expect(result.id).toBe(centerId);
       expect(result.name).toBe('행복지역아동센터');
-      expect(result.teacherCount).toBe(3);
+      // NOTE: Institution-based login으로 전환됨 - teacherCount는 항상 0
+      expect(result.teacherCount).toBe(0);
       expect(mockCenterRepository.findById).toHaveBeenCalledWith(centerId);
     });
 
@@ -108,21 +88,18 @@ describe('GetCommunityChildCenterUseCase', () => {
       expect(mockCenterRepository.findById).toHaveBeenCalledWith(centerId);
     });
 
-    it('소속 선생님 수를 정확히 조회한다', async () => {
+    it('조회된 센터의 선생님 수는 항상 0이다', async () => {
       // Given
       const centerId = 'center-with-teachers';
       const mockCenter = createMockCenter(centerId);
       mockCenterRepository.findById.mockResolvedValue(mockCenter as any);
-      mockGuardianProfileRepository.countByCommunityChildCenterId.mockResolvedValue(5);
 
       // When
       const result = await useCase.execute(centerId);
 
       // Then
-      expect(result.teacherCount).toBe(5);
-      expect(mockGuardianProfileRepository.countByCommunityChildCenterId).toHaveBeenCalledWith(
-        centerId,
-      );
+      // NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
+      expect(result.teacherCount).toBe(0);
     });
   });
 
@@ -132,7 +109,6 @@ describe('GetCommunityChildCenterUseCase', () => {
       const centerId = 'center-123';
       const mockCenter = createMockCenter(centerId);
       mockCenterRepository.findById.mockResolvedValue(mockCenter as any);
-      mockGuardianProfileRepository.countByCommunityChildCenterId.mockResolvedValue(0);
 
       // When
       const result = await useCase.execute(centerId);

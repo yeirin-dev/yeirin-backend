@@ -9,7 +9,6 @@ import { GetChildAssessmentResultsUseCase } from '@application/counsel-request/u
 import { GetCounselRequestRecommendationsUseCase } from '@application/counsel-request/use-cases/get-counsel-request-recommendations.usecase';
 import { GetCounselRequestUseCase } from '@application/counsel-request/use-cases/get-counsel-request.usecase';
 import { GetCounselRequestsByChildUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-by-child.usecase';
-import { GetCounselRequestsByGuardianUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-by-guardian.usecase';
 import { GetCounselRequestsPaginatedUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-paginated.usecase';
 import { RequestCounselRequestRecommendationUseCase } from '@application/counsel-request/use-cases/request-counsel-request-recommendation.usecase';
 import { SelectRecommendedInstitutionUseCase } from '@application/counsel-request/use-cases/select-recommended-institution.usecase';
@@ -51,7 +50,6 @@ import { CounselRequestController } from './counsel-request.controller';
     CreateCounselRequestFromSouliUseCase,
     GetCounselRequestUseCase,
     GetCounselRequestsByChildUseCase,
-    GetCounselRequestsByGuardianUseCase,
     GetCounselRequestsPaginatedUseCase,
     UpdateCounselRequestUseCase,
     DeleteCounselRequestUseCase,

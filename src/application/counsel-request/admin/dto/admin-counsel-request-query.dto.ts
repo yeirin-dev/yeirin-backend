@@ -25,11 +25,6 @@ export class AdminCounselRequestQueryDto extends AdminDateRangeQueryDto {
   @IsEnum(CareType)
   careType?: CareType;
 
-  @ApiPropertyOptional({ description: '보호자 ID 필터' })
-  @IsOptional()
-  @IsUUID()
-  guardianId?: string;
-
   @ApiPropertyOptional({ description: '기관 ID 필터' })
   @IsOptional()
   @IsUUID()

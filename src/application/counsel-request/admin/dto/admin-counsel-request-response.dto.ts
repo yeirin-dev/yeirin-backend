@@ -18,12 +18,6 @@ export class AdminCounselRequestResponseDto {
   @ApiProperty({ description: '아동 이름' })
   childName: string;
 
-  @ApiProperty({ description: '보호자 ID' })
-  guardianId: string;
-
-  @ApiProperty({ description: '보호자 이름' })
-  guardianName: string;
-
   @ApiProperty({ description: '상태', enum: CounselRequestStatus })
   status: CounselRequestStatus;
 

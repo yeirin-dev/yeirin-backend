@@ -36,7 +36,6 @@ export class MatchCounselRequestUseCase {
     return {
       id: counselRequest.id,
       childId: counselRequest.childId,
-      guardianId: counselRequest.guardianId,
       status: counselRequest.status,
       formData: counselRequest.formData,
       centerName: counselRequest.centerName,

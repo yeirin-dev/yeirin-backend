@@ -22,11 +22,6 @@ export interface CounselRequestRepository {
   findByChildId(childId: string): Promise<CounselRequest[]>;
 
   /**
-   * 보호자 ID로 조회
-   */
-  findByGuardianId(guardianId: string): Promise<CounselRequest[]>;
-
-  /**
    * 상태별 조회
    */
   findByStatus(status: CounselRequestStatus): Promise<CounselRequest[]>;
@@ -59,22 +54,4 @@ export interface CounselRequestRepository {
    * 삭제 (Soft Delete 권장)
    */
   delete(id: string): Promise<void>;
-
-  /**
-   * 보호자별 상담의뢰 통계 조회
-   */
-  countByGuardianIdAndStatus(guardianId: string): Promise<{
-    total: number;
-    pending: number;
-    recommended: number;
-    matched: number;
-    inProgress: number;
-    completed: number;
-    rejected: number;
-  }>;
-
-  /**
-   * 보호자별 최근 활동 조회 (최근 N일간 변경된 상담의뢰)
-   */
-  findRecentByGuardianId(guardianId: string, days: number): Promise<CounselRequest[]>;
 }

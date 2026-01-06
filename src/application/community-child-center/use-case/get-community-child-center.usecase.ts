@@ -1,18 +1,17 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { CommunityChildCenterResponseDto } from '../dto/community-child-center-response.dto';
 
 /**
  * 지역아동센터 단건 조회 유스케이스
+ *
+ * NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
  */
 @Injectable()
 export class GetCommunityChildCenterUseCase {
   constructor(
     @Inject('CommunityChildCenterRepository')
     private readonly communityChildCenterRepository: CommunityChildCenterRepository,
-    @Inject('GuardianProfileRepository')
-    private readonly guardianProfileRepository: GuardianProfileRepository,
   ) {}
 
   async execute(id: string): Promise<CommunityChildCenterResponseDto> {
@@ -22,8 +21,8 @@ export class GetCommunityChildCenterUseCase {
       throw new NotFoundException(`지역아동센터를 찾을 수 없습니다 (ID: ${id})`);
     }
 
-    // 소속 선생님 수 조회
-    const teacherCount = await this.guardianProfileRepository.countByCommunityChildCenterId(id);
+    // NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
+    const teacherCount = 0;
 
     return {
       id: center.id,

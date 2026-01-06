@@ -15,14 +15,11 @@ describe('UpdateCounselRequestStatusAdminUseCase', () => {
       save: jest.fn(),
       findById: jest.fn(),
       findByChildId: jest.fn(),
-      findByGuardianId: jest.fn(),
       findByStatus: jest.fn(),
       findByInstitutionId: jest.fn(),
       findByCounselorId: jest.fn(),
       delete: jest.fn(),
       findAll: jest.fn(),
-      countByGuardianIdAndStatus: jest.fn(),
-      findRecentByGuardianId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

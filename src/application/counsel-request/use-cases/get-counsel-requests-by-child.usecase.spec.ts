@@ -8,26 +8,31 @@ import {
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
+import { S3Service } from '@infrastructure/storage/s3.service';
 import { GetCounselRequestsByChildUseCase } from './get-counsel-requests-by-child.usecase';
 
 describe('GetCounselRequestsByChildUseCase', () => {
   let useCase: GetCounselRequestsByChildUseCase;
   let mockRepository: jest.Mocked<CounselRequestRepository>;
+  let mockS3Service: jest.Mocked<S3Service>;
 
   beforeEach(async () => {
     mockRepository = {
       save: jest.fn(),
       findById: jest.fn(),
       findByChildId: jest.fn(),
-      findByGuardianId: jest.fn(),
       findByStatus: jest.fn(),
       findByInstitutionId: jest.fn(),
       findByCounselorId: jest.fn(),
       findAll: jest.fn(),
       delete: jest.fn(),
-      countByGuardianIdAndStatus: jest.fn(),
-      findRecentByGuardianId: jest.fn(),
     };
+
+    mockS3Service = {
+      getPresignedUrl: jest.fn(),
+      uploadFile: jest.fn(),
+      deleteFile: jest.fn(),
+    } as unknown as jest.Mocked<S3Service>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -35,6 +40,10 @@ describe('GetCounselRequestsByChildUseCase', () => {
         {
           provide: 'CounselRequestRepository',
           useValue: mockRepository,
+        },
+        {
+          provide: S3Service,
+          useValue: mockS3Service,
         },
       ],
     }).compile();
@@ -77,7 +86,6 @@ describe('GetCounselRequestsByChildUseCase', () => {
     return CounselRequest.restore({
       id,
       childId,
-      guardianId: 'guardian-123',
       status,
       formData: createMockFormData(),
       centerName: '행복한 지역아동센터',
@@ -155,7 +163,6 @@ describe('GetCounselRequestsByChildUseCase', () => {
       // Then
       expect(result[0]).toHaveProperty('id');
       expect(result[0]).toHaveProperty('childId');
-      expect(result[0]).toHaveProperty('guardianId');
       expect(result[0]).toHaveProperty('status');
       expect(result[0]).toHaveProperty('formData');
       expect(result[0]).toHaveProperty('centerName');

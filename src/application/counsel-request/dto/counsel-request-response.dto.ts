@@ -16,9 +16,6 @@ export class CounselRequestResponseDto {
   @ApiProperty({ description: '아동 ID' })
   childId: string;
 
-  @ApiProperty({ description: '보호자 ID' })
-  guardianId: string;
-
   @ApiProperty({ description: '상태', enum: CounselRequestStatus })
   status: CounselRequestStatus;
 

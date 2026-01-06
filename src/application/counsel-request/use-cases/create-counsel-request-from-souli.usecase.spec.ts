@@ -24,14 +24,11 @@ describe('CreateCounselRequestFromSouliUseCase', () => {
       save: jest.fn(),
       findById: jest.fn(),
       findByChildId: jest.fn(),
-      findByGuardianId: jest.fn(),
       findByStatus: jest.fn(),
       findByInstitutionId: jest.fn(),
       findByCounselorId: jest.fn(),
       findAll: jest.fn(),
       delete: jest.fn(),
-      countByGuardianIdAndStatus: jest.fn(),
-      findRecentByGuardianId: jest.fn(),
     };
 
     mockYeirinAIClient = {
@@ -68,7 +65,6 @@ describe('CreateCounselRequestFromSouliUseCase', () => {
   const createBaseWebhookDto = (): SouliWebhookDto => ({
     souliSessionId: 'souli-session-12345',
     childId: '123e4567-e89b-12d3-a456-426614174001',
-    guardianId: '123e4567-e89b-12d3-a456-426614174002',
     coverInfo: {
       requestDate: { year: 2025, month: 1, day: 15 },
       centerName: '행복한 지역아동센터',
@@ -107,7 +103,6 @@ describe('CreateCounselRequestFromSouliUseCase', () => {
       // Then
       expect(result).toBeDefined();
       expect(result.childId).toBe(dto.childId);
-      expect(result.guardianId).toBe(dto.guardianId);
       expect(result.status).toBe(CounselRequestStatus.PENDING);
       expect(result.centerName).toBe('행복한 지역아동센터');
       expect(mockRepository.save).toHaveBeenCalledTimes(1);

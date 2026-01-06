@@ -30,7 +30,7 @@ export class GetCounselRequestDetailAdminUseCase {
     // 상담의뢰 조회 (관계 포함)
     const counselRequest = await this.counselRequestRepository.findOne({
       where: { id },
-      relations: ['child', 'guardian', 'guardian.user'],
+      relations: ['child'],
     });
 
     if (!counselRequest) {
@@ -59,8 +59,6 @@ export class GetCounselRequestDetailAdminUseCase {
       id: counselRequest.id,
       childId: counselRequest.childId,
       childName: counselRequest.child?.name || '',
-      guardianId: counselRequest.guardianId,
-      guardianName: counselRequest.guardian?.user?.realName || '',
       status: counselRequest.status,
       centerName: counselRequest.centerName,
       careType: counselRequest.careType,

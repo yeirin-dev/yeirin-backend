@@ -71,7 +71,7 @@ describe('GetUsersAdminUseCase', () => {
       // Given
       const query = createQuery();
       const mockUsers = [
-        createMockUserEntity('user-1', 'user1@example.com', 'GUARDIAN'),
+        createMockUserEntity('user-1', 'user1@example.com', 'INSTITUTION_ADMIN'),
         createMockUserEntity('user-2', 'user2@example.com', 'COUNSELOR'),
       ];
 
@@ -91,7 +91,7 @@ describe('GetUsersAdminUseCase', () => {
     it('페이지와 limit을 지정하여 조회한다', async () => {
       // Given
       const query = createQuery({ page: 2, limit: 10 });
-      const mockUsers = [createMockUserEntity('user-11', 'user11@example.com', 'GUARDIAN')];
+      const mockUsers = [createMockUserEntity('user-11', 'user11@example.com', 'INSTITUTION_ADMIN')];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 15]);
 
@@ -107,8 +107,8 @@ describe('GetUsersAdminUseCase', () => {
 
     it('역할로 필터링하여 조회한다', async () => {
       // Given
-      const query = createQuery({ role: UserRoleFilter.GUARDIAN });
-      const mockUsers = [createMockUserEntity('guardian-1', 'guardian@example.com', 'GUARDIAN')];
+      const query = createQuery({ role: UserRoleFilter.COUNSELOR });
+      const mockUsers = [createMockUserEntity('counselor-1', 'counselor@example.com', 'COUNSELOR')];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 1]);
 
@@ -118,7 +118,7 @@ describe('GetUsersAdminUseCase', () => {
       // Then
       expect(result.data.length).toBe(1);
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('user.role = :role', {
-        role: UserRoleFilter.GUARDIAN,
+        role: UserRoleFilter.COUNSELOR,
       });
     });
 
@@ -126,7 +126,7 @@ describe('GetUsersAdminUseCase', () => {
       // Given
       const query = createQuery({ status: UserStatusFilter.ACTIVE });
       const mockUsers = [
-        createMockUserEntity('active-user', 'active@example.com', 'GUARDIAN', true, false),
+        createMockUserEntity('active-user', 'active@example.com', 'INSTITUTION_ADMIN', true, false),
       ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 1]);
@@ -148,7 +148,7 @@ describe('GetUsersAdminUseCase', () => {
       // Given
       const query = createQuery({ status: UserStatusFilter.BANNED });
       const mockUsers = [
-        createMockUserEntity('banned-user', 'banned@example.com', 'GUARDIAN', false, true),
+        createMockUserEntity('banned-user', 'banned@example.com', 'INSTITUTION_ADMIN', false, true),
       ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 1]);
@@ -167,7 +167,7 @@ describe('GetUsersAdminUseCase', () => {
       // Given
       const query = createQuery({ status: UserStatusFilter.INACTIVE });
       const mockUsers = [
-        createMockUserEntity('inactive-user', 'inactive@example.com', 'GUARDIAN', false, false),
+        createMockUserEntity('inactive-user', 'inactive@example.com', 'INSTITUTION_ADMIN', false, false),
       ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 1]);
@@ -184,7 +184,7 @@ describe('GetUsersAdminUseCase', () => {
     it('검색어로 이메일과 이름을 검색한다', async () => {
       // Given
       const query = createQuery({ search: 'test' });
-      const mockUsers = [createMockUserEntity('test-user', 'test@example.com', 'GUARDIAN')];
+      const mockUsers = [createMockUserEntity('test-user', 'test@example.com', 'INSTITUTION_ADMIN')];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 1]);
 
@@ -202,7 +202,7 @@ describe('GetUsersAdminUseCase', () => {
     it('이메일 인증 여부로 필터링한다', async () => {
       // Given
       const query = createQuery({ isEmailVerified: true });
-      const mockUsers = [createMockUserEntity('verified-user', 'verified@example.com', 'GUARDIAN')];
+      const mockUsers = [createMockUserEntity('verified-user', 'verified@example.com', 'INSTITUTION_ADMIN')];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 1]);
 
@@ -220,8 +220,8 @@ describe('GetUsersAdminUseCase', () => {
       // Given
       const query = createQuery({ sortBy: 'email', sortOrder: SortOrder.ASC });
       const mockUsers = [
-        createMockUserEntity('user-1', 'aaa@example.com', 'GUARDIAN'),
-        createMockUserEntity('user-2', 'bbb@example.com', 'GUARDIAN'),
+        createMockUserEntity('user-1', 'aaa@example.com', 'INSTITUTION_ADMIN'),
+        createMockUserEntity('user-2', 'bbb@example.com', 'COUNSELOR'),
       ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockUsers as UserEntity[], 2]);
@@ -267,7 +267,7 @@ describe('GetUsersAdminUseCase', () => {
       const mockUser = createMockUserEntity(
         'user-123',
         'complete@example.com',
-        'GUARDIAN',
+        'INSTITUTION_ADMIN',
         true,
         true,
       );

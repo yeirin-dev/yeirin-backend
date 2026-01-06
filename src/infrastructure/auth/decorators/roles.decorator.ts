@@ -3,7 +3,7 @@ import { SetMetadata } from '@nestjs/common';
 /**
  * 사용자 역할 정의
  */
-export type UserRole = 'GUARDIAN' | 'INSTITUTION_ADMIN' | 'COUNSELOR' | 'ADMIN';
+export type UserRole = 'INSTITUTION_ADMIN' | 'COUNSELOR' | 'ADMIN';
 
 /**
  * 역할 메타데이터 키

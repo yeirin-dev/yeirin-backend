@@ -3,7 +3,7 @@ import { DomainError, Result } from '@domain/common/result';
 /**
  * 사용자 역할 타입
  */
-export type UserRoleType = 'GUARDIAN' | 'INSTITUTION_ADMIN' | 'COUNSELOR' | 'ADMIN';
+export type UserRoleType = 'INSTITUTION_ADMIN' | 'COUNSELOR' | 'ADMIN';
 
 /**
  * 권한 타입
@@ -17,7 +17,6 @@ type Permission = string;
  */
 export class UserRole {
   private static readonly VALID_ROLES: UserRoleType[] = [
-    'GUARDIAN',
     'INSTITUTION_ADMIN',
     'COUNSELOR',
     'ADMIN',
@@ -27,17 +26,14 @@ export class UserRole {
    * 역할별 권한 매핑 (Enterprise RBAC)
    */
   private static readonly ROLE_PERMISSIONS: Record<UserRoleType, Permission[]> = {
-    GUARDIAN: [
-      'view:own-children',
-      'request:counseling',
-      'view:counseling-reports',
-      'update:own-profile',
-    ],
     INSTITUTION_ADMIN: [
       'manage:institution',
       'manage:counselors',
       'view:institution-reports',
       'approve:counselors',
+      'view:own-children',
+      'request:counseling',
+      'view:counseling-reports',
       'update:own-profile',
     ],
     COUNSELOR: [
@@ -54,7 +50,6 @@ export class UserRole {
    * 역할 한글 이름
    */
   private static readonly DISPLAY_NAMES: Record<UserRoleType, string> = {
-    GUARDIAN: '보호자',
     INSTITUTION_ADMIN: '기관 대표',
     COUNSELOR: '상담사',
     ADMIN: '시스템 관리자',

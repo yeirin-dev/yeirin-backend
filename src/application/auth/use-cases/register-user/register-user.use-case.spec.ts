@@ -23,7 +23,7 @@ describe('RegisterUserUseCase', () => {
     password: 'Test1234!@#',
     realName: '홍길동',
     phoneNumber: '010-1234-5678',
-    role: 'GUARDIAN',
+    role: 'INSTITUTION_ADMIN',
   });
 
   describe('성공 케이스', () => {
@@ -41,7 +41,7 @@ describe('RegisterUserUseCase', () => {
       const user = result.getValue();
       expect(user.email.value).toBe('user@example.com');
       expect(user.realName.value).toBe('홍길동');
-      expect(user.role.value).toBe('GUARDIAN');
+      expect(user.role.value).toBe('INSTITUTION_ADMIN');
     });
 
     it('비밀번호는 해시화되어 저장된다', async () => {

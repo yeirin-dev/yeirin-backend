@@ -12,7 +12,6 @@ import { UserRole } from '@domain/user/model/value-objects/user-role.vo';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { RegisterCounselorUseCase } from './use-cases/register-counselor/register-counselor.use-case';
-import { RegisterGuardianUseCase } from './use-cases/register-guardian/register-guardian.use-case';
 import { RegisterInstitutionUseCase } from './use-cases/register-institution/register-institution.use-case';
 import { RegisterUserUseCase } from './use-cases/register-user/register-user.use-case';
 
@@ -29,7 +28,7 @@ describe('AuthService', () => {
       password: { value: '$2b$10$hashed_password', isHashed: true } as Password,
       realName: { value: '테스트사용자' } as RealName,
       phoneNumber: { value: '010-1234-5678' } as PhoneNumber,
-      role: { value: 'GUARDIAN' } as UserRole,
+      role: { value: 'INSTITUTION_ADMIN' } as UserRole,
       refreshToken: null,
       isEmailVerified: false,
       isActive: true,
@@ -70,10 +69,6 @@ describe('AuthService', () => {
       execute: jest.fn(),
     };
 
-    const mockRegisterGuardianUseCase = {
-      execute: jest.fn(),
-    };
-
     const mockRegisterInstitutionUseCase = {
       execute: jest.fn(),
     };
@@ -102,10 +97,6 @@ describe('AuthService', () => {
           useValue: mockRegisterUserUseCase,
         },
         {
-          provide: RegisterGuardianUseCase,
-          useValue: mockRegisterGuardianUseCase,
-        },
-        {
           provide: RegisterInstitutionUseCase,
           useValue: mockRegisterInstitutionUseCase,
         },
@@ -130,7 +121,7 @@ describe('AuthService', () => {
       password: 'Test1234!@',
       realName: '테스트',
       phoneNumber: '010-1234-5678',
-      role: 'GUARDIAN',
+      role: 'INSTITUTION_ADMIN',
     };
 
     it('성공적으로 회원가입하고 토큰을 반환한다', async () => {

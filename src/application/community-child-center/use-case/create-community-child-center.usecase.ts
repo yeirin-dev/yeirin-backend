@@ -3,20 +3,19 @@ import { Address } from '@domain/common/value-objects/address.vo';
 import { InstitutionName } from '@domain/common/value-objects/institution-name.vo';
 import { CommunityChildCenter } from '@domain/community-child-center/model/community-child-center';
 import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { CommunityChildCenterResponseDto } from '../dto/community-child-center-response.dto';
 import { CreateCommunityChildCenterDto } from '../dto/create-community-child-center.dto';
 
 /**
  * 지역아동센터 생성 유스케이스
+ *
+ * NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
  */
 @Injectable()
 export class CreateCommunityChildCenterUseCase {
   constructor(
     @Inject('CommunityChildCenterRepository')
     private readonly communityChildCenterRepository: CommunityChildCenterRepository,
-    @Inject('GuardianProfileRepository')
-    private readonly guardianProfileRepository: GuardianProfileRepository,
   ) {}
 
   async execute(dto: CreateCommunityChildCenterDto): Promise<CommunityChildCenterResponseDto> {
@@ -61,10 +60,8 @@ export class CreateCommunityChildCenterUseCase {
     // 저장
     const savedCenter = await this.communityChildCenterRepository.save(centerResult.getValue());
 
-    // 선생님 수 (새로 생성한 센터는 0)
-    const teacherCount = await this.guardianProfileRepository.countByCommunityChildCenterId(
-      savedCenter.id,
-    );
+    // NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
+    const teacherCount = 0;
 
     return {
       id: savedCenter.id,

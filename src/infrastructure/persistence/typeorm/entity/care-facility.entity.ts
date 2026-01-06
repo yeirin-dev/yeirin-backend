@@ -7,7 +7,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ChildProfileEntity } from './child-profile.entity';
-import { GuardianProfileEntity } from './guardian-profile.entity';
 
 /**
  * 양육시설 Entity
@@ -71,10 +70,6 @@ export class CareFacilityEntity {
   /** 활성화 여부 */
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
-
-  /** 소속 보호자(선생님) 목록 */
-  @OneToMany(() => GuardianProfileEntity, (guardian) => guardian.careFacility)
-  guardians: GuardianProfileEntity[];
 
   /** 소속 아동(고아) 목록 */
   @OneToMany(() => ChildProfileEntity, (child) => child.careFacility)

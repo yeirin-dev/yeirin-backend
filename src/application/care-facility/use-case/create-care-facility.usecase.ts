@@ -3,20 +3,20 @@ import { CareFacility } from '@domain/care-facility/model/care-facility';
 import { CareFacilityRepository } from '@domain/care-facility/repository/care-facility.repository';
 import { Address } from '@domain/common/value-objects/address.vo';
 import { InstitutionName } from '@domain/common/value-objects/institution-name.vo';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { CareFacilityResponseDto } from '../dto/care-facility-response.dto';
 import { CreateCareFacilityDto } from '../dto/create-care-facility.dto';
 
 /**
  * 양육시설 생성 유스케이스
+ *
+ * NOTE: Institution-based login으로 전환됨에 따라 개별 교사 계정 없이
+ * 시설 자체가 로그인 주체가 됨. teacherCount는 항상 0.
  */
 @Injectable()
 export class CreateCareFacilityUseCase {
   constructor(
     @Inject('CareFacilityRepository')
     private readonly careFacilityRepository: CareFacilityRepository,
-    @Inject('GuardianProfileRepository')
-    private readonly guardianProfileRepository: GuardianProfileRepository,
   ) {}
 
   async execute(dto: CreateCareFacilityDto): Promise<CareFacilityResponseDto> {
@@ -60,10 +60,8 @@ export class CreateCareFacilityUseCase {
     // 저장
     const savedFacility = await this.careFacilityRepository.save(facilityResult.getValue());
 
-    // 선생님 수 (새로 생성한 시설은 0)
-    const teacherCount = await this.guardianProfileRepository.countByCareFacilityId(
-      savedFacility.id,
-    );
+    // NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
+    const teacherCount = 0;
 
     return {
       id: savedFacility.id,

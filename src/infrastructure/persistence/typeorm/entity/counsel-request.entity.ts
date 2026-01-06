@@ -14,7 +14,6 @@ import {
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
 import { ChildProfileEntity } from './child-profile.entity';
-import { GuardianProfileEntity } from './guardian-profile.entity';
 
 @Entity('counsel_requests')
 @Index('idx_counsel_requests_status', ['status'])
@@ -30,13 +29,6 @@ export class CounselRequestEntity {
   @ManyToOne(() => ChildProfileEntity, { nullable: false })
   @JoinColumn({ name: 'child_id' })
   child: ChildProfileEntity;
-
-  @Column({ type: 'uuid', name: 'guardian_id' })
-  guardianId: string;
-
-  @ManyToOne(() => GuardianProfileEntity, { nullable: false })
-  @JoinColumn({ name: 'guardian_id', referencedColumnName: 'userId' })
-  guardian: GuardianProfileEntity;
 
   @Column({
     type: 'enum',

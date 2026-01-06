@@ -18,7 +18,7 @@ export class AdminUserResponseDto {
 
   @ApiProperty({
     description: '역할',
-    enum: ['GUARDIAN', 'INSTITUTION_ADMIN', 'COUNSELOR', 'ADMIN'],
+    enum: ['INSTITUTION_ADMIN', 'COUNSELOR', 'ADMIN'],
   })
   role: string;
 
@@ -51,16 +51,6 @@ export class AdminUserResponseDto {
  * Admin 사용자 상세 응답 DTO (프로필 정보 포함)
  */
 export class AdminUserDetailResponseDto extends AdminUserResponseDto {
-  @ApiPropertyOptional({ description: '보호자 프로필' })
-  guardianProfile?: {
-    id: string;
-    careFacilityId?: string;
-    careFacilityName?: string;
-    communityChildCenterId?: string;
-    communityChildCenterName?: string;
-    childrenCount: number;
-  };
-
   @ApiPropertyOptional({ description: '상담사 프로필' })
   counselorProfile?: {
     id: string;

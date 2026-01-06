@@ -6,23 +6,17 @@ import { GetCommunityChildCenterUseCase } from '@application/community-child-cen
 import { GetCommunityChildCentersUseCase } from '@application/community-child-center/use-case/get-community-child-centers.usecase';
 import { UpdateCommunityChildCenterUseCase } from '@application/community-child-center/use-case/update-community-child-center.usecase';
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
-import { GuardianProfileEntity } from '@infrastructure/persistence/typeorm/entity/guardian-profile.entity';
 import { CommunityChildCenterRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/community-child-center.repository.impl';
-import { GuardianProfileRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/guardian-profile.repository.impl';
 import { CommunityChildCenterController } from './community-child-center.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CommunityChildCenterEntity, GuardianProfileEntity])],
+  imports: [TypeOrmModule.forFeature([CommunityChildCenterEntity])],
   controllers: [CommunityChildCenterController],
   providers: [
     // Repository 제공
     {
       provide: 'CommunityChildCenterRepository',
       useClass: CommunityChildCenterRepositoryImpl,
-    },
-    {
-      provide: 'GuardianProfileRepository',
-      useClass: GuardianProfileRepositoryImpl,
     },
     // Use Cases
     GetCommunityChildCenterUseCase,

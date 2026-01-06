@@ -44,6 +44,7 @@ export enum PriorityReason {
 export enum Gender {
   MALE = 'MALE', // 남
   FEMALE = 'FEMALE', // 여
+  OTHER = 'OTHER', // 기타
 }
 
 /**

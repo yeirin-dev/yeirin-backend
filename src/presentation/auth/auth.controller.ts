@@ -4,13 +4,11 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Inject,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { AuthService } from '@application/auth/auth.service';
 import { AuthResponseDto } from '@application/auth/dto/auth-response.dto';
 import {
@@ -22,7 +20,6 @@ import {
 } from '@application/auth/dto/institution-auth.dto';
 import { LoginDto } from '@application/auth/dto/login.dto';
 import { RegisterCounselorDto } from '@application/auth/dto/register-counselor.dto';
-import { RegisterGuardianDto } from '@application/auth/dto/register-guardian.dto';
 import { RegisterInstitutionDto } from '@application/auth/dto/register-institution.dto';
 import { RegisterDto } from '@application/auth/dto/register.dto';
 import { InstitutionAuthService } from '@application/auth/institution-auth.service';
@@ -39,8 +36,6 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly institutionAuthService: InstitutionAuthService,
-    @Inject('GuardianProfileRepository')
-    private readonly guardianProfileRepository: GuardianProfileRepository,
   ) {}
 
   @Public()
@@ -49,21 +44,12 @@ export class AuthController {
     summary: '[DEPRECATED] 회원가입 - 역할별 엔드포인트 사용 권장',
     deprecated: true,
     description:
-      '⚠️ 이 엔드포인트는 곧 제거될 예정입니다. 역할별 회원가입 엔드포인트를 사용하세요: /auth/register/guardian, /auth/register/institution, /auth/register/counselor',
+      '⚠️ 이 엔드포인트는 곧 제거될 예정입니다. 역할별 회원가입 엔드포인트를 사용하세요: /auth/register/institution, /auth/register/counselor',
   })
   @ApiResponse({ status: 201, description: '회원가입 성공', type: AuthResponseDto })
   @ApiResponse({ status: 409, description: '이메일 중복' })
   async register(@Body() dto: RegisterDto): Promise<AuthResponseDto> {
     return await this.authService.register(dto);
-  }
-
-  @Public()
-  @Post('register/guardian')
-  @ApiOperation({ summary: '보호자 회원가입 (User + GuardianProfile 동시 생성)' })
-  @ApiResponse({ status: 201, description: '보호자 회원가입 성공', type: AuthResponseDto })
-  @ApiResponse({ status: 409, description: '이메일 중복 또는 회원가입 실패' })
-  async registerGuardian(@Body() dto: RegisterGuardianDto): Promise<AuthResponseDto> {
-    return await this.authService.registerGuardian(dto);
   }
 
   @Public()
@@ -120,27 +106,12 @@ export class AuthController {
   @ApiOperation({ summary: '현재 사용자 정보 조회' })
   @ApiResponse({ status: 200, description: '사용자 정보 조회 성공' })
   async getMe(@CurrentUser() user: CurrentUserData) {
-    // GUARDIAN 역할인 경우 guardian profile 정보도 함께 반환
-    let guardianProfile = null;
-    if (user.role === 'GUARDIAN') {
-      const profile = await this.guardianProfileRepository.findByUserId(user.userId);
-      if (profile) {
-        guardianProfile = {
-          id: profile.id,
-          guardianType: profile.guardianType,
-          careFacilityId: profile.careFacilityId,
-          communityChildCenterId: profile.communityChildCenterId,
-        };
-      }
-    }
-
     // 프론트엔드 User 타입과 호환되도록 userId를 id로 매핑
     return {
       id: user.userId,
       email: user.email,
       role: user.role,
       institutionId: user.institutionId,
-      guardianProfile,
     };
   }
 

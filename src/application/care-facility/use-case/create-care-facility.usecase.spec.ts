@@ -1,17 +1,14 @@
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CareFacility } from '@domain/care-facility/model/care-facility';
 import { CareFacilityRepository } from '@domain/care-facility/repository/care-facility.repository';
 import { Address } from '@domain/common/value-objects/address.vo';
 import { InstitutionName } from '@domain/common/value-objects/institution-name.vo';
-import { GuardianProfileRepository } from '@domain/guardian/repository/guardian-profile.repository';
 import { CreateCareFacilityDto } from '../dto/create-care-facility.dto';
 import { CreateCareFacilityUseCase } from './create-care-facility.usecase';
 
 describe('CreateCareFacilityUseCase', () => {
   let useCase: CreateCareFacilityUseCase;
   let mockCareFacilityRepository: jest.Mocked<CareFacilityRepository>;
-  let mockGuardianProfileRepository: jest.Mocked<GuardianProfileRepository>;
 
   beforeEach(async () => {
     mockCareFacilityRepository = {
@@ -27,30 +24,12 @@ describe('CreateCareFacilityUseCase', () => {
       getDistinctDistricts: jest.fn(),
     };
 
-    mockGuardianProfileRepository = {
-      findById: jest.fn(),
-      findByUserId: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      findByGuardianType: jest.fn(),
-      findByCareFacilityId: jest.fn(),
-      findByCommunityChildCenterId: jest.fn(),
-      exists: jest.fn(),
-      countByCareFacilityId: jest.fn(),
-      countByCommunityChildCenterId: jest.fn(),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateCareFacilityUseCase,
         {
           provide: 'CareFacilityRepository',
           useValue: mockCareFacilityRepository,
-        },
-        {
-          provide: 'GuardianProfileRepository',
-          useValue: mockGuardianProfileRepository,
         },
       ],
     }).compile();
@@ -100,7 +79,6 @@ describe('CreateCareFacilityUseCase', () => {
 
       mockCareFacilityRepository.existsByName.mockResolvedValue(false);
       mockCareFacilityRepository.save.mockResolvedValue(mockFacility as any);
-      mockGuardianProfileRepository.countByCareFacilityId.mockResolvedValue(0);
 
       // When
       const result = await useCase.execute(dto);
@@ -111,6 +89,7 @@ describe('CreateCareFacilityUseCase', () => {
       expect(result.representativeName).toBe('김원장');
       expect(result.capacity).toBe(50);
       expect(result.isActive).toBe(true);
+      // NOTE: Institution-based login으로 전환됨 - teacherCount는 항상 0
       expect(result.teacherCount).toBe(0);
       expect(mockCareFacilityRepository.existsByName).toHaveBeenCalledWith('새싹 보육원');
       expect(mockCareFacilityRepository.save).toHaveBeenCalled();
@@ -150,7 +129,6 @@ describe('CreateCareFacilityUseCase', () => {
 
       mockCareFacilityRepository.existsByName.mockResolvedValue(false);
       mockCareFacilityRepository.save.mockResolvedValue(mockFacility as any);
-      mockGuardianProfileRepository.countByCareFacilityId.mockResolvedValue(0);
 
       // When
       const result = await useCase.execute(dto);
@@ -176,16 +154,13 @@ describe('CreateCareFacilityUseCase', () => {
 
       mockCareFacilityRepository.existsByName.mockResolvedValue(false);
       mockCareFacilityRepository.save.mockResolvedValue(mockFacility as any);
-      mockGuardianProfileRepository.countByCareFacilityId.mockResolvedValue(0);
 
       // When
       const result = await useCase.execute(dto);
 
       // Then
+      // NOTE: Institution-based login으로 전환됨 - 개별 교사 계정 없음
       expect(result.teacherCount).toBe(0);
-      expect(mockGuardianProfileRepository.countByCareFacilityId).toHaveBeenCalledWith(
-        mockFacility.id,
-      );
     });
   });
 
@@ -208,7 +183,6 @@ describe('CreateCareFacilityUseCase', () => {
 
       mockCareFacilityRepository.existsByName.mockResolvedValue(false);
       mockCareFacilityRepository.save.mockResolvedValue(mockFacility as any);
-      mockGuardianProfileRepository.countByCareFacilityId.mockResolvedValue(3);
 
       // When
       const result = await useCase.execute(dto);
