@@ -38,7 +38,7 @@ export class GetCommunityChildCentersUseCase {
         address: center.address.address,
         addressDetail: center.address.addressDetail,
         postalCode: center.address.postalCode,
-        directorName: center.directorName,
+        representativeName: center.representativeName,
         phoneNumber: center.phoneNumber,
         capacity: center.capacity,
         establishedDate: center.establishedDate?.toISOString().split('T')[0] ?? null,

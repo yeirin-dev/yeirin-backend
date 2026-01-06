@@ -24,6 +24,7 @@ import { MatchingModule } from '@presentation/matching/matching.module';
 import { ReviewModule } from '@presentation/review/review.module';
 import { UploadModule } from '@presentation/upload/upload.module';
 import { WebhookModule } from '@presentation/webhook/webhook.module';
+import { InstitutionDashboardModule } from '@presentation/institution-dashboard/institution-dashboard.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { WebhookModule } from '@presentation/webhook/webhook.module';
     ReviewModule,
     UploadModule,
     WebhookModule,
+    InstitutionDashboardModule,
     // Admin API Module
     AdminApiModule,
   ],
