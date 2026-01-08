@@ -1,4 +1,12 @@
+import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Child } from '@domain/child/model/child';
+import { BirthDate } from '@domain/child/model/value-objects/birth-date.vo';
+import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
+import { ChildType, ChildTypeValue } from '@domain/child/model/value-objects/child-type.vo';
+import { Gender as ChildGender } from '@domain/child/model/value-objects/gender.vo';
+import { GenderType } from '@domain/child/model/value-objects/gender.vo';
+import { ChildRepository } from '@domain/child/repository/child.repository';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import {
   CareType,
@@ -9,12 +17,19 @@ import {
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { S3Service } from '@infrastructure/storage/s3.service';
+import { CounselRequestAuthContext } from './get-counsel-request.usecase';
 import { GetCounselRequestsByChildUseCase } from './get-counsel-requests-by-child.usecase';
 
 describe('GetCounselRequestsByChildUseCase', () => {
   let useCase: GetCounselRequestsByChildUseCase;
   let mockRepository: jest.Mocked<CounselRequestRepository>;
+  let mockChildRepository: jest.Mocked<ChildRepository>;
   let mockS3Service: jest.Mocked<S3Service>;
+
+  const mockAuthContext: CounselRequestAuthContext = {
+    institutionId: 'institution-123',
+    facilityType: 'CARE_FACILITY',
+  };
 
   beforeEach(async () => {
     mockRepository = {
@@ -26,6 +41,17 @@ describe('GetCounselRequestsByChildUseCase', () => {
       findByCounselorId: jest.fn(),
       findAll: jest.fn(),
       delete: jest.fn(),
+    };
+
+    mockChildRepository = {
+      save: jest.fn(),
+      findById: jest.fn(),
+      findByCareFacilityId: jest.fn(),
+      findByCommunityChildCenterId: jest.fn(),
+      delete: jest.fn(),
+      exists: jest.fn(),
+      countByCareFacilityId: jest.fn(),
+      countByCommunityChildCenterId: jest.fn(),
     };
 
     mockS3Service = {
@@ -40,6 +66,10 @@ describe('GetCounselRequestsByChildUseCase', () => {
         {
           provide: 'CounselRequestRepository',
           useValue: mockRepository,
+        },
+        {
+          provide: 'ChildRepository',
+          useValue: mockChildRepository,
         },
         {
           provide: S3Service,
@@ -96,18 +126,35 @@ describe('GetCounselRequestsByChildUseCase', () => {
     });
   };
 
+  const createMockChild = (id: string, careFacilityId: string | null): Child => {
+    return Child.restore(
+      {
+        childType: ChildType.create(ChildTypeValue.CARE_FACILITY).getValue(),
+        name: ChildName.create('홍길동').getValue(),
+        birthDate: BirthDate.create(new Date('2015-05-15')).getValue(),
+        gender: ChildGender.create(GenderType.MALE).getValue(),
+        careFacilityId,
+        communityChildCenterId: null,
+      },
+      id,
+      new Date(),
+    );
+  };
+
   describe('아동별 상담의뢰지 목록 조회', () => {
     it('아동 ID로 상담의뢰지 목록을 조회한다', async () => {
       // Given
       const childId = 'child-123';
+      const child = createMockChild(childId, 'institution-123');
       const counselRequests = [
         createCounselRequest('request-1', childId, CounselRequestStatus.PENDING),
         createCounselRequest('request-2', childId, CounselRequestStatus.COMPLETED),
       ];
+      mockChildRepository.findById.mockResolvedValue(child);
       mockRepository.findByChildId.mockResolvedValue(counselRequests);
 
       // When
-      const result = await useCase.execute(childId);
+      const result = await useCase.execute(childId, mockAuthContext);
 
       // Then
       expect(result).toHaveLength(2);
@@ -119,10 +166,12 @@ describe('GetCounselRequestsByChildUseCase', () => {
     it('상담의뢰지가 없는 아동 조회시 빈 배열을 반환한다', async () => {
       // Given
       const childId = 'child-no-requests';
+      const child = createMockChild(childId, 'institution-123');
+      mockChildRepository.findById.mockResolvedValue(child);
       mockRepository.findByChildId.mockResolvedValue([]);
 
       // When
-      const result = await useCase.execute(childId);
+      const result = await useCase.execute(childId, mockAuthContext);
 
       // Then
       expect(result).toHaveLength(0);
@@ -132,15 +181,17 @@ describe('GetCounselRequestsByChildUseCase', () => {
     it('여러 상태의 상담의뢰지를 모두 반환한다', async () => {
       // Given
       const childId = 'child-123';
+      const child = createMockChild(childId, 'institution-123');
       const counselRequests = [
         createCounselRequest('request-1', childId, CounselRequestStatus.PENDING),
         createCounselRequest('request-2', childId, CounselRequestStatus.IN_PROGRESS),
         createCounselRequest('request-3', childId, CounselRequestStatus.COMPLETED),
       ];
+      mockChildRepository.findById.mockResolvedValue(child);
       mockRepository.findByChildId.mockResolvedValue(counselRequests);
 
       // When
-      const result = await useCase.execute(childId);
+      const result = await useCase.execute(childId, mockAuthContext);
 
       // Then
       const statuses = result.map((r) => r.status);
@@ -148,17 +199,29 @@ describe('GetCounselRequestsByChildUseCase', () => {
       expect(statuses).toContain(CounselRequestStatus.IN_PROGRESS);
       expect(statuses).toContain(CounselRequestStatus.COMPLETED);
     });
+
+    it('다른 시설의 아동 상담의뢰지를 조회하면 ForbiddenException을 던진다', async () => {
+      // Given
+      const childId = 'child-123';
+      const child = createMockChild(childId, 'other-institution');
+      mockChildRepository.findById.mockResolvedValue(child);
+
+      // When & Then
+      await expect(useCase.execute(childId, mockAuthContext)).rejects.toThrow(ForbiddenException);
+    });
   });
 
   describe('응답 DTO 변환', () => {
     it('각 CounselRequest를 CounselRequestResponseDto로 변환한다', async () => {
       // Given
       const childId = 'child-123';
+      const child = createMockChild(childId, 'institution-123');
       const counselRequests = [createCounselRequest('request-1', childId)];
+      mockChildRepository.findById.mockResolvedValue(child);
       mockRepository.findByChildId.mockResolvedValue(counselRequests);
 
       // When
-      const result = await useCase.execute(childId);
+      const result = await useCase.execute(childId, mockAuthContext);
 
       // Then
       expect(result[0]).toHaveProperty('id');

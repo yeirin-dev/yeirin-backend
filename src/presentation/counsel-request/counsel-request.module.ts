@@ -9,6 +9,7 @@ import { GetChildAssessmentResultsUseCase } from '@application/counsel-request/u
 import { GetCounselRequestRecommendationsUseCase } from '@application/counsel-request/use-cases/get-counsel-request-recommendations.usecase';
 import { GetCounselRequestUseCase } from '@application/counsel-request/use-cases/get-counsel-request.usecase';
 import { GetCounselRequestsByChildUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-by-child.usecase';
+import { GetCounselRequestsByInstitutionUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-by-institution.usecase';
 import { GetCounselRequestsPaginatedUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-paginated.usecase';
 import { RequestCounselRequestRecommendationUseCase } from '@application/counsel-request/use-cases/request-counsel-request-recommendation.usecase';
 import { SelectRecommendedInstitutionUseCase } from '@application/counsel-request/use-cases/select-recommended-institution.usecase';
@@ -20,6 +21,7 @@ import { CounselRequestRecommendationEntity } from '@infrastructure/persistence/
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { CounselRequestRecommendationRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-request-recommendation.repository.impl';
 import { CounselRequestRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-request.repository.impl';
+import { ChildModule } from '@presentation/child/child.module';
 import { MatchingModule } from '@presentation/matching/matching.module';
 import { UploadModule } from '@presentation/upload/upload.module';
 import { CounselRequestController } from './counsel-request.controller';
@@ -28,6 +30,7 @@ import { CounselRequestController } from './counsel-request.controller';
   imports: [
     TypeOrmModule.forFeature([CounselRequestEntity, CounselRequestRecommendationEntity]),
     ConfigModule,
+    ChildModule, // ChildRepository 사용 (권한 검증)
     MatchingModule, // Matching Domain Service 사용 (DDD 패턴)
     UploadModule, // S3Service 사용 (통합 보고서 Presigned URL)
   ],
@@ -50,6 +53,7 @@ import { CounselRequestController } from './counsel-request.controller';
     CreateCounselRequestFromSouliUseCase,
     GetCounselRequestUseCase,
     GetCounselRequestsByChildUseCase,
+    GetCounselRequestsByInstitutionUseCase,
     GetCounselRequestsPaginatedUseCase,
     UpdateCounselRequestUseCase,
     DeleteCounselRequestUseCase,

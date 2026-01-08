@@ -34,11 +34,13 @@ import { GetChildAssessmentResultsUseCase } from '@application/counsel-request/u
 import { GetCounselRequestRecommendationsUseCase } from '@application/counsel-request/use-cases/get-counsel-request-recommendations.usecase';
 import { GetCounselRequestUseCase } from '@application/counsel-request/use-cases/get-counsel-request.usecase';
 import { GetCounselRequestsByChildUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-by-child.usecase';
+import { GetCounselRequestsByInstitutionUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-by-institution.usecase';
 import { GetCounselRequestsPaginatedUseCase } from '@application/counsel-request/use-cases/get-counsel-requests-paginated.usecase';
 import { RequestCounselRequestRecommendationUseCase } from '@application/counsel-request/use-cases/request-counsel-request-recommendation.usecase';
 import { SelectRecommendedInstitutionUseCase } from '@application/counsel-request/use-cases/select-recommended-institution.usecase';
 import { StartCounselingUseCase } from '@application/counsel-request/use-cases/start-counseling.usecase';
 import { UpdateCounselRequestUseCase } from '@application/counsel-request/use-cases/update-counsel-request.usecase';
+import { CurrentUser, CurrentUserData } from '@infrastructure/auth/decorators/current-user.decorator';
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 
@@ -52,6 +54,7 @@ export class CounselRequestController {
     private readonly createCounselRequestFromSouliUseCase: CreateCounselRequestFromSouliUseCase,
     private readonly getCounselRequestUseCase: GetCounselRequestUseCase,
     private readonly getCounselRequestsByChildUseCase: GetCounselRequestsByChildUseCase,
+    private readonly getCounselRequestsByInstitutionUseCase: GetCounselRequestsByInstitutionUseCase,
     private readonly getCounselRequestsPaginatedUseCase: GetCounselRequestsPaginatedUseCase,
     private readonly updateCounselRequestUseCase: UpdateCounselRequestUseCase,
     private readonly deleteCounselRequestUseCase: DeleteCounselRequestUseCase,
@@ -79,7 +82,7 @@ export class CounselRequestController {
   }
 
   @Get()
-  @ApiOperation({ summary: '상담의뢰지 목록 조회 (페이지네이션 + 필터)' })
+  @ApiOperation({ summary: '내 시설 상담의뢰지 목록 조회 (페이지네이션 + 필터)' })
   @ApiQuery({ name: 'page', required: false, description: '페이지 번호 (1부터 시작)', example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: '페이지당 항목 수', example: 10 })
   @ApiQuery({
@@ -90,15 +93,22 @@ export class CounselRequestController {
   })
   @ApiResponse({
     status: 200,
-    description: '조회 성공',
+    description: '조회 성공 (본인 시설의 아동 상담의뢰지만 반환)',
     type: PaginatedResponseDto<CounselRequestResponseDto>,
   })
   async getCounselRequests(
+    @CurrentUser() user: CurrentUserData,
     @Query() query: PaginationQueryDto,
   ): Promise<PaginatedResponseDto<CounselRequestResponseDto>> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
-    return await this.getCounselRequestsPaginatedUseCase.execute(page, limit, query.status);
+    return await this.getCounselRequestsByInstitutionUseCase.execute(
+      user.institutionId,
+      user.facilityType,
+      page,
+      limit,
+      query.status,
+    );
   }
 
   @Post()
@@ -124,9 +134,16 @@ export class CounselRequestController {
     description: '조회 성공',
     type: CounselRequestResponseDto,
   })
+  @ApiResponse({ status: 403, description: '권한 없음 (다른 시설의 상담의뢰지)' })
   @ApiResponse({ status: 404, description: '상담의뢰지를 찾을 수 없음' })
-  async getCounselRequest(@Param('id') id: string): Promise<CounselRequestResponseDto> {
-    return await this.getCounselRequestUseCase.execute(id);
+  async getCounselRequest(
+    @CurrentUser() user: CurrentUserData,
+    @Param('id') id: string,
+  ): Promise<CounselRequestResponseDto> {
+    return await this.getCounselRequestUseCase.execute(id, {
+      institutionId: user.institutionId,
+      facilityType: user.facilityType,
+    });
   }
 
   @Get('child/:childId')
@@ -137,10 +154,15 @@ export class CounselRequestController {
     description: '조회 성공',
     type: [CounselRequestResponseDto],
   })
+  @ApiResponse({ status: 403, description: '권한 없음 (다른 시설의 아동)' })
   async getCounselRequestsByChild(
+    @CurrentUser() user: CurrentUserData,
     @Param('childId') childId: string,
   ): Promise<CounselRequestResponseDto[]> {
-    return await this.getCounselRequestsByChildUseCase.execute(childId);
+    return await this.getCounselRequestsByChildUseCase.execute(childId, {
+      institutionId: user.institutionId,
+      facilityType: user.facilityType,
+    });
   }
 
   @Patch(':id')
