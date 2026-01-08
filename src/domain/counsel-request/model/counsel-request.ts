@@ -208,9 +208,12 @@ export class CounselRequest {
       return Result.fail(new DomainError('일은 1-31 사이여야 합니다'));
     }
 
-    // 우선돌봄 아동인 경우 세부 사유 필수
-    if (formData.basicInfo.careType === CareType.PRIORITY && !formData.basicInfo.priorityReason) {
-      return Result.fail(new DomainError('우선돌봄 아동은 세부 사유를 선택해야 합니다'));
+    // 우선돌봄 아동인 경우 세부 사유 필수 (최소 1개 이상)
+    if (
+      formData.basicInfo.careType === CareType.PRIORITY &&
+      (!formData.basicInfo.priorityReasons || formData.basicInfo.priorityReasons.length === 0)
+    ) {
+      return Result.fail(new DomainError('우선돌봄 아동은 세부 사유를 최소 1개 이상 선택해야 합니다'));
     }
 
     return Result.ok(undefined);

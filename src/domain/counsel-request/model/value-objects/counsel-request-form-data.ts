@@ -49,7 +49,7 @@ export interface ProtectedChildInfo {
 export interface BasicInfo {
   childInfo: ChildInfo;
   careType: CareType;
-  priorityReason?: PriorityReason; // careType === 'PRIORITY'일 때만
+  priorityReasons?: PriorityReason[]; // careType === 'PRIORITY'일 때만, 중복 선택 가능
   protectedChildInfo?: ProtectedChildInfo; // 보호대상 아동 정보 (새 문서 포맷)
 }
 

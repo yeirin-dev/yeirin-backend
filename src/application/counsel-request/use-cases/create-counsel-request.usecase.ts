@@ -212,7 +212,7 @@ export class CreateCounselRequestUseCase {
             birthDate: dto.basicInfo.childInfo.birthDate, // 사회서비스 이용 추천서용
           },
           careType: dto.basicInfo.careType,
-          priorityReason: dto.basicInfo.priorityReason,
+          priorityReasons: dto.basicInfo.priorityReasons,
           protectedChildInfo: dto.basicInfo.protectedChildInfo, // 보호대상 아동 정보
         },
         psychological_info: {
