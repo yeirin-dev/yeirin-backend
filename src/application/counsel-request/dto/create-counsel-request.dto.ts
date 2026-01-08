@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -147,13 +148,15 @@ export class BasicInfoDto {
   careType: CareType;
 
   @ApiProperty({
-    description: '우선돌봄 세부 사유 (careType이 PRIORITY일 때 필수)',
+    description: '우선돌봄 세부 사유 (careType이 PRIORITY일 때 필수, 중복 선택 가능)',
     enum: PriorityReason,
+    isArray: true,
     required: false,
   })
-  @IsEnum(PriorityReason)
+  @IsArray()
+  @IsEnum(PriorityReason, { each: true })
   @IsOptional()
-  priorityReason?: PriorityReason;
+  priorityReasons?: PriorityReason[];
 
   @ApiProperty({
     description: '보호대상 아동 정보 (새 문서 포맷)',

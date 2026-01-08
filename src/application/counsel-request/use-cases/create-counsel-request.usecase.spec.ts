@@ -126,11 +126,11 @@ describe('CreateCounselRequestUseCase', () => {
       // Given
       const dto = createValidDto();
       dto.basicInfo.careType = CareType.PRIORITY;
-      dto.basicInfo.priorityReason = undefined;
+      dto.basicInfo.priorityReasons = undefined;
 
       // When & Then
       await expect(useCase.execute(dto)).rejects.toThrow(
-        '우선돌봄 아동은 세부 사유를 선택해야 합니다',
+        '우선돌봄 아동은 세부 사유를 최소 1개 이상 선택해야 합니다',
       );
       expect(mockRepository.save).not.toHaveBeenCalled();
     });

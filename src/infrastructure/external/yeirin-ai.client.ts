@@ -127,7 +127,7 @@ export interface IntegratedReportRequestDto {
       birthDate?: BirthDate; // 사회서비스 이용 추천서용
     };
     careType: string;
-    priorityReason?: string;
+    priorityReasons?: string[]; // 중복 선택 가능
     protectedChildInfo?: ProtectedChildInfo; // 보호대상 아동 정보 (새 문서 포맷)
   };
   psychological_info: {
