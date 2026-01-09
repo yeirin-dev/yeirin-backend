@@ -22,6 +22,7 @@ import { InstitutionDashboardModule } from '@presentation/institution-dashboard/
 import { MatchingModule } from '@presentation/matching/matching.module';
 import { ReviewModule } from '@presentation/review/review.module';
 import { UploadModule } from '@presentation/upload/upload.module';
+import { ConsentModule } from '@presentation/consent/consent.module';
 import { WebhookModule } from '@presentation/webhook/webhook.module';
 
 @Module({
@@ -56,6 +57,7 @@ import { WebhookModule } from '@presentation/webhook/webhook.module';
     UploadModule,
     WebhookModule,
     InstitutionDashboardModule,
+    ConsentModule,
     // Admin API Module
     AdminApiModule,
   ],
