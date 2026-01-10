@@ -3,6 +3,29 @@ import { ConfigService } from '@nestjs/config';
 import axios, { AxiosError, AxiosInstance } from 'axios';
 
 /**
+ * 보호자 동의 링크 생성 요청 인터페이스
+ */
+export interface GenerateGuardianConsentLinkRequest {
+  child_id: string;
+  child_name: string;
+  child_birth_date: string; // YYYY-MM-DD 형식
+  institution_name: string;
+  guardian_phone: string;
+  expiry_days?: number;
+}
+
+/**
+ * 보호자 동의 링크 생성 응답 인터페이스
+ */
+export interface GenerateGuardianConsentLinkResponse {
+  token: string;
+  consent_url: string;
+  expires_at: string;
+  child_id: string;
+  child_name: string;
+}
+
+/**
  * KPRC 전문가 소견 요약 인터페이스
  * yeirin-ai가 생성한 요약 정보
  */
@@ -45,10 +68,13 @@ export class SoulEClient {
   private readonly logger = new Logger(SoulEClient.name);
   private readonly client: AxiosInstance;
   private readonly serviceUrl: string;
+  private readonly internalApiSecret: string;
 
   constructor(private readonly configService: ConfigService) {
     this.serviceUrl =
       this.configService.get<string>('SOUL_E_SERVICE_URL') || 'http://localhost:8000';
+    this.internalApiSecret =
+      this.configService.get<string>('INTERNAL_API_SECRET') || 'yeirin-internal-secret';
 
     const timeout = this.configService.get<number>('SOUL_E_API_TIMEOUT') || 10000;
 
@@ -167,6 +193,71 @@ export class SoulEClient {
     } catch (error) {
       this.logger.warn(`Soul-E 서비스 헬스 체크 실패`, error);
       return false;
+    }
+  }
+
+  /**
+   * 보호자 동의 링크 생성
+   * Soul-E의 guardian consent API를 호출하여 JWT 토큰과 동의 페이지 URL을 생성
+   * @param request 보호자 동의 링크 생성 요청
+   * @returns 생성된 토큰 및 동의 페이지 URL
+   */
+  async generateGuardianConsentLink(
+    request: GenerateGuardianConsentLinkRequest,
+  ): Promise<GenerateGuardianConsentLinkResponse> {
+    this.logger.log(
+      `보호자 동의 링크 생성 요청 - childId: ${request.child_id}, childName: ${request.child_name}`,
+    );
+
+    try {
+      const response = await this.client.post<GenerateGuardianConsentLinkResponse>(
+        '/api/v1/consent/guardian/generate-link',
+        request,
+        {
+          headers: {
+            'X-Internal-Secret': this.internalApiSecret,
+          },
+        },
+      );
+
+      this.logger.log(
+        `보호자 동의 링크 생성 성공 - childId: ${request.child_id}, url: ${response.data.consent_url}`,
+      );
+
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        const status = axiosError.response?.status || HttpStatus.INTERNAL_SERVER_ERROR;
+        const message =
+          (axiosError.response?.data as { detail?: string })?.detail ||
+          axiosError.message ||
+          'Soul-E service failed';
+
+        this.logger.error(
+          `보호자 동의 링크 생성 실패 - Status: ${status}, Message: ${message}`,
+        );
+
+        throw new HttpException(
+          {
+            statusCode: status,
+            message,
+            service: 'soul-e',
+          },
+          status,
+        );
+      }
+
+      this.logger.error(`보호자 동의 링크 생성 예상치 못한 에러`, error);
+
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Unexpected error calling Soul-E service',
+          service: 'soul-e',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

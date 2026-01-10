@@ -11,12 +11,18 @@ import {
   UseGuards,
   ForbiddenException,
   BadRequestException,
+  Logger,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { ChildResponseDto } from '@application/child/dto/child-response.dto';
 import { RegisterChildDto } from '@application/child/dto/register-child.dto';
 import { UpdateChildDto } from '@application/child/dto/update-child.dto';
+import {
+  SendGuardianSmsDto,
+  SendGuardianSmsResponseDto,
+} from '@application/child/dto/send-guardian-sms.dto';
 import { BirthDate } from '@domain/child/model/value-objects/birth-date.vo';
 import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { Gender } from '@domain/child/model/value-objects/gender.vo';
@@ -27,6 +33,10 @@ import {
 } from '@infrastructure/auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 import { ChildType } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';
+import { SoulEClient } from '@infrastructure/external/soul-e.client';
+import { SmsService } from '@infrastructure/external/sms.service';
+import { CareFacilityRepository } from '@domain/care-facility/repository/care-facility.repository';
+import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
 
 /**
  * 아동 관리 Controller
@@ -39,10 +49,18 @@ import { ChildType } from '@infrastructure/persistence/typeorm/entity/enums/chil
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class ChildController {
+  private readonly logger = new Logger(ChildController.name);
+
   constructor(
     private readonly registerChildUseCase: RegisterChildUseCase,
     @Inject('ChildRepository')
     private readonly childRepository: ChildRepository,
+    @Inject('CareFacilityRepository')
+    private readonly careFacilityRepository: CareFacilityRepository,
+    @Inject('CommunityChildCenterRepository')
+    private readonly communityChildCenterRepository: CommunityChildCenterRepository,
+    private readonly soulEClient: SoulEClient,
+    private readonly smsService: SmsService,
   ) {}
 
   @Get()
@@ -265,5 +283,111 @@ export class ChildController {
     await this.childRepository.delete(id);
 
     return { message: '아동이 삭제되었습니다.' };
+  }
+
+  @Post(':id/guardian-sms')
+  @ApiOperation({
+    summary: '보호자 동의 SMS 발송',
+    description: `
+아동의 보호자에게 동의 요청 SMS를 발송합니다.
+SMS에는 보호자 동의 페이지 URL이 포함됩니다.
+    `,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'SMS 발송 성공',
+    type: SendGuardianSmsResponseDto,
+  })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  @ApiResponse({ status: 403, description: '발송 권한 없음' })
+  @ApiResponse({ status: 404, description: '아동을 찾을 수 없음' })
+  async sendGuardianSms(
+    @CurrentUser() user: CurrentUserData,
+    @Param('id') id: string,
+    @Body() dto: SendGuardianSmsDto,
+  ): Promise<SendGuardianSmsResponseDto> {
+    this.logger.log(`보호자 동의 SMS 발송 요청 - childId: ${id}`);
+
+    // 아동 존재 확인
+    const child = await this.childRepository.findById(id);
+    if (!child) {
+      throw new NotFoundException('아동을 찾을 수 없습니다.');
+    }
+
+    // 시설 인증인지 확인
+    if (user.role !== 'INSTITUTION' || !user.institutionId) {
+      throw new ForbiddenException('시설 로그인이 필요합니다.');
+    }
+
+    // 권한 확인: 해당 시설의 아동인지 확인
+    const hasPermission =
+      (child.careFacilityId && child.careFacilityId === user.institutionId) ||
+      (child.communityChildCenterId && child.communityChildCenterId === user.institutionId);
+
+    if (!hasPermission) {
+      throw new ForbiddenException('이 아동에 대한 SMS 발송 권한이 없습니다.');
+    }
+
+    // 시설 이름 조회
+    let institutionName = '소울이';
+    if (child.careFacilityId) {
+      const careFacility = await this.careFacilityRepository.findById(child.careFacilityId);
+      if (careFacility) {
+        institutionName = careFacility.name.value;
+      }
+    } else if (child.communityChildCenterId) {
+      const communityCenter = await this.communityChildCenterRepository.findById(
+        child.communityChildCenterId,
+      );
+      if (communityCenter) {
+        institutionName = communityCenter.name.value;
+      }
+    }
+
+    try {
+      // 1. Soul-E에서 보호자 동의 링크 생성
+      const linkResponse = await this.soulEClient.generateGuardianConsentLink({
+        child_id: id,
+        child_name: child.name.value,
+        child_birth_date: child.birthDate.value.toISOString().split('T')[0], // YYYY-MM-DD
+        institution_name: institutionName,
+        guardian_phone: dto.guardianPhone,
+        expiry_days: 7,
+      });
+
+      this.logger.log(`보호자 동의 링크 생성 완료 - url: ${linkResponse.consent_url}`);
+
+      // 2. SMS 발송
+      const smsResult = await this.smsService.sendGuardianConsentSms(
+        dto.guardianPhone,
+        linkResponse.consent_url,
+        child.name.value,
+      );
+
+      if (!smsResult.success) {
+        this.logger.error(`SMS 발송 실패 - ${smsResult.errorMessage}`);
+        throw new InternalServerErrorException(
+          smsResult.errorMessage || 'SMS 발송에 실패했습니다.',
+        );
+      }
+
+      this.logger.log(`보호자 동의 SMS 발송 완료 - childId: ${id}, to: ${dto.guardianPhone}`);
+
+      // 개발 환경에서는 URL도 반환 (디버깅 용도)
+      const isDev = process.env.NODE_ENV !== 'production';
+
+      return {
+        success: true,
+        message: `${dto.guardianName} 보호자님에게 동의 요청 문자가 발송되었습니다.`,
+        ...(isDev && { consentUrl: linkResponse.consent_url }),
+      };
+    } catch (error) {
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+
+      this.logger.error(`보호자 동의 SMS 발송 중 오류 - ${error}`);
+      throw new InternalServerErrorException('보호자 동의 SMS 발송 중 오류가 발생했습니다.');
+    }
   }
 }

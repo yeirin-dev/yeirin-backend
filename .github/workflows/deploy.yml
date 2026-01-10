@@ -84,9 +84,14 @@ jobs:
             echo "INTERNAL_API_SECRET=$(aws ssm get-parameter --name '/yeirin/dev/common/internal-api-secret' --with-decryption --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
             echo "SOUL_E_WEBHOOK_SECRET=$(aws ssm get-parameter --name '/yeirin/dev/common/webhook-secret' --with-decryption --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
             echo "SOUL_E_SERVICE_URL=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/soul-e-service-url' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "SOUL_E_API_TIMEOUT=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/soul-e-api-timeout' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
             echo "AWS_S3_BUCKET_NAME=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/s3-bucket-name' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
             echo "AWS_REGION=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/aws-region' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
             echo "LOG_LEVEL=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/log-level' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "SOLAPI_API_KEY=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/solapi-api-key' --with-decryption --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "SOLAPI_API_SECRET=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/solapi-api-secret' --with-decryption --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "SOLAPI_SENDER_NUMBER=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/solapi-sender-number' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "SOLAPI_ENABLED=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/solapi-enabled' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
 
             echo "Environment file created."
             cat .env | head -5

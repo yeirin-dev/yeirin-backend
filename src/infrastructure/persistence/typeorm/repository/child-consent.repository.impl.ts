@@ -2,13 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChildConsent } from '@domain/consent/model/child-consent';
+import { ConsentRole } from '@domain/consent/model/value-objects/consent-role';
 import {
   ChildConsentRepository,
+  CompleteConsentStatus,
   ConsentHistoryData,
 } from '@domain/consent/repository/child-consent.repository';
 import { ChildConsentEntity } from '../entity/child-consent.entity';
 import { ConsentHistoryEntity } from '../entity/consent-history.entity';
 import { ConsentAction } from '../entity/enums/consent-action.enum';
+import { ConsentRole as EntityConsentRole } from '../entity/enums/consent-role.enum';
 import { ChildConsentMapper } from '../mapper/child-consent.mapper';
 
 /**
@@ -43,8 +46,36 @@ export class ChildConsentRepositoryImpl implements ChildConsentRepository {
   }
 
   async findByChildId(childId: string): Promise<ChildConsent | null> {
+    // 기존 호환성: CHILD role 우선, 없으면 GUARDIAN
     const entity = await this.consentRepository.findOne({
-      where: { childId },
+      where: { childId, role: EntityConsentRole.CHILD },
+    });
+
+    if (entity) {
+      return ChildConsentMapper.toDomain(entity);
+    }
+
+    // CHILD 없으면 GUARDIAN 조회 (기존 데이터 호환)
+    const guardianEntity = await this.consentRepository.findOne({
+      where: { childId, role: EntityConsentRole.GUARDIAN },
+    });
+
+    if (!guardianEntity) {
+      return null;
+    }
+
+    return ChildConsentMapper.toDomain(guardianEntity);
+  }
+
+  async findByChildIdAndRole(
+    childId: string,
+    role: ConsentRole,
+  ): Promise<ChildConsent | null> {
+    const entityRole =
+      role === ConsentRole.GUARDIAN ? EntityConsentRole.GUARDIAN : EntityConsentRole.CHILD;
+
+    const entity = await this.consentRepository.findOne({
+      where: { childId, role: entityRole },
     });
 
     if (!entity) {
@@ -54,21 +85,82 @@ export class ChildConsentRepositoryImpl implements ChildConsentRepository {
     return ChildConsentMapper.toDomain(entity);
   }
 
-  async hasValidConsent(childId: string): Promise<boolean> {
-    const entity = await this.consentRepository.findOne({
+  async findAllByChildId(childId: string): Promise<ChildConsent[]> {
+    const entities = await this.consentRepository.find({
       where: { childId },
+    });
+
+    return entities.map((entity) => ChildConsentMapper.toDomain(entity));
+  }
+
+  async hasValidConsent(childId: string): Promise<boolean> {
+    // 기존 호환성: 아무 유효한 동의가 있으면 true
+    const entities = await this.consentRepository.find({
+      where: { childId },
+    });
+
+    return entities.some((entity) => {
+      const isNotRevoked = entity.revokedAt === null;
+      const hasRequiredConsents =
+        entity.consentItems.personalInfo && entity.consentItems.sensitiveData;
+      return isNotRevoked && hasRequiredConsents;
+    });
+  }
+
+  async hasValidConsentByRole(childId: string, role: ConsentRole): Promise<boolean> {
+    const entityRole =
+      role === ConsentRole.GUARDIAN ? EntityConsentRole.GUARDIAN : EntityConsentRole.CHILD;
+
+    const entity = await this.consentRepository.findOne({
+      where: { childId, role: entityRole },
     });
 
     if (!entity) {
       return false;
     }
 
-    // 철회되지 않고 필수 항목이 동의된 상태인지 확인
     const isNotRevoked = entity.revokedAt === null;
     const hasRequiredConsents =
       entity.consentItems.personalInfo && entity.consentItems.sensitiveData;
 
     return isNotRevoked && hasRequiredConsents;
+  }
+
+  async getCompleteConsentStatus(
+    childId: string,
+    isOver14: boolean,
+  ): Promise<CompleteConsentStatus> {
+    const hasGuardianConsent = await this.hasValidConsentByRole(childId, ConsentRole.GUARDIAN);
+    const hasChildConsent = await this.hasValidConsentByRole(childId, ConsentRole.CHILD);
+
+    if (isOver14) {
+      // 14세 이상: 보호자 + 아동 본인 동의 모두 필요
+      const isComplete = hasGuardianConsent && hasChildConsent;
+      let requiredConsent: 'GUARDIAN' | 'CHILD' | 'BOTH' | null = null;
+
+      if (!hasGuardianConsent && !hasChildConsent) {
+        requiredConsent = 'BOTH';
+      } else if (!hasGuardianConsent) {
+        requiredConsent = 'GUARDIAN';
+      } else if (!hasChildConsent) {
+        requiredConsent = 'CHILD';
+      }
+
+      return {
+        isComplete,
+        hasGuardianConsent,
+        hasChildConsent,
+        requiredConsent,
+      };
+    } else {
+      // 14세 미만: 보호자 동의만 필요
+      return {
+        isComplete: hasGuardianConsent,
+        hasGuardianConsent,
+        hasChildConsent,
+        requiredConsent: hasGuardianConsent ? null : 'GUARDIAN',
+      };
+    }
   }
 
   async delete(id: string): Promise<void> {

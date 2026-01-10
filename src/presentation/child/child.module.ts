@@ -7,6 +7,8 @@ import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/
 import { CareFacilityRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/care-facility.repository.impl';
 import { ChildRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/child.repository.impl';
 import { CommunityChildCenterRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/community-child-center.repository.impl';
+import { SoulEClient } from '@infrastructure/external/soul-e.client';
+import { SmsService } from '@infrastructure/external/sms.service';
 import { ChildController } from './child.controller';
 
 /**
@@ -33,6 +35,9 @@ import { ChildController } from './child.controller';
       provide: 'CommunityChildCenterRepository',
       useClass: CommunityChildCenterRepositoryImpl,
     },
+    // External Services
+    SoulEClient,
+    SmsService,
     // Use Cases
     RegisterChildUseCase,
   ],

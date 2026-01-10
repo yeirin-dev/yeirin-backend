@@ -9,6 +9,7 @@ import {
   Logger,
   Param,
   Post,
+  Query,
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -17,14 +18,21 @@ import {
   ApiHeader,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AcceptConsentDto } from '@application/consent/dto/accept-consent.dto';
+import { AcceptGuardianConsentDto } from '@application/consent/dto/accept-guardian-consent.dto';
 import { ConsentResponseDto, ConsentStatusResponseDto } from '@application/consent/dto/consent-response.dto';
 import { RevokeConsentDto } from '@application/consent/dto/revoke-consent.dto';
 import { AcceptConsentUseCase } from '@application/consent/use-cases/accept-consent.use-case';
+import { AcceptGuardianConsentUseCase } from '@application/consent/use-cases/accept-guardian-consent.use-case';
+import {
+  CompleteConsentStatusResponseDto,
+  GetCompleteConsentStatusUseCase,
+} from '@application/consent/use-cases/get-complete-consent-status.use-case';
 import { GetConsentStatusUseCase } from '@application/consent/use-cases/get-consent-status.use-case';
 import { RevokeConsentUseCase } from '@application/consent/use-cases/revoke-consent.use-case';
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
@@ -42,7 +50,9 @@ export class ConsentController {
 
   constructor(
     private readonly acceptConsentUseCase: AcceptConsentUseCase,
+    private readonly acceptGuardianConsentUseCase: AcceptGuardianConsentUseCase,
     private readonly getConsentStatusUseCase: GetConsentStatusUseCase,
+    private readonly getCompleteConsentStatusUseCase: GetCompleteConsentStatusUseCase,
     private readonly revokeConsentUseCase: RevokeConsentUseCase,
     private readonly configService: ConfigService,
   ) {}
@@ -291,6 +301,183 @@ response = await httpx.post(
     }
 
     this.logger.log(`[Consent] Consent revoked - childId: ${childId}`);
+
+    return result.getValue();
+  }
+
+  @Public()
+  @Post('guardian/accept')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '보호자 동의 제출',
+    description: `
+## 설명
+보호자가 아동을 대신하여 개인정보 처리 동의를 저장합니다.
+- role: GUARDIAN으로 저장
+- 보호자 전화번호, 관계 정보 필수
+- 새 동의 생성 또는 기존 보호자 동의 업데이트
+- 동의 이력 자동 기록
+
+## 인증
+- **Header**: \`X-Internal-Secret: {internal_api_secret}\`
+- MSA 내부 통신용 Shared Secret 사용
+
+## 필수 동의 항목
+- **personalInfo**: 개인정보 수집·이용 및 제3자 제공 동의 (필수)
+- **sensitiveData**: 민감정보 처리 동의 (필수)
+
+## 선택 동의 항목
+- **researchData**: 비식별화 데이터 연구 활용 동의
+
+## 보호자 관계
+- 부모, 시설담당자, 기타
+
+## 호출 예시 (Soul-E에서)
+\`\`\`python
+import httpx
+
+response = await httpx.post(
+    f"{YEIRIN_BACKEND_URL}/api/v1/consent/guardian/accept",
+    headers={"X-Internal-Secret": INTERNAL_SECRET},
+    json={
+        "childId": "550e8400-e29b-41d4-a716-446655440000",
+        "consentItems": {
+            "personalInfo": True,
+            "sensitiveData": True,
+            "researchData": False
+        },
+        "guardianPhone": "010-1234-5678",
+        "guardianRelation": "부모",
+        "documentUrl": "/documents/privacy-policy-v1.0.0.pdf"
+    }
+)
+\`\`\`
+    `,
+  })
+  @ApiHeader({
+    name: 'X-Internal-Secret',
+    description: '내부 API 인증 Secret',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '보호자 동의 제출 성공',
+    type: ConsentResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '잘못된 요청 (필수 동의 항목 누락, 유효하지 않은 보호자 관계 등)',
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패',
+  })
+  async acceptGuardianConsent(
+    @Headers('X-Internal-Secret') internalSecret: string | undefined,
+    @Body() dto: AcceptGuardianConsentDto,
+    @Req() req: Request,
+  ): Promise<ConsentResponseDto> {
+    // 1. 내부 API 인증
+    this.validateInternalSecret(internalSecret);
+
+    // 2. IP 주소 자동 주입
+    if (!dto.ipAddress) {
+      dto.ipAddress = this.getClientIp(req);
+    }
+
+    // 3. UseCase 실행
+    const result = await this.acceptGuardianConsentUseCase.execute(dto);
+
+    if (result.isFailure) {
+      throw new BadRequestException(result.getError().message);
+    }
+
+    this.logger.log(
+      `[Consent] Guardian consent accepted - childId: ${dto.childId}, relation: ${dto.guardianRelation}`,
+    );
+
+    return result.getValue();
+  }
+
+  @Public()
+  @Get('complete-status/:childId')
+  @ApiOperation({
+    summary: '완전한 동의 상태 조회 (14세 기준 분기)',
+    description: `
+## 설명
+아동의 완전한 동의 상태를 조회합니다.
+14세 기준으로 필요한 동의가 다릅니다:
+- **14세 미만**: 보호자 동의만 필요
+- **14세 이상**: 보호자 동의 + 아동 본인 동의 모두 필요
+
+## 인증
+- **Header**: \`X-Internal-Secret: {internal_api_secret}\`
+- MSA 내부 통신용 Shared Secret 사용
+
+## 응답
+- **isComplete**: 완전한 동의 여부
+- **hasGuardianConsent**: 보호자 동의 존재 여부
+- **hasChildConsent**: 아동 본인 동의 존재 여부
+- **requiredConsent**: 필요한 동의 유형 (GUARDIAN, CHILD, BOTH, null)
+- **isOver14**: 요청한 아동의 14세 이상 여부
+
+## 호출 예시 (Soul-E에서)
+\`\`\`python
+import httpx
+
+response = await httpx.get(
+    f"{YEIRIN_BACKEND_URL}/api/v1/consent/complete-status/{child_id}",
+    headers={"X-Internal-Secret": INTERNAL_SECRET},
+    params={"isOver14": True}
+)
+\`\`\`
+    `,
+  })
+  @ApiHeader({
+    name: 'X-Internal-Secret',
+    description: '내부 API 인증 Secret',
+    required: true,
+  })
+  @ApiParam({
+    name: 'childId',
+    description: '아동 ID (UUID)',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @ApiQuery({
+    name: 'isOver14',
+    description: '아동이 만 14세 이상인지 여부',
+    type: Boolean,
+    required: true,
+    example: false,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '완전한 동의 상태 조회 성공',
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패',
+  })
+  async getCompleteConsentStatus(
+    @Headers('X-Internal-Secret') internalSecret: string | undefined,
+    @Param('childId') childId: string,
+    @Query('isOver14') isOver14: string,
+  ): Promise<CompleteConsentStatusResponseDto> {
+    // 1. 내부 API 인증
+    this.validateInternalSecret(internalSecret);
+
+    // 2. isOver14 파라미터 변환 (query string은 항상 string)
+    const isOver14Boolean = isOver14 === 'true';
+
+    // 3. UseCase 실행
+    const result = await this.getCompleteConsentStatusUseCase.execute({
+      childId,
+      isOver14: isOver14Boolean,
+    });
+
+    if (result.isFailure) {
+      throw new BadRequestException(result.getError().message);
+    }
 
     return result.getValue();
   }

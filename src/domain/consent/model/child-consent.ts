@@ -1,5 +1,6 @@
 import { DomainError, Result } from '@domain/common/result';
 import { ConsentItems, ConsentItemsValue } from './value-objects/consent-items.vo';
+import { ConsentRole, isValidGuardianRelation } from './value-objects/consent-role';
 import { ConsentVersion } from './value-objects/consent-version.vo';
 
 /**
@@ -7,12 +8,15 @@ import { ConsentVersion } from './value-objects/consent-version.vo';
  */
 export interface ChildConsentProps {
   childId: string;
+  role: ConsentRole;
   consentItems: ConsentItems;
   consentVersion: ConsentVersion;
   documentUrl: string | null;
   consentedAt: Date;
   revokedAt: Date | null;
   revocationReason: string | null;
+  guardianPhone: string | null;
+  guardianRelation: string | null;
   ipAddress: string | null;
 }
 
@@ -22,10 +26,25 @@ export interface FullChildConsentProps extends ChildConsentProps {
   updatedAt: Date;
 }
 
+/**
+ * 아동 본인 동의 생성 Props
+ */
 export type CreateChildConsentProps = {
   childId: string;
   consentItems: ConsentItemsValue;
   isChildOver14: boolean;
+  documentUrl?: string;
+  ipAddress?: string;
+};
+
+/**
+ * 보호자 동의 생성 Props
+ */
+export type CreateGuardianConsentProps = {
+  childId: string;
+  consentItems: Omit<ConsentItemsValue, 'childSelfConsent'>;
+  guardianPhone: string;
+  guardianRelation: string;
   documentUrl?: string;
   ipAddress?: string;
 };
@@ -36,20 +55,24 @@ export type CreateChildConsentProps = {
  * Soul-E 서비스 이용을 위한 개인정보 처리 동의
  *
  * 비즈니스 규칙:
- * - 아동당 하나의 유효한 동의만 존재
+ * - 아동당 역할별(CHILD/GUARDIAN)로 하나의 유효한 동의만 존재
  * - 필수 항목(personalInfo, sensitiveData) 동의 필수
- * - 14세 이상 아동은 본인 동의(childSelfConsent) 필수
+ * - 14세 미만: 보호자 동의(GUARDIAN)만 필요
+ * - 14세 이상: 보호자 동의(GUARDIAN) + 아동 본인 동의(CHILD) 모두 필요
  * - 동의 철회 시 revokedAt 기록, 사유 필수
  */
 export class ChildConsent {
   private readonly _id: string;
   private readonly _childId: string;
+  private readonly _role: ConsentRole;
   private _consentItems: ConsentItems;
   private _consentVersion: ConsentVersion;
   private _documentUrl: string | null;
   private _consentedAt: Date;
   private _revokedAt: Date | null;
   private _revocationReason: string | null;
+  private _guardianPhone: string | null;
+  private _guardianRelation: string | null;
   private _ipAddress: string | null;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
@@ -57,12 +80,15 @@ export class ChildConsent {
   private constructor(props: FullChildConsentProps) {
     this._id = props.id;
     this._childId = props.childId;
+    this._role = props.role;
     this._consentItems = props.consentItems;
     this._consentVersion = props.consentVersion;
     this._documentUrl = props.documentUrl;
     this._consentedAt = props.consentedAt;
     this._revokedAt = props.revokedAt;
     this._revocationReason = props.revocationReason;
+    this._guardianPhone = props.guardianPhone;
+    this._guardianRelation = props.guardianRelation;
     this._ipAddress = props.ipAddress;
     this._createdAt = props.createdAt;
     this._updatedAt = props.updatedAt;
@@ -76,6 +102,10 @@ export class ChildConsent {
 
   get childId(): string {
     return this._childId;
+  }
+
+  get role(): ConsentRole {
+    return this._role;
   }
 
   get consentItems(): ConsentItems {
@@ -102,6 +132,14 @@ export class ChildConsent {
     return this._revocationReason;
   }
 
+  get guardianPhone(): string | null {
+    return this._guardianPhone;
+  }
+
+  get guardianRelation(): string | null {
+    return this._guardianRelation;
+  }
+
   get ipAddress(): string | null {
     return this._ipAddress;
   }
@@ -117,7 +155,7 @@ export class ChildConsent {
   // ==================== Static Factory Methods ====================
 
   /**
-   * 새로운 동의 생성
+   * 아동 본인 동의 생성 (14세 이상 필수)
    */
   public static create(
     props: CreateChildConsentProps,
@@ -133,12 +171,71 @@ export class ChildConsent {
     const consent = new ChildConsent({
       id: id || crypto.randomUUID(),
       childId: props.childId,
+      role: ConsentRole.CHILD,
       consentItems: consentItemsResult.getValue(),
       consentVersion: ConsentVersion.createCurrent(),
       documentUrl: props.documentUrl ?? null,
       consentedAt: now,
       revokedAt: null,
       revocationReason: null,
+      guardianPhone: null,
+      guardianRelation: null,
+      ipAddress: props.ipAddress ?? null,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return Result.ok(consent);
+  }
+
+  /**
+   * 보호자 동의 생성
+   */
+  public static createGuardianConsent(
+    props: CreateGuardianConsentProps,
+    id?: string,
+  ): Result<ChildConsent, DomainError> {
+    // 보호자 관계 유효성 검증
+    if (!isValidGuardianRelation(props.guardianRelation)) {
+      return Result.fail(
+        new DomainError(
+          '유효하지 않은 보호자 관계입니다. 선택 가능: 부모, 시설담당자, 기타',
+          'INVALID_GUARDIAN_RELATION',
+        ),
+      );
+    }
+
+    // 보호자 전화번호 검증
+    if (!props.guardianPhone || props.guardianPhone.trim().length === 0) {
+      return Result.fail(
+        new DomainError('보호자 전화번호는 필수입니다.', 'GUARDIAN_PHONE_REQUIRED'),
+      );
+    }
+
+    // 동의 항목 검증 (보호자 동의는 childSelfConsent 불필요)
+    const consentItemsValue: ConsentItemsValue = {
+      ...props.consentItems,
+      childSelfConsent: false, // 보호자 동의에는 아동 본인 동의 항목 없음
+    };
+
+    const consentItemsResult = ConsentItems.create(consentItemsValue, false);
+    if (consentItemsResult.isFailure) {
+      return Result.fail(consentItemsResult.getError());
+    }
+
+    const now = new Date();
+    const consent = new ChildConsent({
+      id: id || crypto.randomUUID(),
+      childId: props.childId,
+      role: ConsentRole.GUARDIAN,
+      consentItems: consentItemsResult.getValue(),
+      consentVersion: ConsentVersion.createCurrent(),
+      documentUrl: props.documentUrl ?? null,
+      consentedAt: now,
+      revokedAt: null,
+      revocationReason: null,
+      guardianPhone: props.guardianPhone.trim(),
+      guardianRelation: props.guardianRelation,
       ipAddress: props.ipAddress ?? null,
       createdAt: now,
       updatedAt: now,
@@ -152,6 +249,22 @@ export class ChildConsent {
    */
   public static restore(props: FullChildConsentProps): ChildConsent {
     return new ChildConsent(props);
+  }
+
+  // ==================== Helper Methods ====================
+
+  /**
+   * 보호자 동의인지 확인
+   */
+  public isGuardianConsent(): boolean {
+    return this._role === ConsentRole.GUARDIAN;
+  }
+
+  /**
+   * 아동 본인 동의인지 확인
+   */
+  public isChildConsent(): boolean {
+    return this._role === ConsentRole.CHILD;
   }
 
   // ==================== Business Logic ====================

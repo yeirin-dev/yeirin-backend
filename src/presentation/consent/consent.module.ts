@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AcceptConsentUseCase } from '@application/consent/use-cases/accept-consent.use-case';
+import { AcceptGuardianConsentUseCase } from '@application/consent/use-cases/accept-guardian-consent.use-case';
+import { GetCompleteConsentStatusUseCase } from '@application/consent/use-cases/get-complete-consent-status.use-case';
 import { GetConsentStatusUseCase } from '@application/consent/use-cases/get-consent-status.use-case';
 import { RevokeConsentUseCase } from '@application/consent/use-cases/revoke-consent.use-case';
 import { ChildConsentEntity } from '@infrastructure/persistence/typeorm/entity/child-consent.entity';
@@ -24,7 +26,9 @@ import { ConsentController } from './consent.controller';
     },
     // Use Cases
     AcceptConsentUseCase,
+    AcceptGuardianConsentUseCase,
     GetConsentStatusUseCase,
+    GetCompleteConsentStatusUseCase,
     RevokeConsentUseCase,
   ],
   exports: ['ChildConsentRepository'],
