@@ -1,6 +1,7 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -16,6 +17,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     ]);
 
     if (isPublic) {
+      return true;
+    }
+
+    // Admin API는 별도 AdminJwtAuthGuard 사용 - 글로벌 가드 스킵
+    const request = context.switchToHttp().getRequest<Request>();
+    if (request.path.startsWith('/admin')) {
       return true;
     }
 
