@@ -14,14 +14,14 @@ import {
 } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
+import { Roles } from '@infrastructure/auth/decorators/roles.decorator';
 import {
-  AdminJwtAuthGuard,
   AdminPermissionGuard,
   AdminPermissions,
   AdminAuditInterceptor,
-  Roles,
   ADMIN_PERMISSIONS,
-} from '@shared/admin-common';
+} from '@yeirin/admin-common';
+import { AdminJwtAuthGuard } from '../auth/guards/admin-jwt-auth.guard';
 import { AssessmentSettingsEntity } from '@infrastructure/persistence/typeorm/entity/assessment-settings.entity';
 import {
   UpdateAssessmentSettingsDto,
