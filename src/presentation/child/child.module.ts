@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RegisterChildUseCase } from '@application/child/use-cases/register-child/register-child.use-case';
+import { SmsService } from '@infrastructure/external/sms.service';
+import { SoulEClient } from '@infrastructure/external/soul-e.client';
 import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
 import { CareFacilityRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/care-facility.repository.impl';
 import { ChildRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/child.repository.impl';
 import { CommunityChildCenterRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/community-child-center.repository.impl';
-import { SoulEClient } from '@infrastructure/external/soul-e.client';
-import { SmsService } from '@infrastructure/external/sms.service';
 import { ChildController } from './child.controller';
 
 /**

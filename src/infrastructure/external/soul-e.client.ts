@@ -234,9 +234,7 @@ export class SoulEClient {
           axiosError.message ||
           'Soul-E service failed';
 
-        this.logger.error(
-          `보호자 동의 링크 생성 실패 - Status: ${status}, Message: ${message}`,
-        );
+        this.logger.error(`보호자 동의 링크 생성 실패 - Status: ${status}, Message: ${message}`);
 
         throw new HttpException(
           {

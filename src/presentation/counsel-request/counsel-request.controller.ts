@@ -40,7 +40,10 @@ import { RequestCounselRequestRecommendationUseCase } from '@application/counsel
 import { SelectRecommendedInstitutionUseCase } from '@application/counsel-request/use-cases/select-recommended-institution.usecase';
 import { StartCounselingUseCase } from '@application/counsel-request/use-cases/start-counseling.usecase';
 import { UpdateCounselRequestUseCase } from '@application/counsel-request/use-cases/update-counsel-request.usecase';
-import { CurrentUser, CurrentUserData } from '@infrastructure/auth/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  CurrentUserData,
+} from '@infrastructure/auth/decorators/current-user.decorator';
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
 import { JwtAuthGuard } from '@infrastructure/auth/guards/jwt-auth.guard';
 

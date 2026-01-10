@@ -67,10 +67,7 @@ export class ChildConsentRepositoryImpl implements ChildConsentRepository {
     return ChildConsentMapper.toDomain(guardianEntity);
   }
 
-  async findByChildIdAndRole(
-    childId: string,
-    role: ConsentRole,
-  ): Promise<ChildConsent | null> {
+  async findByChildIdAndRole(childId: string, role: ConsentRole): Promise<ChildConsent | null> {
     const entityRole =
       role === ConsentRole.GUARDIAN ? EntityConsentRole.GUARDIAN : EntityConsentRole.CHILD;
 

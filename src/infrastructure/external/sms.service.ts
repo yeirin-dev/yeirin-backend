@@ -109,19 +109,35 @@ export class SmsService {
   }
 
   /**
-   * 보호자 동의 링크 SMS 발송
+   * 보호자 동의 링크 MMS 발송
    * @param to 수신자 전화번호
    * @param consentUrl 동의 페이지 URL
-   * @param childName 아동 이름
+   * @param childName 아동 이름 (현재 미사용, 향후 확장용)
    * @returns 발송 결과
    */
   async sendGuardianConsentSms(
     to: string,
     consentUrl: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     childName: string,
   ): Promise<SmsSendResult> {
-    // SMS 본문 생성 (90자 이하 = SMS, 초과 = LMS)
-    const text = `[소울이] ${childName} 아동의 보호자 동의가 필요합니다.\n${consentUrl}`;
+    // LMS 본문 생성
+    const text = `안녕하세요? 예이린 사회적협동조합입니다.
+예이린은 부산사회서비스원과 함께 2026년 「AI와 함께하는 마음건강+ : 연계로 완성하는 통합 돌봄」 사업을 운영합니다.
+
+본 사업은 AI 기반 아동 마음건강 지원 서비스 '내 친구 소울이'를 활용하여,
+✔ 자녀의 정서·심리 상태를 간편하게 확인하고
+✔ 필요 시 인근 상담·치료 등 바우처 서비스로 연계하는 통합 돌봄 사업입니다.
+
+서비스 이용을 위해서는 학부모님의 사전 동의가 필요하여,
+아래 링크를 통해 동의서 제출을 부탁드립니다.
+
+▶ 동의서 제출 링크: ${consentUrl}
+
+자녀의 마음건강을 함께 살피는 이번 사업에 많은 관심과 협조를 부탁드립니다.
+감사합니다.
+
+예이린 사회적협동조합 드림`;
 
     return this.sendSms(to, text);
   }

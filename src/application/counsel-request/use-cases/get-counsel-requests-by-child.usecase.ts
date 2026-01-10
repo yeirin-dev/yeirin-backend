@@ -18,7 +18,10 @@ export class GetCounselRequestsByChildUseCase {
     private readonly s3Service: S3Service,
   ) {}
 
-  async execute(childId: string, authContext: CounselRequestAuthContext): Promise<CounselRequestResponseDto[]> {
+  async execute(
+    childId: string,
+    authContext: CounselRequestAuthContext,
+  ): Promise<CounselRequestResponseDto[]> {
     // 권한 검증: 해당 아동이 현재 시설에 속하는지 확인
     await this.validateAccess(childId, authContext);
 
@@ -30,7 +33,10 @@ export class GetCounselRequestsByChildUseCase {
    * 아동 접근 권한 검증
    * - 아동이 현재 로그인한 시설에 속하는지 확인
    */
-  private async validateAccess(childId: string, authContext: CounselRequestAuthContext): Promise<void> {
+  private async validateAccess(
+    childId: string,
+    authContext: CounselRequestAuthContext,
+  ): Promise<void> {
     const child = await this.childRepository.findById(childId);
 
     if (!child) {
@@ -38,8 +44,10 @@ export class GetCounselRequestsByChildUseCase {
     }
 
     const hasAccess =
-      (authContext.facilityType === 'CARE_FACILITY' && child.careFacilityId === authContext.institutionId) ||
-      (authContext.facilityType === 'COMMUNITY_CENTER' && child.communityChildCenterId === authContext.institutionId);
+      (authContext.facilityType === 'CARE_FACILITY' &&
+        child.careFacilityId === authContext.institutionId) ||
+      (authContext.facilityType === 'COMMUNITY_CENTER' &&
+        child.communityChildCenterId === authContext.institutionId);
 
     if (!hasAccess) {
       throw new ForbiddenException('이 아동의 상담의뢰지를 조회할 권한이 없습니다.');

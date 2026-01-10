@@ -4,8 +4,7 @@ import { Child } from '@domain/child/model/child';
 import { BirthDate } from '@domain/child/model/value-objects/birth-date.vo';
 import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { ChildType, ChildTypeValue } from '@domain/child/model/value-objects/child-type.vo';
-import { Gender as ChildGender } from '@domain/child/model/value-objects/gender.vo';
-import { GenderType } from '@domain/child/model/value-objects/gender.vo';
+import { Gender as ChildGender, GenderType } from '@domain/child/model/value-objects/gender.vo';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import {

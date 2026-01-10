@@ -14,18 +14,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  ApiHeader,
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AcceptConsentDto } from '@application/consent/dto/accept-consent.dto';
 import { AcceptGuardianConsentDto } from '@application/consent/dto/accept-guardian-consent.dto';
-import { ConsentResponseDto, ConsentStatusResponseDto } from '@application/consent/dto/consent-response.dto';
+import {
+  ConsentResponseDto,
+  ConsentStatusResponseDto,
+} from '@application/consent/dto/consent-response.dto';
 import { RevokeConsentDto } from '@application/consent/dto/revoke-consent.dto';
 import { AcceptConsentUseCase } from '@application/consent/use-cases/accept-consent.use-case';
 import { AcceptGuardianConsentUseCase } from '@application/consent/use-cases/accept-guardian-consent.use-case';

@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DomainError, Result } from '@domain/common/result';
-import { ChildConsentRepository, CompleteConsentStatus } from '@domain/consent/repository/child-consent.repository';
+import {
+  ChildConsentRepository,
+  CompleteConsentStatus,
+} from '@domain/consent/repository/child-consent.repository';
 
 /**
  * 완전한 동의 상태 조회 응답 DTO
