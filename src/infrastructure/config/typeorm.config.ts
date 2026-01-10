@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { AssessmentSettingsEntity } from '../persistence/typeorm/entity/assessment-settings.entity';
 import { AuditLogEntity } from '../persistence/typeorm/entity/audit-log.entity';
 import { CareFacilityEntity } from '../persistence/typeorm/entity/care-facility.entity';
 import { ChildConsentEntity } from '../persistence/typeorm/entity/child-consent.entity';
@@ -44,6 +45,8 @@ export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOpt
       // Audit & Logging
       PsychologicalStatusLogEntity,
       AuditLogEntity,
+      // Settings
+      AssessmentSettingsEntity,
     ],
     synchronize: isDevelopment,
     logging: isDevelopment,
