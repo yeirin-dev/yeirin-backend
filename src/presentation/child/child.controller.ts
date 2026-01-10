@@ -21,6 +21,8 @@ import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { Gender } from '@domain/child/model/value-objects/gender.vo';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
+import { ConsentRole } from '@domain/consent/model/value-objects/consent-role';
+import { ChildConsentRepository } from '@domain/consent/repository/child-consent.repository';
 import { ChildResponseDto } from '@application/child/dto/child-response.dto';
 import { RegisterChildDto } from '@application/child/dto/register-child.dto';
 import {
@@ -59,6 +61,8 @@ export class ChildController {
     private readonly careFacilityRepository: CareFacilityRepository,
     @Inject('CommunityChildCenterRepository')
     private readonly communityChildCenterRepository: CommunityChildCenterRepository,
+    @Inject('ChildConsentRepository')
+    private readonly childConsentRepository: ChildConsentRepository,
     private readonly soulEClient: SoulEClient,
     private readonly smsService: SmsService,
   ) {}
@@ -76,18 +80,29 @@ export class ChildController {
       throw new ForbiddenException('시설 로그인이 필요합니다.');
     }
 
+    let children;
+
     // 시설 유형에 따라 조회
     if (user.facilityType === 'CARE_FACILITY') {
-      const children = await this.childRepository.findByCareFacilityId(user.institutionId);
-      return children.map((child) => ChildResponseDto.fromDomain(child));
+      children = await this.childRepository.findByCareFacilityId(user.institutionId);
+    } else if (user.facilityType === 'COMMUNITY_CENTER') {
+      children = await this.childRepository.findByCommunityChildCenterId(user.institutionId);
+    } else {
+      throw new BadRequestException('알 수 없는 시설 유형입니다.');
     }
 
-    if (user.facilityType === 'COMMUNITY_CENTER') {
-      const children = await this.childRepository.findByCommunityChildCenterId(user.institutionId);
-      return children.map((child) => ChildResponseDto.fromDomain(child));
+    // 각 아동의 보호자 동의 상태 조회
+    const result: ChildResponseDto[] = [];
+    for (const child of children) {
+      const dto = ChildResponseDto.fromDomain(child);
+      dto.hasGuardianConsent = await this.childConsentRepository.hasValidConsentByRole(
+        child.id,
+        ConsentRole.GUARDIAN,
+      );
+      result.push(dto);
     }
 
-    throw new BadRequestException('알 수 없는 시설 유형입니다.');
+    return result;
   }
 
   @Post()

@@ -94,6 +94,15 @@ export class ChildResponseDto {
   })
   updatedAt: Date;
 
+  // ========== 동의 상태 ==========
+
+  @ApiPropertyOptional({
+    description: '보호자 동의 완료 여부',
+    example: true,
+    nullable: true,
+  })
+  hasGuardianConsent?: boolean;
+
   /**
    * Domain → DTO 변환
    */

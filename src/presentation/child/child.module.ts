@@ -9,6 +9,7 @@ import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/
 import { CareFacilityRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/care-facility.repository.impl';
 import { ChildRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/child.repository.impl';
 import { CommunityChildCenterRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/community-child-center.repository.impl';
+import { ConsentModule } from '../consent/consent.module';
 import { ChildController } from './child.controller';
 
 /**
@@ -19,6 +20,7 @@ import { ChildController } from './child.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ChildProfileEntity, CareFacilityEntity, CommunityChildCenterEntity]),
+    ConsentModule,
   ],
   controllers: [ChildController],
   providers: [
