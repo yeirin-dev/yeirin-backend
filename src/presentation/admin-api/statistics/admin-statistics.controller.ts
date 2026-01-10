@@ -22,7 +22,7 @@ import {
  * @route /admin/statistics
  */
 @ApiTags('Admin - 통계')
-@Controller('api/v1/admin/statistics')
+@Controller('admin/statistics')
 @UseGuards(AdminPermissionGuard)
 @UseInterceptors(AdminAuditInterceptor)
 @Roles('ADMIN')

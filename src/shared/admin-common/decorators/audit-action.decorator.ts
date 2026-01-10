@@ -17,6 +17,7 @@ export type AuditActionType =
   | 'LOGOUT'
   | 'PERMISSION_CHANGE'
   | 'STATUS_CHANGE'
+  | 'UPDATE_STATUS'
   | 'EXPORT'
   | 'IMPORT'
   | 'BAN'
@@ -24,7 +25,11 @@ export type AuditActionType =
   | 'ACTIVATE'
   | 'DEACTIVATE'
   | 'FORCE_STATUS_CHANGE'
-  | 'BULK_OPERATION';
+  | 'BULK_OPERATION'
+  | 'REVOKE'
+  | 'RESET_PASSWORD'
+  | 'HIDE'
+  | 'SHOW';
 
 /**
  * 감사 로그 메타데이터 인터페이스

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GetDashboardOverviewUseCase } from '@application/admin-statistics/get-dashboard-overview.usecase';
 import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
@@ -6,6 +6,7 @@ import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/c
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { AdminStatisticsRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/admin-statistics.repository.impl';
+import { AdminAuthModule } from '../auth/admin-auth.module';
 import { AdminDashboardController } from './admin-dashboard.controller';
 
 /**
@@ -22,6 +23,7 @@ import { AdminDashboardController } from './admin-dashboard.controller';
       CareFacilityEntity,
       CommunityChildCenterEntity,
     ]),
+    forwardRef(() => AdminAuthModule),
   ],
   controllers: [AdminDashboardController],
   providers: [

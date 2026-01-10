@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GetCounselRequestDetailAdminUseCase } from '@application/counsel-request/admin/get-counsel-request-detail.admin.usecase';
 import { GetCounselRequestsAdminUseCase } from '@application/counsel-request/admin/get-counsel-requests.admin.usecase';
@@ -8,6 +8,7 @@ import { CounselReportEntity } from '@infrastructure/persistence/typeorm/entity/
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { ReviewEntity } from '@infrastructure/persistence/typeorm/entity/review.entity';
 import { CounselRequestRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-request.repository.impl';
+import { AdminAuthModule } from '../auth/admin-auth.module';
 import { AdminCounselRequestController } from './admin-counsel-request.controller';
 
 // Admin Use Cases
@@ -24,6 +25,7 @@ import { AdminCounselRequestController } from './admin-counsel-request.controlle
       ReviewEntity,
       AuditLogEntity,
     ]),
+    forwardRef(() => AdminAuthModule),
   ],
   controllers: [AdminCounselRequestController],
   providers: [

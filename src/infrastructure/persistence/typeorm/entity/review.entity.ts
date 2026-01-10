@@ -39,6 +39,10 @@ export class ReviewEntity {
   @Column({ type: 'int', default: 0 })
   helpfulCount: number;
 
+  /** 숨김 상태 */
+  @Column({ type: 'boolean', default: false })
+  isHidden: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

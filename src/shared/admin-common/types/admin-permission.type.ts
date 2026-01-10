@@ -13,6 +13,7 @@ export type AdminResource =
   | 'institution'
   | 'counselor'
   | 'child'
+  | 'consent'
   | 'review'
   | 'audit-log'
   | 'statistics'
@@ -31,6 +32,7 @@ export type AdminAction =
   | 'deactivate'
   | 'update:status'
   | 'export'
+  | 'revoke'
   | 'manage';
 
 /**
@@ -80,8 +82,13 @@ export const ADMIN_PERMISSIONS = {
   CHILD_READ: 'child:read' as AdminPermission,
   CHILD_UPDATE: 'child:update' as AdminPermission,
 
+  // Consent Management
+  CONSENT_READ: 'consent:read' as AdminPermission,
+  CONSENT_REVOKE: 'consent:revoke' as AdminPermission,
+
   // Review Management
   REVIEW_READ: 'review:read' as AdminPermission,
+  REVIEW_UPDATE: 'review:update' as AdminPermission,
   REVIEW_DELETE: 'review:delete' as AdminPermission,
 
   // Audit Log

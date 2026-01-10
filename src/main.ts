@@ -54,6 +54,9 @@ async function bootstrap() {
       'http://3.38.162.252:3000',
       'http://43.202.32.196:8000',
       'http://43.203.210.136:8001',
+      // Vercel 배포 (yeirin-admin)
+      'https://yeirin-admin.vercel.app',
+      /\.vercel\.app$/,
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

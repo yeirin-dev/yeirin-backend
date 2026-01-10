@@ -25,6 +25,7 @@ import {
   SkipAdminAudit,
   ADMIN_PERMISSIONS,
 } from '@yeirin/admin-common';
+import { AdminJwtAuthGuard } from '../auth/guards/admin-jwt-auth.guard';
 
 /**
  * Admin Counsel Request Controller
@@ -33,8 +34,8 @@ import {
  * @route /admin/counsel-requests
  */
 @ApiTags('Admin - 상담의뢰 관리')
-@Controller('api/v1/admin/counsel-requests')
-@UseGuards(AdminPermissionGuard)
+@Controller('admin/counsel-requests')
+@UseGuards(AdminJwtAuthGuard, AdminPermissionGuard)
 @UseInterceptors(AdminAuditInterceptor)
 @Roles('ADMIN')
 @ApiBearerAuth()

@@ -2,7 +2,7 @@ import { Controller, Get, Query, Res, UseGuards, UseInterceptors } from '@nestjs
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
-import { Repository, Between, Like } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { Roles } from '@infrastructure/auth/decorators/roles.decorator';
 import { AuditLogEntity } from '@infrastructure/persistence/typeorm/entity/audit-log.entity';
 import {
@@ -15,6 +15,7 @@ import {
   AdminDateRangeQueryDto,
   AdminPaginatedResponseDto,
 } from '@yeirin/admin-common';
+import { AdminJwtAuthGuard } from '../auth/guards/admin-jwt-auth.guard';
 
 /**
  * Admin Audit Log Controller
@@ -23,8 +24,8 @@ import {
  * @route /admin/audit-logs
  */
 @ApiTags('Admin - 감사 로그')
-@Controller('api/v1/admin/audit-logs')
-@UseGuards(AdminPermissionGuard)
+@Controller('admin/audit-logs')
+@UseGuards(AdminJwtAuthGuard, AdminPermissionGuard)
 @UseInterceptors(AdminAuditInterceptor)
 @Roles('ADMIN')
 @ApiBearerAuth()

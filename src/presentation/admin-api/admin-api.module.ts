@@ -3,10 +3,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuditService } from '@infrastructure/audit/audit.service';
 import { AuditLogEntity } from '@infrastructure/persistence/typeorm/entity/audit-log.entity';
 import { AdminCommonModule } from '@yeirin/admin-common';
+import { AdminAuthModule } from './auth/admin-auth.module';
 import { AdminAuditLogModule } from './audit-log/admin-audit-log.module';
+import { AdminChildrenModule } from './children/admin-children.module';
+import { AdminConsentModule } from './consent/admin-consent.module';
+import { AdminCounselReportModule } from './counsel-report/admin-counsel-report.module';
 import { AdminCounselRequestModule } from './counsel-request/admin-counsel-request.module';
 import { AdminDashboardModule } from './dashboard/admin-dashboard.module';
 import { AdminInstitutionModule } from './institution/admin-institution.module';
+import { AdminReviewModule } from './review/admin-review.module';
 import { AdminStatisticsModule } from './statistics/admin-statistics.module';
 
 /**
@@ -28,14 +33,21 @@ import { AdminStatisticsModule } from './statistics/admin-statistics.module';
       globalInterceptor: false,
     }),
 
+    // Admin Auth Module
+    AdminAuthModule,
+
     // Admin Sub-Modules
-    AdminCounselRequestModule,
+    AdminDashboardModule,
     AdminInstitutionModule,
+    AdminChildrenModule,
+    AdminConsentModule,
+    AdminCounselRequestModule,
+    AdminCounselReportModule,
+    AdminReviewModule,
     AdminStatisticsModule,
     AdminAuditLogModule,
-    AdminDashboardModule,
   ],
   providers: [AuditService],
-  exports: [AuditService],
+  exports: [AuditService, AdminAuthModule],
 })
 export class AdminApiModule {}
