@@ -22,6 +22,7 @@ import { CounselRequestModule } from '@presentation/counsel-request/counsel-requ
 import { InstitutionDashboardModule } from '@presentation/institution-dashboard/institution-dashboard.module';
 import { MatchingModule } from '@presentation/matching/matching.module';
 import { ReviewModule } from '@presentation/review/review.module';
+import { SettingsModule } from '@presentation/settings/settings.module';
 import { UploadModule } from '@presentation/upload/upload.module';
 import { WebhookModule } from '@presentation/webhook/webhook.module';
 
@@ -54,6 +55,7 @@ import { WebhookModule } from '@presentation/webhook/webhook.module';
     CounselReportModule,
     MatchingModule,
     ReviewModule,
+    SettingsModule,
     UploadModule,
     WebhookModule,
     InstitutionDashboardModule,

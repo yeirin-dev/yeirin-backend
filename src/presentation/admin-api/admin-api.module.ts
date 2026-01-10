@@ -12,6 +12,7 @@ import { AdminCounselRequestModule } from './counsel-request/admin-counsel-reque
 import { AdminDashboardModule } from './dashboard/admin-dashboard.module';
 import { AdminInstitutionModule } from './institution/admin-institution.module';
 import { AdminReviewModule } from './review/admin-review.module';
+import { AdminSettingsModule } from './settings/admin-settings.module';
 import { AdminStatisticsModule } from './statistics/admin-statistics.module';
 
 /**
@@ -44,6 +45,7 @@ import { AdminStatisticsModule } from './statistics/admin-statistics.module';
     AdminCounselRequestModule,
     AdminCounselReportModule,
     AdminReviewModule,
+    AdminSettingsModule,
     AdminStatisticsModule,
     AdminAuditLogModule,
   ],
