@@ -141,7 +141,7 @@ export class AdminChildrenController {
         id: child.id,
         childType: child.careFacilityId ? 'CARE_FACILITY' : 'COMMUNITY_CENTER',
         name: child.name,
-        birthDate: child.birthDate.toISOString().split('T')[0],
+        birthDate: this.formatDate(child.birthDate),
         gender: child.gender,
         careFacilityId: child.careFacilityId,
         communityChildCenterId: child.communityChildCenterId,
@@ -244,7 +244,7 @@ export class AdminChildrenController {
       id: child.id,
       childType: child.careFacilityId ? 'CARE_FACILITY' : 'COMMUNITY_CENTER',
       name: child.name,
-      birthDate: child.birthDate.toISOString().split('T')[0],
+      birthDate: this.formatDate(child.birthDate),
       gender: child.gender,
       careFacilityId: child.careFacilityId,
       communityChildCenterId: child.communityChildCenterId,
@@ -315,13 +315,21 @@ export class AdminChildrenController {
     };
   }
 
-  private calculateAge(birthDate: Date): number {
+  private calculateAge(birthDate: Date | string): number {
+    const date = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
     const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    let age = today.getFullYear() - date.getFullYear();
+    const monthDiff = today.getMonth() - date.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
       age--;
     }
     return age;
+  }
+
+  private formatDate(date: Date | string): string {
+    if (typeof date === 'string') {
+      return date.split('T')[0];
+    }
+    return date.toISOString().split('T')[0];
   }
 }

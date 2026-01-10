@@ -94,7 +94,7 @@ export class AdminCareFacilityController {
       contactPhone: facility.phoneNumber,
       phoneNumber: facility.phoneNumber,
       capacity: facility.capacity,
-      establishedDate: facility.establishedDate?.toISOString() || null,
+      establishedDate: this.formatDate(facility.establishedDate),
       introduction: facility.introduction,
       isActive: facility.isActive,
       isPasswordChanged: facility.isPasswordChanged,
@@ -141,7 +141,7 @@ export class AdminCareFacilityController {
       contactPhone: facility.phoneNumber,
       phoneNumber: facility.phoneNumber,
       capacity: facility.capacity,
-      establishedDate: facility.establishedDate?.toISOString() || null,
+      establishedDate: this.formatDate(facility.establishedDate),
       introduction: facility.introduction,
       isActive: facility.isActive,
       isPasswordChanged: facility.isPasswordChanged,
@@ -202,5 +202,13 @@ export class AdminCareFacilityController {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return password;
+  }
+
+  private formatDate(date: Date | string | null | undefined): string | null {
+    if (!date) return null;
+    if (typeof date === 'string') {
+      return date.split('T')[0];
+    }
+    return date.toISOString().split('T')[0];
   }
 }

@@ -102,7 +102,7 @@ export class AdminCommunityCenterController {
       email: center.email,
       expectedChildCount: center.expectedChildCount,
       capacity: center.capacity,
-      establishedDate: center.establishedDate?.toISOString() || null,
+      establishedDate: this.formatDate(center.establishedDate),
       introduction: center.introduction,
       operatingHours: center.operatingHours,
       isActive: center.isActive,
@@ -155,7 +155,7 @@ export class AdminCommunityCenterController {
       email: center.email,
       expectedChildCount: center.expectedChildCount,
       capacity: center.capacity,
-      establishedDate: center.establishedDate?.toISOString() || null,
+      establishedDate: this.formatDate(center.establishedDate),
       introduction: center.introduction,
       operatingHours: center.operatingHours,
       isActive: center.isActive,
@@ -217,5 +217,13 @@ export class AdminCommunityCenterController {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return password;
+  }
+
+  private formatDate(date: Date | string | null | undefined): string | null {
+    if (!date) return null;
+    if (typeof date === 'string') {
+      return date.split('T')[0];
+    }
+    return date.toISOString().split('T')[0];
   }
 }

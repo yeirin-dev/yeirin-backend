@@ -105,7 +105,7 @@ export class AdminCounselReportController {
         counselorId: report.counselorId,
         institutionId: report.institutionId,
         sessionNumber: report.sessionNumber,
-        reportDate: report.reportDate.toISOString().split('T')[0],
+        reportDate: this.formatDate(report.reportDate),
         centerName: report.centerName,
         counselorSignature: report.counselorSignature,
         counselReason: report.counselReason,
@@ -164,7 +164,7 @@ export class AdminCounselReportController {
       counselorId: report.counselorId,
       institutionId: report.institutionId,
       sessionNumber: report.sessionNumber,
-      reportDate: report.reportDate.toISOString().split('T')[0],
+      reportDate: this.formatDate(report.reportDate),
       centerName: report.centerName,
       counselorSignature: report.counselorSignature,
       counselReason: report.counselReason,
@@ -225,5 +225,12 @@ export class AdminCounselReportController {
     this.logger.log(`상담보고서 상태 변경: ${id} → ${dto.status}`);
 
     return { success: true, message: '상태가 변경되었습니다' };
+  }
+
+  private formatDate(date: Date | string): string {
+    if (typeof date === 'string') {
+      return date.split('T')[0];
+    }
+    return date.toISOString().split('T')[0];
   }
 }
