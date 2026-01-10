@@ -21,6 +21,13 @@ export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest();
+
+    // Admin API는 별도 AdminPermissionGuard 사용 - 글로벌 RolesGuard 스킵
+    if (request.path?.startsWith('/admin')) {
+      return true;
+    }
+
     // 메타데이터에서 필요한 역할 추출
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
       context.getHandler(),
@@ -33,7 +40,6 @@ export class RolesGuard implements CanActivate {
     }
 
     // 요청에서 사용자 정보 추출
-    const request = context.switchToHttp().getRequest();
     const user = request.user;
 
     // 사용자 정보 없음 (JwtAuthGuard가 먼저 실행되어야 함)
