@@ -80,13 +80,15 @@ export class RequestCounselRequestRecommendationUseCase {
       });
 
       if (recommendationResult.isFailure) {
-        throw new Error(recommendationResult.getError().message);
+        throw new BadRequestException(recommendationResult.getError().message);
       }
 
       recommendations.push(recommendationResult.getValue());
     }
 
     // 6. 추천 저장 (벌크)
+    // TODO: 현재 DDD Repository 패턴에서는 트랜잭션 전파가 어려움
+    // 향후 Repository에 queryRunner 지원 추가 시 트랜잭션으로 묶을 것
     const savedRecommendations = await this.recommendationRepository.saveAll(recommendations);
 
     // 7. 상담의뢰지 상태 변경 → RECOMMENDED

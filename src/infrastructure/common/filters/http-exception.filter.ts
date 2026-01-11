@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { QueryFailedError, EntityNotFoundError } from 'typeorm';
 
 /**
  * 표준화된 에러 응답 인터페이스
@@ -118,6 +119,54 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
         const details = Array.isArray(responseObj.message) ? (responseObj.message as string[]) : [];
         return { statusCode, message, details };
       }
+    }
+
+    // TypeORM QueryFailedError 처리 (데이터베이스 쿼리 실패)
+    if (exception instanceof QueryFailedError) {
+      const driverError = exception.driverError as { code?: string; detail?: string };
+
+      // PostgreSQL unique violation (중복 키)
+      if (driverError?.code === '23505') {
+        return {
+          statusCode: HttpStatus.CONFLICT,
+          message: '이미 존재하는 데이터입니다',
+          details: driverError.detail ? [driverError.detail] : [],
+        };
+      }
+
+      // PostgreSQL foreign key violation (외래 키 제약 조건)
+      if (driverError?.code === '23503') {
+        return {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: '참조된 데이터가 존재하지 않거나 참조 무결성 위반입니다',
+          details: driverError.detail ? [driverError.detail] : [],
+        };
+      }
+
+      // PostgreSQL not null violation (필수 필드 누락)
+      if (driverError?.code === '23502') {
+        return {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: '필수 필드가 누락되었습니다',
+          details: driverError.detail ? [driverError.detail] : [],
+        };
+      }
+
+      // 기타 DB 에러
+      return {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: '데이터베이스 처리 중 오류가 발생했습니다',
+        details: [],
+      };
+    }
+
+    // TypeORM EntityNotFoundError 처리
+    if (exception instanceof EntityNotFoundError) {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: '요청한 데이터를 찾을 수 없습니다',
+        details: [],
+      };
     }
 
     // 일반 Error 처리

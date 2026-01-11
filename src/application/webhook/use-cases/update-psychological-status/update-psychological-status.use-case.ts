@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -43,13 +43,13 @@ export class UpdatePsychologicalStatusUseCase {
     // 3. 새로운 상태 생성
     const newStatusResult = PsychologicalStatus.create(this.mapEnumToDomain(dto.newStatus));
     if (newStatusResult.isFailure) {
-      throw new Error('유효하지 않은 심리 상태입니다');
+      throw new BadRequestException('유효하지 않은 심리 상태입니다');
     }
 
     // 4. 상태 업데이트
     const updateResult = child.updatePsychologicalStatus(newStatusResult.getValue());
     if (updateResult.isFailure) {
-      throw new Error(updateResult.getError().message);
+      throw new BadRequestException(updateResult.getError().message);
     }
 
     const { isEscalation, isDeescalation } = updateResult.getValue();

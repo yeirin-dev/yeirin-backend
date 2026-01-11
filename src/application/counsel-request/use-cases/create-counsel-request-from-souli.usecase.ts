@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
@@ -42,7 +42,7 @@ export class CreateCounselRequestFromSouliUseCase {
     });
 
     if (result.isFailure) {
-      throw new Error(result.getError().message);
+      throw new BadRequestException(result.getError().message);
     }
 
     const counselRequest = result.getValue();

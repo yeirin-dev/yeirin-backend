@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { RecommendationRepository } from '@domain/matching/repository/recommendation.repository';
 import { RECOMMENDATION_REPOSITORY } from '@domain/matching/repository/recommendation.repository.token';
 import { CounselRequestText } from '@domain/matching/value-object/counsel-request-text';
@@ -29,7 +29,7 @@ export class RequestCounselorRecommendationUseCase {
     // 1. Value Object로 변환 및 검증
     const counselRequestTextResult = CounselRequestText.create(dto.counselRequestText);
     if (counselRequestTextResult.isFailure) {
-      throw new Error(counselRequestTextResult.error);
+      throw new BadRequestException(counselRequestTextResult.error);
     }
 
     // 2. Repository를 통해 추천 요청

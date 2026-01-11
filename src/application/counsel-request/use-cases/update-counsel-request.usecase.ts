@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
@@ -32,7 +32,7 @@ export class UpdateCounselRequestUseCase {
     const result = counselRequest.updateFormData(updatedFormData);
 
     if (result.isFailure) {
-      throw new Error(result.getError().message);
+      throw new BadRequestException(result.getError().message);
     }
 
     const saved = await this.counselRequestRepository.save(counselRequest);
