@@ -107,13 +107,25 @@ export class SmsService {
         messageId: (result as { groupId?: string })?.groupId || 'sent',
       };
     } catch (error: unknown) {
+      // 항상 전체 에러 객체 로깅 (디버깅용)
+      this.logger.error(
+        `SMS 발송 실패 전체 에러 - to: ${normalizedTo}, error: ${JSON.stringify(error, Object.getOwnPropertyNames(error))}`,
+      );
+
       // Solapi SDK 에러는 다양한 형태로 올 수 있음
       let errorMessage = 'Unknown error';
 
       if (error instanceof Error) {
         errorMessage = error.message;
+        // Error 객체의 추가 속성 확인 (Solapi 에러는 추가 속성을 가질 수 있음)
+        const errAny = error as Error & Record<string, unknown>;
+        if (errAny.errorCode) {
+          errorMessage = `[${errAny.errorCode}] ${error.message}`;
+        }
+        if (errAny.statusCode) {
+          errorMessage = `(${errAny.statusCode}) ${errorMessage}`;
+        }
       } else if (typeof error === 'object' && error !== null) {
-        // Solapi 에러 객체 처리
         const errObj = error as Record<string, unknown>;
         if (errObj.message) {
           errorMessage = String(errObj.message);
@@ -122,9 +134,6 @@ export class SmsService {
         } else if (errObj.error) {
           errorMessage = String(errObj.error);
         }
-        this.logger.error(
-          `SMS 발송 실패 상세 - to: ${normalizedTo}, errorObj: ${JSON.stringify(error)}`,
-        );
       }
 
       this.logger.error(`SMS 발송 실패 - to: ${normalizedTo}, error: ${errorMessage}`);
