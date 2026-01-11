@@ -1,9 +1,10 @@
 import { DomainError, Result } from '@domain/common/result';
+import { calculateKoreanAge } from '@infrastructure/common/timezone';
 
 /**
  * 생년월일 Value Object
  * - 불변성: 생성 후 변경 불가
- * - 나이 계산 로직 포함
+ * - 나이 계산 로직 포함 (한국 시간대 기준)
  */
 export class BirthDate {
   private readonly _value: Date;
@@ -49,20 +50,17 @@ export class BirthDate {
   }
 
   /**
-   * 현재 나이 계산
+   * 현재 나이 계산 (한국 시간대 기준)
+   *
+   * Uses Korean date (KST) as reference for accurate age calculation.
+   * This is important for legal age verification (만 나이).
+   *
+   * If the server is in UTC, at 3 AM KST (= 6 PM UTC previous day),
+   * new Date() in UTC would return the previous day, causing incorrect
+   * age calculation around midnight KST.
    */
   public getAge(): number {
-    const today = new Date();
-    let age = today.getFullYear() - this._value.getFullYear();
-    const monthDiff = today.getMonth() - this._value.getMonth();
-    const dayDiff = today.getDate() - this._value.getDate();
-
-    // 생일이 아직 지나지 않았으면 -1
-    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-      age--;
-    }
-
-    return age;
+    return calculateKoreanAge(this._value);
   }
 
   /**

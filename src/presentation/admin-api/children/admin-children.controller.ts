@@ -12,6 +12,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, FindOptionsWhere, IsNull, Not } from 'typeorm';
 import { Roles } from '@infrastructure/auth/decorators/roles.decorator';
+import { calculateKoreanAge } from '@infrastructure/common/timezone';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
 import { ChildConsentEntity } from '@infrastructure/persistence/typeorm/entity/child-consent.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
@@ -315,15 +316,15 @@ export class AdminChildrenController {
     };
   }
 
+  /**
+   * 나이 계산 (한국 시간대 기준)
+   *
+   * Uses Korean date (KST) as reference for accurate age calculation.
+   * This is important for legal age verification (만 나이).
+   */
   private calculateAge(birthDate: Date | string): number {
     const date = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
-    const today = new Date();
-    let age = today.getFullYear() - date.getFullYear();
-    const monthDiff = today.getMonth() - date.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
-      age--;
-    }
-    return age;
+    return calculateKoreanAge(date);
   }
 
   private formatDate(date: Date | string): string {

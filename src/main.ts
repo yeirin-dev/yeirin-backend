@@ -5,6 +5,10 @@ import helmet from 'helmet';
 import { createWinstonLogger } from '@infrastructure/logging/winston.config';
 import { AppModule } from './app.module';
 
+// 🇰🇷 한국 시간대 설정 (KST, UTC+9)
+// 모든 날짜/시간 연산이 한국 시간 기준으로 동작하도록 설정
+process.env.TZ = 'Asia/Seoul';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: createWinstonLogger(),
