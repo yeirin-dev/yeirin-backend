@@ -83,22 +83,50 @@ export class SmsService {
     }
 
     try {
-      this.logger.log(`SMS 발송 시작 - to: ${normalizedTo}`);
+      // 메시지 길이에 따라 SMS/LMS 자동 결정 (한글 90바이트 = 약 45자)
+      const byteLength = Buffer.byteLength(text, 'utf8');
+      const messageType = byteLength > 90 ? 'LMS' : 'SMS';
+
+      this.logger.log(
+        `${messageType} 발송 시작 - to: ${normalizedTo}, byteLength: ${byteLength}`,
+      );
 
       const result = await this.messageService.send({
         to: normalizedTo,
         from: normalizedFrom,
         text,
+        type: messageType,
       });
 
-      this.logger.log(`SMS 발송 성공 - to: ${normalizedTo}, result: ${JSON.stringify(result)}`);
+      this.logger.log(
+        `${messageType} 발송 성공 - to: ${normalizedTo}, result: ${JSON.stringify(result)}`,
+      );
 
       return {
         success: true,
         messageId: (result as { groupId?: string })?.groupId || 'sent',
       };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    } catch (error: unknown) {
+      // Solapi SDK 에러는 다양한 형태로 올 수 있음
+      let errorMessage = 'Unknown error';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null) {
+        // Solapi 에러 객체 처리
+        const errObj = error as Record<string, unknown>;
+        if (errObj.message) {
+          errorMessage = String(errObj.message);
+        } else if (errObj.errorMessage) {
+          errorMessage = String(errObj.errorMessage);
+        } else if (errObj.error) {
+          errorMessage = String(errObj.error);
+        }
+        this.logger.error(
+          `SMS 발송 실패 상세 - to: ${normalizedTo}, errorObj: ${JSON.stringify(error)}`,
+        );
+      }
+
       this.logger.error(`SMS 발송 실패 - to: ${normalizedTo}, error: ${errorMessage}`);
 
       return {
