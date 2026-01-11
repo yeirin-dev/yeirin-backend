@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 
 /**
  * 테스트 앱 설정 헬퍼
@@ -33,56 +33,128 @@ export async function closeTestApp(app: INestApplication): Promise<void> {
  * API 요청 헬퍼
  */
 export class TestRequest {
+  private customHeaders: Record<string, string> = {};
+
   constructor(private readonly app: INestApplication) {}
 
+  /**
+   * 커스텀 헤더 설정
+   */
+  withHeader(name: string, value: string) {
+    const newInstance = new TestRequest(this.app);
+    newInstance.customHeaders = { ...this.customHeaders, [name]: value };
+    return newInstance;
+  }
+
+  private applyHeaders(req: request.Test): request.Test {
+    for (const [key, value] of Object.entries(this.customHeaders)) {
+      req = req.set(key, value);
+    }
+    return req;
+  }
+
   get(path: string) {
-    return request(this.app.getHttpServer()).get(path);
+    return this.applyHeaders(request(this.app.getHttpServer()).get(path));
   }
 
   post(path: string, body?: any) {
-    return request(this.app.getHttpServer()).post(path).send(body);
+    return this.applyHeaders(request(this.app.getHttpServer()).post(path).send(body));
   }
 
   put(path: string, body?: any) {
-    return request(this.app.getHttpServer()).put(path).send(body);
+    return this.applyHeaders(request(this.app.getHttpServer()).put(path).send(body));
   }
 
   patch(path: string, body?: any) {
-    return request(this.app.getHttpServer()).patch(path).send(body);
+    return this.applyHeaders(request(this.app.getHttpServer()).patch(path).send(body));
   }
 
   delete(path: string) {
-    return request(this.app.getHttpServer()).delete(path);
+    return this.applyHeaders(request(this.app.getHttpServer()).delete(path));
+  }
+
+  /**
+   * 단일 파일 multipart 업로드
+   */
+  postMultipart(path: string, fieldName: string, filePath: string) {
+    let req = request(this.app.getHttpServer()).post(path).attach(fieldName, filePath);
+    return this.applyHeaders(req);
+  }
+
+  /**
+   * 여러 파일 multipart 업로드
+   */
+  postMultipartMultiple(path: string, fieldName: string, filePaths: string[]) {
+    let req = request(this.app.getHttpServer()).post(path);
+    for (const filePath of filePaths) {
+      req = req.attach(fieldName, filePath);
+    }
+    return this.applyHeaders(req);
   }
 
   /**
    * 인증 토큰 포함 요청
    */
   authenticated(token: string) {
+    const self = this;
     return {
       get: (path: string) =>
-        request(this.app.getHttpServer()).get(path).set('Authorization', `Bearer ${token}`),
+        self.applyHeaders(
+          request(self.app.getHttpServer()).get(path).set('Authorization', `Bearer ${token}`),
+        ),
 
       post: (path: string, body?: any) =>
-        request(this.app.getHttpServer())
-          .post(path)
-          .set('Authorization', `Bearer ${token}`)
-          .send(body),
+        self.applyHeaders(
+          request(self.app.getHttpServer())
+            .post(path)
+            .set('Authorization', `Bearer ${token}`)
+            .send(body),
+        ),
 
       put: (path: string, body?: any) =>
-        request(this.app.getHttpServer())
-          .put(path)
-          .set('Authorization', `Bearer ${token}`)
-          .send(body),
+        self.applyHeaders(
+          request(self.app.getHttpServer())
+            .put(path)
+            .set('Authorization', `Bearer ${token}`)
+            .send(body),
+        ),
 
       patch: (path: string, body?: any) =>
-        request(this.app.getHttpServer())
-          .patch(path)
-          .set('Authorization', `Bearer ${token}`)
-          .send(body),
+        self.applyHeaders(
+          request(self.app.getHttpServer())
+            .patch(path)
+            .set('Authorization', `Bearer ${token}`)
+            .send(body),
+        ),
 
       delete: (path: string) =>
-        request(this.app.getHttpServer()).delete(path).set('Authorization', `Bearer ${token}`),
+        self.applyHeaders(
+          request(self.app.getHttpServer()).delete(path).set('Authorization', `Bearer ${token}`),
+        ),
+
+      /**
+       * 단일 파일 multipart 업로드 (인증 포함)
+       */
+      postMultipart: (path: string, fieldName: string, filePath: string) =>
+        self.applyHeaders(
+          request(self.app.getHttpServer())
+            .post(path)
+            .set('Authorization', `Bearer ${token}`)
+            .attach(fieldName, filePath),
+        ),
+
+      /**
+       * 여러 파일 multipart 업로드 (인증 포함)
+       */
+      postMultipartMultiple: (path: string, fieldName: string, filePaths: string[]) => {
+        let req = request(self.app.getHttpServer())
+          .post(path)
+          .set('Authorization', `Bearer ${token}`);
+        for (const filePath of filePaths) {
+          req = req.attach(fieldName, filePath);
+        }
+        return self.applyHeaders(req);
+      },
     };
   }
 }

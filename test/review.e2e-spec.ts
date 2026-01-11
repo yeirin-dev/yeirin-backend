@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
+import { Response } from 'supertest';
 import { AppModule } from '../src/app.module';
 
 describe('Review API (e2e)', () => {
@@ -34,7 +35,7 @@ describe('Review API (e2e)', () => {
         .post('/reviews')
         .send(createReviewDto)
         .expect(201)
-        .expect((res) => {
+        .expect((res: Response) => {
           expect(res.body).toHaveProperty('id');
           expect(res.body.institutionId).toBe(createReviewDto.institutionId);
           expect(res.body.authorNickname).toBe(createReviewDto.authorNickname);
@@ -71,7 +72,7 @@ describe('Review API (e2e)', () => {
         .get('/reviews')
         .query({ page: 1, limit: 10 })
         .expect(200)
-        .expect((res) => {
+        .expect((res: Response) => {
           expect(res.body).toHaveProperty('reviews');
           expect(res.body).toHaveProperty('total');
           expect(res.body).toHaveProperty('page');
@@ -84,7 +85,7 @@ describe('Review API (e2e)', () => {
       return request(app.getHttpServer())
         .get('/reviews')
         .expect(200)
-        .expect((res) => {
+        .expect((res: Response) => {
           expect(res.body.page).toBe(1);
           expect(res.body.limit).toBe(10);
         });
@@ -112,7 +113,7 @@ describe('Review API (e2e)', () => {
       return request(app.getHttpServer())
         .get(`/reviews/${createdReviewId}`)
         .expect(200)
-        .expect((res) => {
+        .expect((res: Response) => {
           expect(res.body.id).toBe(createdReviewId);
           expect(res.body).toHaveProperty('authorNickname');
           expect(res.body).toHaveProperty('rating');
@@ -152,7 +153,7 @@ describe('Review API (e2e)', () => {
         .put(`/reviews/${createdReviewId}`)
         .send(updateDto)
         .expect(200)
-        .expect((res) => {
+        .expect((res: Response) => {
           expect(res.body.content).toBe(updateDto.content);
           expect(res.body.rating).toBe(updateDto.rating);
         });
@@ -184,7 +185,7 @@ describe('Review API (e2e)', () => {
       return request(app.getHttpServer())
         .patch(`/reviews/${createdReviewId}/helpful`)
         .expect(200)
-        .expect((res) => {
+        .expect((res: Response) => {
           expect(res.body.helpfulCount).toBe(initialCount + 1);
         });
     });
