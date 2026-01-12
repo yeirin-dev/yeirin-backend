@@ -50,6 +50,7 @@ export class ChildMapper {
         gender: genderResult.getValue(),
         careFacilityId: entity.careFacilityId,
         communityChildCenterId: entity.communityChildCenterId,
+        educationWelfareSchoolId: entity.educationWelfareSchoolId,
         medicalInfo: entity.medicalInfo ?? undefined,
         specialNeeds: entity.specialNeeds ?? undefined,
         psychologicalStatus: psychologicalStatusResult.getValue(),
@@ -71,6 +72,7 @@ export class ChildMapper {
     entity.gender = child.gender.value;
     entity.careFacilityId = child.careFacilityId;
     entity.communityChildCenterId = child.communityChildCenterId;
+    entity.educationWelfareSchoolId = child.educationWelfareSchoolId;
     entity.medicalInfo = child.medicalInfo;
     entity.specialNeeds = child.specialNeeds;
     entity.psychologicalStatus = ChildMapper.mapPsychologicalStatusDomainToEnum(
@@ -89,6 +91,7 @@ export class ChildMapper {
     const mapping: Record<ChildTypeEnum, ChildTypeValue> = {
       [ChildTypeEnum.CARE_FACILITY]: ChildTypeValue.CARE_FACILITY,
       [ChildTypeEnum.COMMUNITY_CENTER]: ChildTypeValue.COMMUNITY_CENTER,
+      [ChildTypeEnum.EDUCATION_WELFARE_SCHOOL]: ChildTypeValue.EDUCATION_WELFARE_SCHOOL,
       [ChildTypeEnum.REGULAR]: ChildTypeValue.REGULAR,
     };
     return mapping[enumValue];
@@ -101,6 +104,7 @@ export class ChildMapper {
     const mapping: Record<ChildTypeValue, ChildTypeEnum> = {
       [ChildTypeValue.CARE_FACILITY]: ChildTypeEnum.CARE_FACILITY,
       [ChildTypeValue.COMMUNITY_CENTER]: ChildTypeEnum.COMMUNITY_CENTER,
+      [ChildTypeValue.EDUCATION_WELFARE_SCHOOL]: ChildTypeEnum.EDUCATION_WELFARE_SCHOOL,
       [ChildTypeValue.REGULAR]: ChildTypeEnum.REGULAR,
     };
     return mapping[domainValue];

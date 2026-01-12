@@ -9,7 +9,7 @@ import {
 
 interface GetDashboardParams {
   institutionId: string;
-  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER';
+  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL';
 }
 
 /**
@@ -35,10 +35,20 @@ export class GetInstitutionDashboardUseCase {
     const { institutionId, facilityType } = params;
 
     // 시설 유형에 따라 아동 목록 조회
-    const children =
-      facilityType === 'CARE_FACILITY'
-        ? await this.childRepository.findByCareFacilityId(institutionId)
-        : await this.childRepository.findByCommunityChildCenterId(institutionId);
+    let children;
+    switch (facilityType) {
+      case 'CARE_FACILITY':
+        children = await this.childRepository.findByCareFacilityId(institutionId);
+        break;
+      case 'COMMUNITY_CENTER':
+        children = await this.childRepository.findByCommunityChildCenterId(institutionId);
+        break;
+      case 'EDUCATION_WELFARE_SCHOOL':
+        children = await this.childRepository.findByEducationWelfareSchoolId(institutionId);
+        break;
+      default:
+        throw new BadRequestException(`알 수 없는 시설 유형: ${facilityType}`);
+    }
 
     const childrenCount = children.length;
     const childIds = children.map((child) => child.id);

@@ -1,13 +1,11 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CareFacilityRepository } from '@domain/care-facility/repository/care-facility.repository';
-import { Child } from '@domain/child/model/child';
-import { BirthDate } from '@domain/child/model/value-objects/birth-date.vo';
-import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
-import { ChildType, ChildTypeValue } from '@domain/child/model/value-objects/child-type.vo';
-import { Gender, GenderType } from '@domain/child/model/value-objects/gender.vo';
+import { ChildTypeValue } from '@domain/child/model/value-objects/child-type.vo';
+import { GenderType } from '@domain/child/model/value-objects/gender.vo';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
+import { EducationWelfareSchoolRepository } from '@domain/education-welfare-school/repository/education-welfare-school.repository';
 import { ChildType as ChildTypeEnum } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';
 import { RegisterChildDto } from '../../dto/register-child.dto';
 import { RegisterChildUseCase } from './register-child.use-case';
@@ -17,6 +15,7 @@ describe('RegisterChildUseCase', () => {
   let mockChildRepository: jest.Mocked<ChildRepository>;
   let mockCareFacilityRepository: jest.Mocked<CareFacilityRepository>;
   let mockCommunityChildCenterRepository: jest.Mocked<CommunityChildCenterRepository>;
+  let mockEducationWelfareSchoolRepository: jest.Mocked<EducationWelfareSchoolRepository>;
 
   beforeEach(async () => {
     mockChildRepository = {
@@ -24,10 +23,12 @@ describe('RegisterChildUseCase', () => {
       findById: jest.fn(),
       findByCareFacilityId: jest.fn(),
       findByCommunityChildCenterId: jest.fn(),
+      findByEducationWelfareSchoolId: jest.fn(),
       delete: jest.fn(),
       exists: jest.fn(),
       countByCareFacilityId: jest.fn(),
       countByCommunityChildCenterId: jest.fn(),
+      countByEducationWelfareSchoolId: jest.fn(),
     };
 
     mockCareFacilityRepository = {
@@ -56,6 +57,19 @@ describe('RegisterChildUseCase', () => {
       getDistinctDistricts: jest.fn(),
     };
 
+    mockEducationWelfareSchoolRepository = {
+      save: jest.fn(),
+      findById: jest.fn(),
+      findByName: jest.fn(),
+      findAllActive: jest.fn(),
+      findAll: jest.fn(),
+      delete: jest.fn(),
+      exists: jest.fn(),
+      existsByName: jest.fn(),
+      findActiveByDistrict: jest.fn(),
+      getDistinctDistricts: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterChildUseCase,
@@ -70,6 +84,10 @@ describe('RegisterChildUseCase', () => {
         {
           provide: 'CommunityChildCenterRepository',
           useValue: mockCommunityChildCenterRepository,
+        },
+        {
+          provide: 'EducationWelfareSchoolRepository',
+          useValue: mockEducationWelfareSchoolRepository,
         },
       ],
     }).compile();

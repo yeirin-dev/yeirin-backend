@@ -47,10 +47,12 @@ describe('GetCounselRequestsByChildUseCase', () => {
       findById: jest.fn(),
       findByCareFacilityId: jest.fn(),
       findByCommunityChildCenterId: jest.fn(),
+      findByEducationWelfareSchoolId: jest.fn(),
       delete: jest.fn(),
       exists: jest.fn(),
       countByCareFacilityId: jest.fn(),
       countByCommunityChildCenterId: jest.fn(),
+      countByEducationWelfareSchoolId: jest.fn(),
     };
 
     mockS3Service = {
@@ -134,6 +136,7 @@ describe('GetCounselRequestsByChildUseCase', () => {
         gender: ChildGender.create(GenderType.MALE).getValue(),
         careFacilityId,
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
       },
       id,
       new Date(),

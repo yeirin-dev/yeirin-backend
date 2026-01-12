@@ -5,11 +5,11 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 
 /**
  * 시설 기반 JWT Payload
- * - 아동양육시설(CARE_FACILITY) 또는 지역아동센터(COMMUNITY_CENTER) 인증
+ * - 아동양육시설(CARE_FACILITY), 지역아동센터(COMMUNITY_CENTER), 교육복지사협회 학교(EDUCATION_WELFARE_SCHOOL) 인증
  */
 export interface InstitutionJwtPayload {
   sub: string; // facility id
-  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER';
+  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL';
   facilityName: string;
   district: string;
   role: 'INSTITUTION';

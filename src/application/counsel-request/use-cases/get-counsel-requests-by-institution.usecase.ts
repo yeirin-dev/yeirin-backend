@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestStatus } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
@@ -10,7 +10,7 @@ import { PaginatedResponseDto } from '../dto/paginated-response.dto';
 /**
  * 시설별 상담의뢰지 목록 조회 Use Case
  *
- * 해당 시설(양육시설/지역아동센터)에 속한 아동들의 상담의뢰지만 조회합니다.
+ * 해당 시설(양육시설/지역아동센터/교육복지사협회 학교)에 속한 아동들의 상담의뢰지만 조회합니다.
  */
 @Injectable()
 export class GetCounselRequestsByInstitutionUseCase {
@@ -26,16 +26,26 @@ export class GetCounselRequestsByInstitutionUseCase {
 
   async execute(
     institutionId: string,
-    facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER',
+    facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL',
     page: number = 1,
     limit: number = 10,
     status?: CounselRequestStatus,
   ): Promise<PaginatedResponseDto<CounselRequestResponseDto>> {
     // 1. 시설에 속한 아동 ID 목록 조회
-    const children =
-      facilityType === 'CARE_FACILITY'
-        ? await this.childRepository.findByCareFacilityId(institutionId)
-        : await this.childRepository.findByCommunityChildCenterId(institutionId);
+    let children;
+    switch (facilityType) {
+      case 'CARE_FACILITY':
+        children = await this.childRepository.findByCareFacilityId(institutionId);
+        break;
+      case 'COMMUNITY_CENTER':
+        children = await this.childRepository.findByCommunityChildCenterId(institutionId);
+        break;
+      case 'EDUCATION_WELFARE_SCHOOL':
+        children = await this.childRepository.findByEducationWelfareSchoolId(institutionId);
+        break;
+      default:
+        throw new BadRequestException(`알 수 없는 시설 유형: ${facilityType}`);
+    }
 
     const childIds = children.map((child) => child.id);
 

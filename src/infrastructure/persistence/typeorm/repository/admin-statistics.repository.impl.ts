@@ -6,6 +6,7 @@ import { CareFacilityEntity } from '../entity/care-facility.entity';
 import { ChildProfileEntity } from '../entity/child-profile.entity';
 import { CommunityChildCenterEntity } from '../entity/community-child-center.entity';
 import { CounselRequestEntity } from '../entity/counsel-request.entity';
+import { EducationWelfareSchoolEntity } from '../entity/education-welfare-school.entity';
 
 /**
  * Admin Statistics Repository 구현체
@@ -24,6 +25,8 @@ export class AdminStatisticsRepositoryImpl implements AdminStatisticsRepository 
     private readonly careFacilityRepository: Repository<CareFacilityEntity>,
     @InjectRepository(CommunityChildCenterEntity)
     private readonly communityChildCenterRepository: Repository<CommunityChildCenterEntity>,
+    @InjectRepository(EducationWelfareSchoolEntity)
+    private readonly educationWelfareSchoolRepository: Repository<EducationWelfareSchoolEntity>,
   ) {}
 
   // ============ Counsel Request Statistics ============
@@ -131,22 +134,26 @@ export class AdminStatisticsRepositoryImpl implements AdminStatisticsRepository 
     return result?.avgHours ? parseFloat(result.avgHours) : 0;
   }
 
-  // ============ Institution Statistics (CareFacility + CommunityChildCenter) ============
+  // ============ Institution Statistics (CareFacility + CommunityChildCenter + EducationWelfareSchool) ============
 
   async countInstitutions(): Promise<number> {
-    const careFacilityCount = await this.careFacilityRepository.count();
-    const communityChildCenterCount = await this.communityChildCenterRepository.count();
-    return careFacilityCount + communityChildCenterCount;
+    const [careFacilityCount, communityChildCenterCount, educationWelfareSchoolCount] =
+      await Promise.all([
+        this.careFacilityRepository.count(),
+        this.communityChildCenterRepository.count(),
+        this.educationWelfareSchoolRepository.count(),
+      ]);
+    return careFacilityCount + communityChildCenterCount + educationWelfareSchoolCount;
   }
 
   async countActiveInstitutions(): Promise<number> {
-    const careFacilityCount = await this.careFacilityRepository.count({
-      where: { isActive: true },
-    });
-    const communityChildCenterCount = await this.communityChildCenterRepository.count({
-      where: { isActive: true },
-    });
-    return careFacilityCount + communityChildCenterCount;
+    const [careFacilityCount, communityChildCenterCount, educationWelfareSchoolCount] =
+      await Promise.all([
+        this.careFacilityRepository.count({ where: { isActive: true } }),
+        this.communityChildCenterRepository.count({ where: { isActive: true } }),
+        this.educationWelfareSchoolRepository.count({ where: { isActive: true } }),
+      ]);
+    return careFacilityCount + communityChildCenterCount + educationWelfareSchoolCount;
   }
 
   async getInstitutionChildMetrics(
@@ -157,7 +164,7 @@ export class AdminStatisticsRepositoryImpl implements AdminStatisticsRepository 
     {
       institutionId: string;
       institutionName: string;
-      institutionType: 'CARE_FACILITY' | 'COMMUNITY_CENTER';
+      institutionType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL';
       totalChildCount: number;
       counselRequestCount: number;
     }[]
@@ -202,16 +209,45 @@ export class AdminStatisticsRepositoryImpl implements AdminStatisticsRepository 
       );
     }
 
-    const [careFacilityResults, communityChildCenterResults] = await Promise.all([
-      careFacilityQuery.getRawMany(),
-      communityChildCenterQuery.getRawMany(),
-    ]);
+    // EducationWelfareSchool 통계
+    const educationWelfareSchoolQuery = this.educationWelfareSchoolRepository
+      .createQueryBuilder('ews')
+      .leftJoin('child_profiles', 'child', 'child.educationWelfareSchoolId = ews.id')
+      .leftJoin('counsel_requests', 'cr', 'cr.childId = child.id')
+      .select('ews.id', 'institutionId')
+      .addSelect('ews.name', 'institutionName')
+      .addSelect("'EDUCATION_WELFARE_SCHOOL'", 'institutionType')
+      .addSelect('COUNT(DISTINCT child.id)', 'totalChildCount')
+      .addSelect('COUNT(DISTINCT cr.id)', 'counselRequestCount')
+      .groupBy('ews.id')
+      .addGroupBy('ews.name');
 
-    const combined = [...careFacilityResults, ...communityChildCenterResults]
+    if (startDate && endDate) {
+      educationWelfareSchoolQuery.andWhere(
+        '(cr.createdAt IS NULL OR cr.createdAt BETWEEN :startDate AND :endDate)',
+        { startDate, endDate },
+      );
+    }
+
+    const [careFacilityResults, communityChildCenterResults, educationWelfareSchoolResults] =
+      await Promise.all([
+        careFacilityQuery.getRawMany(),
+        communityChildCenterQuery.getRawMany(),
+        educationWelfareSchoolQuery.getRawMany(),
+      ]);
+
+    const combined = [
+      ...careFacilityResults,
+      ...communityChildCenterResults,
+      ...educationWelfareSchoolResults,
+    ]
       .map((item) => ({
         institutionId: item.institutionId,
         institutionName: item.institutionName,
-        institutionType: item.institutionType as 'CARE_FACILITY' | 'COMMUNITY_CENTER',
+        institutionType: item.institutionType as
+          | 'CARE_FACILITY'
+          | 'COMMUNITY_CENTER'
+          | 'EDUCATION_WELFARE_SCHOOL',
         totalChildCount: parseInt(item.totalChildCount, 10),
         counselRequestCount: parseInt(item.counselRequestCount, 10),
       }))

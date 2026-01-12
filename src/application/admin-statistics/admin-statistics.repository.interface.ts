@@ -40,10 +40,10 @@ export interface AdminStatisticsRepository {
    */
   getAverageMatchingHours(startDate?: Date, endDate?: Date): Promise<number>;
 
-  // ============ Institution Statistics (CareFacility + CommunityChildCenter) ============
+  // ============ Institution Statistics (CareFacility + CommunityChildCenter + EducationWelfareSchool) ============
 
   /**
-   * 전체 시설 수 조회 (양육시설 + 지역아동센터)
+   * 전체 시설 수 조회 (양육시설 + 지역아동센터 + 교육복지사협회 학교)
    */
   countInstitutions(): Promise<number>;
 
@@ -63,7 +63,7 @@ export interface AdminStatisticsRepository {
     {
       institutionId: string;
       institutionName: string;
-      institutionType: 'CARE_FACILITY' | 'COMMUNITY_CENTER';
+      institutionType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL';
       totalChildCount: number;
       counselRequestCount: number;
     }[]

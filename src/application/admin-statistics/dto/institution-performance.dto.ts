@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * 기관별 아동 현황 데이터
- * NOTE: VoucherInstitution → CareFacility/CommunityChildCenter 전환
+ * NOTE: VoucherInstitution → CareFacility/CommunityChildCenter/EducationWelfareSchool 전환
  */
 export class InstitutionPerformanceItemDto {
   @ApiProperty({ description: '기관 ID' })
@@ -11,8 +11,11 @@ export class InstitutionPerformanceItemDto {
   @ApiProperty({ description: '기관명' })
   institutionName: string;
 
-  @ApiProperty({ description: '기관 유형', enum: ['CARE_FACILITY', 'COMMUNITY_CENTER'] })
-  institutionType: 'CARE_FACILITY' | 'COMMUNITY_CENTER';
+  @ApiProperty({
+    description: '기관 유형',
+    enum: ['CARE_FACILITY', 'COMMUNITY_CENTER', 'EDUCATION_WELFARE_SCHOOL'],
+  })
+  institutionType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL';
 
   @ApiProperty({ description: '등록 아동 수' })
   totalChildCount: number;

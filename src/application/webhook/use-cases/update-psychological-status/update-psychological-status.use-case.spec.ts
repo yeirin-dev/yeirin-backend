@@ -29,10 +29,12 @@ describe('UpdatePsychologicalStatusUseCase', () => {
       findById: jest.fn(),
       findByCareFacilityId: jest.fn(),
       findByCommunityChildCenterId: jest.fn(),
+      findByEducationWelfareSchoolId: jest.fn(),
       delete: jest.fn(),
       exists: jest.fn(),
       countByCareFacilityId: jest.fn(),
       countByCommunityChildCenterId: jest.fn(),
+      countByEducationWelfareSchoolId: jest.fn(),
     };
 
     mockLogRepository = {
@@ -72,6 +74,7 @@ describe('UpdatePsychologicalStatusUseCase', () => {
         gender: Gender.create(GenderType.MALE).getValue(),
         careFacilityId: 'facility-123',
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
         psychologicalStatus: PsychologicalStatus.create(psychologicalStatusValue).getValue(),
       },
       id,

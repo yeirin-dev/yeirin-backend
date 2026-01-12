@@ -53,6 +53,15 @@ export class ChildRepositoryImpl implements ChildRepository {
     return entities.map((entity) => ChildMapper.toDomain(entity));
   }
 
+  async findByEducationWelfareSchoolId(educationWelfareSchoolId: string): Promise<Child[]> {
+    const entities = await this.childRepository.find({
+      where: { educationWelfareSchoolId },
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => ChildMapper.toDomain(entity));
+  }
+
   async delete(id: string): Promise<void> {
     await this.childRepository.delete(id);
   }
@@ -74,6 +83,12 @@ export class ChildRepositoryImpl implements ChildRepository {
   async countByCommunityChildCenterId(communityChildCenterId: string): Promise<number> {
     return this.childRepository.count({
       where: { communityChildCenterId },
+    });
+  }
+
+  async countByEducationWelfareSchoolId(educationWelfareSchoolId: string): Promise<number> {
+    return this.childRepository.count({
+      where: { educationWelfareSchoolId },
     });
   }
 }

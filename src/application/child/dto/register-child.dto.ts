@@ -9,14 +9,15 @@ import { ChildType } from '@infrastructure/persistence/typeorm/entity/enums/chil
  * 아동 유형별 관계 규칙:
  * - CARE_FACILITY (양육시설 아동): careFacilityId 필수
  * - COMMUNITY_CENTER (지역아동센터 아동): communityChildCenterId 필수
+ * - EDUCATION_WELFARE_SCHOOL (교육복지사협회 학교 아동): educationWelfareSchoolId 필수
  *
  * NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
  *       Guardian 연결은 더 이상 사용되지 않습니다.
  */
 export class RegisterChildDto {
   @ApiProperty({
-    description: '아동 유형 (CARE_FACILITY 또는 COMMUNITY_CENTER)',
-    enum: [ChildType.CARE_FACILITY, ChildType.COMMUNITY_CENTER],
+    description: '아동 유형 (CARE_FACILITY, COMMUNITY_CENTER 또는 EDUCATION_WELFARE_SCHOOL)',
+    enum: [ChildType.CARE_FACILITY, ChildType.COMMUNITY_CENTER, ChildType.EDUCATION_WELFARE_SCHOOL],
     example: ChildType.CARE_FACILITY,
     enumName: 'ChildType',
   })
@@ -66,6 +67,15 @@ export class RegisterChildDto {
   @IsUUID('4', { message: '유효한 지역아동센터 ID가 아닙니다' })
   @IsOptional()
   communityChildCenterId?: string;
+
+  @ApiPropertyOptional({
+    description: '교육복지사협회 학교 ID (EDUCATION_WELFARE_SCHOOL 유형, 시설 로그인 시 자동 주입)',
+    example: 'education-welfare-school-uuid-789',
+  })
+  @ValidateIf((o) => o.childType === ChildType.EDUCATION_WELFARE_SCHOOL)
+  @IsUUID('4', { message: '유효한 교육복지사협회 학교 ID가 아닙니다' })
+  @IsOptional()
+  educationWelfareSchoolId?: string;
 
   // ========== 추가 정보 ==========
 

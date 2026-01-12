@@ -7,7 +7,7 @@ import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
 
 export interface CounselRequestAuthContext {
   institutionId: string;
-  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER';
+  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL';
 }
 
 @Injectable()
@@ -52,11 +52,18 @@ export class GetCounselRequestUseCase {
       throw new NotFoundException(`아동을 찾을 수 없습니다 (ID: ${childId})`);
     }
 
-    const hasAccess =
-      (authContext.facilityType === 'CARE_FACILITY' &&
-        child.careFacilityId === authContext.institutionId) ||
-      (authContext.facilityType === 'COMMUNITY_CENTER' &&
-        child.communityChildCenterId === authContext.institutionId);
+    let hasAccess = false;
+    switch (authContext.facilityType) {
+      case 'CARE_FACILITY':
+        hasAccess = child.careFacilityId === authContext.institutionId;
+        break;
+      case 'COMMUNITY_CENTER':
+        hasAccess = child.communityChildCenterId === authContext.institutionId;
+        break;
+      case 'EDUCATION_WELFARE_SCHOOL':
+        hasAccess = child.educationWelfareSchoolId === authContext.institutionId;
+        break;
+    }
 
     if (!hasAccess) {
       throw new ForbiddenException('이 상담의뢰지를 조회할 권한이 없습니다.');

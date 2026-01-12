@@ -21,6 +21,7 @@ export interface ChildProps {
   // 기관 연결 (아동 유형에 따라 선택적)
   careFacilityId: string | null; // 양육시설 ID (CARE_FACILITY 유형)
   communityChildCenterId: string | null; // 지역아동센터 ID (COMMUNITY_CENTER 유형)
+  educationWelfareSchoolId: string | null; // 교육복지사협회 학교 ID (EDUCATION_WELFARE_SCHOOL 유형)
   // 추가 정보
   medicalInfo?: string; // 의료 정보 (선택)
   specialNeeds?: string; // 특수 요구사항 (선택)
@@ -35,11 +36,15 @@ export interface ChildProps {
  *
  * 1. CARE_FACILITY (양육시설 아동):
  *    - careFacilityId 필수
- *    - communityChildCenterId null
+ *    - communityChildCenterId, educationWelfareSchoolId null
  *
  * 2. COMMUNITY_CENTER (지역아동센터 아동):
- *    - careFacilityId null
  *    - communityChildCenterId 필수
+ *    - careFacilityId, educationWelfareSchoolId null
+ *
+ * 3. EDUCATION_WELFARE_SCHOOL (교육복지사협회 학교 아동):
+ *    - educationWelfareSchoolId 필수
+ *    - careFacilityId, communityChildCenterId null
  *
  * NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
  *       Guardian 연결은 제거되었습니다.
@@ -54,6 +59,7 @@ export class Child extends AggregateRoot {
   // 기관 연결 (아동 유형에 따라 선택적)
   private _careFacilityId: string | null;
   private _communityChildCenterId: string | null;
+  private _educationWelfareSchoolId: string | null;
 
   // 의료/심리 정보 (민감 정보)
   private _medicalInfo: string | null;
@@ -75,6 +81,7 @@ export class Child extends AggregateRoot {
     this._gender = props.gender;
     this._careFacilityId = props.careFacilityId;
     this._communityChildCenterId = props.communityChildCenterId;
+    this._educationWelfareSchoolId = props.educationWelfareSchoolId;
     this._medicalInfo = props.medicalInfo ?? null;
     this._specialNeeds = props.specialNeeds ?? null;
     this._psychologicalStatus = props.psychologicalStatus ?? PsychologicalStatus.createDefault();
@@ -109,6 +116,10 @@ export class Child extends AggregateRoot {
 
   get communityChildCenterId(): string | null {
     return this._communityChildCenterId;
+  }
+
+  get educationWelfareSchoolId(): string | null {
+    return this._educationWelfareSchoolId;
   }
 
   get medicalInfo(): string | null {
@@ -159,6 +170,11 @@ export class Child extends AggregateRoot {
       if (props.communityChildCenterId) {
         return Result.fail(new DomainError('양육시설 아동은 지역아동센터와 연결될 수 없습니다'));
       }
+      if (props.educationWelfareSchoolId) {
+        return Result.fail(
+          new DomainError('양육시설 아동은 교육복지사협회 학교와 연결될 수 없습니다'),
+        );
+      }
     }
 
     // COMMUNITY_CENTER (지역아동센터 아동) 검증
@@ -166,8 +182,32 @@ export class Child extends AggregateRoot {
       if (props.careFacilityId) {
         return Result.fail(new DomainError('지역아동센터 아동은 양육시설과 연결될 수 없습니다'));
       }
+      if (props.educationWelfareSchoolId) {
+        return Result.fail(
+          new DomainError('지역아동센터 아동은 교육복지사협회 학교와 연결될 수 없습니다'),
+        );
+      }
       if (!props.communityChildCenterId) {
         return Result.fail(new DomainError('지역아동센터 아동은 지역아동센터 ID가 필수입니다'));
+      }
+    }
+
+    // EDUCATION_WELFARE_SCHOOL (교육복지사협회 학교 아동) 검증
+    if (childTypeValue === ChildTypeValue.EDUCATION_WELFARE_SCHOOL) {
+      if (props.careFacilityId) {
+        return Result.fail(
+          new DomainError('교육복지사협회 학교 아동은 양육시설과 연결될 수 없습니다'),
+        );
+      }
+      if (props.communityChildCenterId) {
+        return Result.fail(
+          new DomainError('교육복지사협회 학교 아동은 지역아동센터와 연결될 수 없습니다'),
+        );
+      }
+      if (!props.educationWelfareSchoolId) {
+        return Result.fail(
+          new DomainError('교육복지사협회 학교 아동은 교육복지사협회 학교 ID가 필수입니다'),
+        );
       }
     }
 

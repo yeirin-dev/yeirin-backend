@@ -6,9 +6,11 @@ import { SoulEClient } from '@infrastructure/external/soul-e.client';
 import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
+import { EducationWelfareSchoolEntity } from '@infrastructure/persistence/typeorm/entity/education-welfare-school.entity';
 import { CareFacilityRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/care-facility.repository.impl';
 import { ChildRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/child.repository.impl';
 import { CommunityChildCenterRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/community-child-center.repository.impl';
+import { EducationWelfareSchoolRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/education-welfare-school.repository.impl';
 import { ConsentModule } from '../consent/consent.module';
 import { ChildController } from './child.controller';
 
@@ -19,7 +21,12 @@ import { ChildController } from './child.controller';
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ChildProfileEntity, CareFacilityEntity, CommunityChildCenterEntity]),
+    TypeOrmModule.forFeature([
+      ChildProfileEntity,
+      CareFacilityEntity,
+      CommunityChildCenterEntity,
+      EducationWelfareSchoolEntity,
+    ]),
     ConsentModule,
   ],
   controllers: [ChildController],
@@ -36,6 +43,10 @@ import { ChildController } from './child.controller';
     {
       provide: 'CommunityChildCenterRepository',
       useClass: CommunityChildCenterRepositoryImpl,
+    },
+    {
+      provide: 'EducationWelfareSchoolRepository',
+      useClass: EducationWelfareSchoolRepositoryImpl,
     },
     // External Services
     SoulEClient,

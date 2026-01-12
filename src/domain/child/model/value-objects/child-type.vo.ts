@@ -4,6 +4,7 @@ import { DomainError, Result } from '@domain/common/result';
  * 아동 유형 enum
  * - CARE_FACILITY: 양육시설 아동 (고아)
  * - COMMUNITY_CENTER: 지역아동센터 아동 (비고아, 부모+센터)
+ * - EDUCATION_WELFARE_SCHOOL: 교육복지사협회 학교 아동
  * - REGULAR: 일반 아동 (부모 직접보호)
  */
 export enum ChildTypeValue {
@@ -12,6 +13,9 @@ export enum ChildTypeValue {
 
   /** 지역아동센터 아동 (비고아) - 지역아동센터 + 부모 연결 */
   COMMUNITY_CENTER = 'COMMUNITY_CENTER',
+
+  /** 교육복지사협회 학교 아동 - 학교 + 부모 연결 */
+  EDUCATION_WELFARE_SCHOOL = 'EDUCATION_WELFARE_SCHOOL',
 
   /** 일반 아동 - 부모만 연결 (직접보호) */
   REGULAR = 'REGULAR',
@@ -23,6 +27,7 @@ export enum ChildTypeValue {
  * 유형별 관계 규칙:
  * - CARE_FACILITY: careFacilityId 필수, guardianId null
  * - COMMUNITY_CENTER: communityChildCenterId 필수, guardianId 필수
+ * - EDUCATION_WELFARE_SCHOOL: educationWelfareSchoolId 필수, guardianId 필수
  * - REGULAR: guardianId 필수, 기관 연결 없음
  */
 export class ChildType {
@@ -49,7 +54,8 @@ export class ChildType {
   get requiresInstitution(): boolean {
     return (
       this._value === ChildTypeValue.CARE_FACILITY ||
-      this._value === ChildTypeValue.COMMUNITY_CENTER
+      this._value === ChildTypeValue.COMMUNITY_CENTER ||
+      this._value === ChildTypeValue.EDUCATION_WELFARE_SCHOOL
     );
   }
 
@@ -58,7 +64,9 @@ export class ChildType {
    */
   get requiresGuardian(): boolean {
     return (
-      this._value === ChildTypeValue.COMMUNITY_CENTER || this._value === ChildTypeValue.REGULAR
+      this._value === ChildTypeValue.COMMUNITY_CENTER ||
+      this._value === ChildTypeValue.EDUCATION_WELFARE_SCHOOL ||
+      this._value === ChildTypeValue.REGULAR
     );
   }
 
@@ -74,6 +82,13 @@ export class ChildType {
    */
   get requiresCommunityChildCenter(): boolean {
     return this._value === ChildTypeValue.COMMUNITY_CENTER;
+  }
+
+  /**
+   * 교육복지사협회 학교 연결 필요 여부
+   */
+  get requiresEducationWelfareSchool(): boolean {
+    return this._value === ChildTypeValue.EDUCATION_WELFARE_SCHOOL;
   }
 
   /**

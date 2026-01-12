@@ -30,6 +30,12 @@ export interface ChildRepository {
   findByCommunityChildCenterId(communityChildCenterId: string): Promise<Child[]>;
 
   /**
+   * 교육복지사협회 학교 ID로 아동 목록 조회
+   * - EDUCATION_WELFARE_SCHOOL 유형 아동 조회
+   */
+  findByEducationWelfareSchoolId(educationWelfareSchoolId: string): Promise<Child[]>;
+
+  /**
    * 아동 삭제
    */
   delete(id: string): Promise<void>;
@@ -48,4 +54,9 @@ export interface ChildRepository {
    * 지역아동센터별 아동 수 조회
    */
   countByCommunityChildCenterId(communityChildCenterId: string): Promise<number>;
+
+  /**
+   * 교육복지사협회 학교별 아동 수 조회
+   */
+  countByEducationWelfareSchoolId(educationWelfareSchoolId: string): Promise<number>;
 }

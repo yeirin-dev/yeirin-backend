@@ -3,11 +3,12 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 /**
  * JWT 인증된 시설 정보
  * - 시설 기반 인증: userId (=facilityId), role='INSTITUTION', facilityType, facilityName, district
+ * - 지원 시설 유형: CARE_FACILITY, COMMUNITY_CENTER, EDUCATION_WELFARE_SCHOOL
  */
 export interface CurrentUserData {
   userId: string; // facilityId와 동일 (기존 API 호환)
   institutionId: string; // 시설 ID
-  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER';
+  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL';
   facilityName: string;
   district: string;
   role: 'INSTITUTION';

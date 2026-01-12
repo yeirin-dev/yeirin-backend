@@ -21,6 +21,7 @@ import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { Gender } from '@domain/child/model/value-objects/gender.vo';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
+import { EducationWelfareSchoolRepository } from '@domain/education-welfare-school/repository/education-welfare-school.repository';
 import { ConsentRole } from '@domain/consent/model/value-objects/consent-role';
 import { ChildConsentRepository } from '@domain/consent/repository/child-consent.repository';
 import { ChildResponseDto } from '@application/child/dto/child-response.dto';
@@ -61,6 +62,8 @@ export class ChildController {
     private readonly careFacilityRepository: CareFacilityRepository,
     @Inject('CommunityChildCenterRepository')
     private readonly communityChildCenterRepository: CommunityChildCenterRepository,
+    @Inject('EducationWelfareSchoolRepository')
+    private readonly educationWelfareSchoolRepository: EducationWelfareSchoolRepository,
     @Inject('ChildConsentRepository')
     private readonly childConsentRepository: ChildConsentRepository,
     private readonly soulEClient: SoulEClient,
@@ -87,6 +90,8 @@ export class ChildController {
       children = await this.childRepository.findByCareFacilityId(user.institutionId);
     } else if (user.facilityType === 'COMMUNITY_CENTER') {
       children = await this.childRepository.findByCommunityChildCenterId(user.institutionId);
+    } else if (user.facilityType === 'EDUCATION_WELFARE_SCHOOL') {
+      children = await this.childRepository.findByEducationWelfareSchoolId(user.institutionId);
     } else {
       throw new BadRequestException('알 수 없는 시설 유형입니다.');
     }
@@ -112,6 +117,7 @@ export class ChildController {
 시설 로그인 후 아동을 등록합니다.
 - CARE_FACILITY (양육시설): 양육시설 ID가 자동으로 연결됩니다.
 - COMMUNITY_CENTER (지역아동센터): 지역아동센터 ID가 자동으로 연결됩니다.
+- EDUCATION_WELFARE_SCHOOL (교육복지사협회 학교): 학교 ID가 자동으로 연결됩니다.
     `,
   })
   @ApiResponse({
@@ -153,6 +159,19 @@ export class ChildController {
       });
     }
 
+    if (user.facilityType === 'EDUCATION_WELFARE_SCHOOL') {
+      if (dto.childType !== ChildType.EDUCATION_WELFARE_SCHOOL) {
+        throw new BadRequestException(
+          '교육복지사협회 학교에서는 교육복지사협회 학교 아동만 등록할 수 있습니다.',
+        );
+      }
+      // 시설 ID 자동 주입
+      return await this.registerChildUseCase.execute({
+        ...dto,
+        educationWelfareSchoolId: user.institutionId,
+      });
+    }
+
     throw new BadRequestException('알 수 없는 시설 유형입니다.');
   }
 
@@ -178,7 +197,8 @@ export class ChildController {
     if (user.role === 'INSTITUTION' && user.institutionId) {
       const hasPermission =
         (child.careFacilityId && child.careFacilityId === user.institutionId) ||
-        (child.communityChildCenterId && child.communityChildCenterId === user.institutionId);
+        (child.communityChildCenterId && child.communityChildCenterId === user.institutionId) ||
+        (child.educationWelfareSchoolId && child.educationWelfareSchoolId === user.institutionId);
 
       if (!hasPermission) {
         throw new ForbiddenException('이 아동을 조회할 권한이 없습니다.');
@@ -217,7 +237,8 @@ export class ChildController {
     // 권한 확인: 해당 시설의 아동인지 확인
     const hasPermission =
       (child.careFacilityId && child.careFacilityId === user.institutionId) ||
-      (child.communityChildCenterId && child.communityChildCenterId === user.institutionId);
+      (child.communityChildCenterId && child.communityChildCenterId === user.institutionId) ||
+      (child.educationWelfareSchoolId && child.educationWelfareSchoolId === user.institutionId);
 
     if (!hasPermission) {
       throw new ForbiddenException('이 아동을 수정할 권한이 없습니다.');
@@ -289,7 +310,8 @@ export class ChildController {
     // 권한 확인: 해당 시설의 아동인지 확인
     const hasPermission =
       (child.careFacilityId && child.careFacilityId === user.institutionId) ||
-      (child.communityChildCenterId && child.communityChildCenterId === user.institutionId);
+      (child.communityChildCenterId && child.communityChildCenterId === user.institutionId) ||
+      (child.educationWelfareSchoolId && child.educationWelfareSchoolId === user.institutionId);
 
     if (!hasPermission) {
       throw new ForbiddenException('이 아동을 삭제할 권한이 없습니다.');
@@ -337,7 +359,8 @@ SMS에는 보호자 동의 페이지 URL이 포함됩니다.
     // 권한 확인: 해당 시설의 아동인지 확인
     const hasPermission =
       (child.careFacilityId && child.careFacilityId === user.institutionId) ||
-      (child.communityChildCenterId && child.communityChildCenterId === user.institutionId);
+      (child.communityChildCenterId && child.communityChildCenterId === user.institutionId) ||
+      (child.educationWelfareSchoolId && child.educationWelfareSchoolId === user.institutionId);
 
     if (!hasPermission) {
       throw new ForbiddenException('이 아동에 대한 SMS 발송 권한이 없습니다.');
@@ -356,6 +379,13 @@ SMS에는 보호자 동의 페이지 URL이 포함됩니다.
       );
       if (communityCenter) {
         institutionName = communityCenter.name.value;
+      }
+    } else if (child.educationWelfareSchoolId) {
+      const school = await this.educationWelfareSchoolRepository.findById(
+        child.educationWelfareSchoolId,
+      );
+      if (school) {
+        institutionName = school.name.value;
       }
     }
 

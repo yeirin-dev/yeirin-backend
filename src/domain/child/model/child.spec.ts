@@ -33,6 +33,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId,
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
       });
 
       // Then
@@ -56,6 +57,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: null,
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
       });
 
       // Then
@@ -75,6 +77,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: 'care-facility-123',
         communityChildCenterId: 'center-123',
+        educationWelfareSchoolId: null,
       });
 
       // Then
@@ -97,6 +100,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: null,
         communityChildCenterId,
+        educationWelfareSchoolId: null,
       });
 
       // Then
@@ -120,6 +124,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: null,
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
       });
 
       // Then
@@ -139,6 +144,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: 'care-facility-123',
         communityChildCenterId: 'center-123',
+        educationWelfareSchoolId: null,
       });
 
       // Then
@@ -160,6 +166,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: null,
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
       });
 
       // Then
@@ -186,6 +193,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: 'facility-123',
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
       }).getValue();
 
       // When
@@ -208,6 +216,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: 'facility-123',
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
       }).getValue();
 
       // When
@@ -228,6 +237,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: 'facility-123',
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
       }).getValue();
 
       // When
@@ -250,6 +260,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: 'facility-123',
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
       }).getValue();
 
       const atRiskStatus = PsychologicalStatus.create(PsychologicalStatusValue.AT_RISK).getValue();
@@ -276,6 +287,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: 'facility-123',
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
       }).getValue();
 
       const normalStatus = PsychologicalStatus.create(PsychologicalStatusValue.NORMAL).getValue();
@@ -301,6 +313,7 @@ describe('Child Aggregate Root', () => {
         gender,
         careFacilityId: 'facility-123',
         communityChildCenterId: null,
+        educationWelfareSchoolId: null,
       }).getValue();
 
       // Initially NORMAL
@@ -341,6 +354,7 @@ describe('Child Aggregate Root', () => {
           gender,
           careFacilityId: 'facility-123',
           communityChildCenterId: null,
+          educationWelfareSchoolId: null,
         },
         id,
         createdAt,

@@ -7,6 +7,7 @@ import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/c
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
+import { EducationWelfareSchoolEntity } from '@infrastructure/persistence/typeorm/entity/education-welfare-school.entity';
 import { AdminStatisticsRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/admin-statistics.repository.impl';
 import { AdminStatisticsController } from './admin-statistics.controller';
 
@@ -23,6 +24,7 @@ import { AdminStatisticsController } from './admin-statistics.controller';
       ChildProfileEntity,
       CareFacilityEntity,
       CommunityChildCenterEntity,
+      EducationWelfareSchoolEntity,
     ]),
   ],
   controllers: [AdminStatisticsController],

@@ -7,6 +7,7 @@ import { ChildType, ChildTypeValue } from '@domain/child/model/value-objects/chi
 import { Gender } from '@domain/child/model/value-objects/gender.vo';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
+import { EducationWelfareSchoolRepository } from '@domain/education-welfare-school/repository/education-welfare-school.repository';
 import { ChildType as ChildTypeEnum } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';
 import { ChildResponseDto } from '../../dto/child-response.dto';
 import { RegisterChildDto } from '../../dto/register-child.dto';
@@ -17,6 +18,7 @@ import { RegisterChildDto } from '../../dto/register-child.dto';
  * 아동 유형별 관계 비즈니스 규칙:
  * - CARE_FACILITY (양육시설 아동): careFacilityId 필수
  * - COMMUNITY_CENTER (지역아동센터 아동): communityChildCenterId 필수
+ * - EDUCATION_WELFARE_SCHOOL (교육복지사협회 학교 아동): educationWelfareSchoolId 필수
  *
  * NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
  */
@@ -29,6 +31,8 @@ export class RegisterChildUseCase {
     private readonly careFacilityRepository: CareFacilityRepository,
     @Inject('CommunityChildCenterRepository')
     private readonly communityChildCenterRepository: CommunityChildCenterRepository,
+    @Inject('EducationWelfareSchoolRepository')
+    private readonly educationWelfareSchoolRepository: EducationWelfareSchoolRepository,
   ) {}
 
   async execute(dto: RegisterChildDto): Promise<ChildResponseDto> {
@@ -64,6 +68,7 @@ export class RegisterChildUseCase {
       gender: genderResult.getValue(),
       careFacilityId: dto.careFacilityId ?? null,
       communityChildCenterId: dto.communityChildCenterId ?? null,
+      educationWelfareSchoolId: dto.educationWelfareSchoolId ?? null,
       medicalInfo: dto.medicalInfo,
       specialNeeds: dto.specialNeeds,
     });
@@ -90,6 +95,9 @@ export class RegisterChildUseCase {
       case ChildTypeEnum.COMMUNITY_CENTER:
         await this.validateCommunityChildCenterChild(dto);
         break;
+      case ChildTypeEnum.EDUCATION_WELFARE_SCHOOL:
+        await this.validateEducationWelfareSchoolChild(dto);
+        break;
       case ChildTypeEnum.REGULAR:
         throw new BadRequestException(
           '일반 아동 유형은 더 이상 지원되지 않습니다. 시설에 연결된 아동만 등록 가능합니다.',
@@ -102,7 +110,7 @@ export class RegisterChildUseCase {
   /**
    * 양육시설 아동 검증
    * - careFacilityId 필수
-   * - communityChildCenterId 없어야 함
+   * - communityChildCenterId, educationWelfareSchoolId 없어야 함
    */
   private async validateCareFacilityChild(dto: RegisterChildDto): Promise<void> {
     if (!dto.careFacilityId) {
@@ -111,6 +119,10 @@ export class RegisterChildUseCase {
 
     if (dto.communityChildCenterId) {
       throw new BadRequestException('양육시설 아동은 지역아동센터와 연결될 수 없습니다');
+    }
+
+    if (dto.educationWelfareSchoolId) {
+      throw new BadRequestException('양육시설 아동은 교육복지사협회 학교와 연결될 수 없습니다');
     }
 
     // 양육시설 존재 확인
@@ -123,11 +135,15 @@ export class RegisterChildUseCase {
   /**
    * 지역아동센터 아동 검증
    * - communityChildCenterId 필수
-   * - careFacilityId 없어야 함
+   * - careFacilityId, educationWelfareSchoolId 없어야 함
    */
   private async validateCommunityChildCenterChild(dto: RegisterChildDto): Promise<void> {
     if (dto.careFacilityId) {
       throw new BadRequestException('지역아동센터 아동은 양육시설과 연결될 수 없습니다');
+    }
+
+    if (dto.educationWelfareSchoolId) {
+      throw new BadRequestException('지역아동센터 아동은 교육복지사협회 학교와 연결될 수 없습니다');
     }
 
     if (!dto.communityChildCenterId) {
@@ -144,12 +160,44 @@ export class RegisterChildUseCase {
   }
 
   /**
+   * 교육복지사협회 학교 아동 검증
+   * - educationWelfareSchoolId 필수
+   * - careFacilityId, communityChildCenterId 없어야 함
+   */
+  private async validateEducationWelfareSchoolChild(dto: RegisterChildDto): Promise<void> {
+    if (dto.careFacilityId) {
+      throw new BadRequestException('교육복지사협회 학교 아동은 양육시설과 연결될 수 없습니다');
+    }
+
+    if (dto.communityChildCenterId) {
+      throw new BadRequestException('교육복지사협회 학교 아동은 지역아동센터와 연결될 수 없습니다');
+    }
+
+    if (!dto.educationWelfareSchoolId) {
+      throw new BadRequestException(
+        '교육복지사협회 학교 아동은 교육복지사협회 학교 ID가 필수입니다',
+      );
+    }
+
+    // 교육복지사협회 학교 존재 확인
+    const schoolExists = await this.educationWelfareSchoolRepository.exists(
+      dto.educationWelfareSchoolId,
+    );
+    if (!schoolExists) {
+      throw new NotFoundException(
+        `교육복지사협회 학교를 찾을 수 없습니다: ${dto.educationWelfareSchoolId}`,
+      );
+    }
+  }
+
+  /**
    * Infrastructure Enum → Domain Value
    */
   private mapChildTypeEnumToDomain(enumValue: ChildTypeEnum): ChildTypeValue {
     const mapping: Record<ChildTypeEnum, ChildTypeValue> = {
       [ChildTypeEnum.CARE_FACILITY]: ChildTypeValue.CARE_FACILITY,
       [ChildTypeEnum.COMMUNITY_CENTER]: ChildTypeValue.COMMUNITY_CENTER,
+      [ChildTypeEnum.EDUCATION_WELFARE_SCHOOL]: ChildTypeValue.EDUCATION_WELFARE_SCHOOL,
       [ChildTypeEnum.REGULAR]: ChildTypeValue.REGULAR,
     };
     return mapping[enumValue];
