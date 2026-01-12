@@ -53,7 +53,12 @@ export class SmsService implements OnModuleInit {
    * MMS 이미지는 200KB 이내의 JPG 파일만 가능
    */
   private async uploadGuardianConsentImage(): Promise<void> {
-    const imagePath = path.join(__dirname, '../../assets/mms/guardian-consent.jpg');
+    // webpack 번들링 시 __dirname이 작동하지 않으므로 process.cwd() 사용
+    // 배포 환경: dist/assets/mms/, 개발 환경: src/assets/mms/
+    let imagePath = path.join(process.cwd(), 'dist/assets/mms/guardian-consent.jpg');
+    if (!fs.existsSync(imagePath)) {
+      imagePath = path.join(process.cwd(), 'src/assets/mms/guardian-consent.jpg');
+    }
 
     if (!fs.existsSync(imagePath)) {
       this.logger.warn(
