@@ -43,8 +43,15 @@ export class SmsService implements OnModuleInit {
    * 모듈 초기화 시 MMS 이미지 업로드
    */
   async onModuleInit() {
+    this.logger.log(
+      `SmsService onModuleInit - messageService: ${!!this.messageService}, isEnabled: ${this.isEnabled}`,
+    );
     if (this.messageService && this.isEnabled) {
       await this.uploadGuardianConsentImage();
+    } else {
+      this.logger.warn(
+        `MMS 이미지 업로드 건너뜀 - messageService: ${!!this.messageService}, isEnabled: ${this.isEnabled}`,
+      );
     }
   }
 
@@ -54,25 +61,51 @@ export class SmsService implements OnModuleInit {
    */
   private async uploadGuardianConsentImage(): Promise<void> {
     // webpack 번들링 시 __dirname이 작동하지 않으므로 process.cwd() 사용
+    const cwd = process.cwd();
+    this.logger.log(`MMS 이미지 업로드 시작 - cwd: ${cwd}`);
+
     // 배포 환경: dist/assets/mms/, 개발 환경: src/assets/mms/
-    let imagePath = path.join(process.cwd(), 'dist/assets/mms/guardian-consent.jpg');
+    const distPath = path.join(cwd, 'dist/assets/mms/guardian-consent.jpg');
+    const srcPath = path.join(cwd, 'src/assets/mms/guardian-consent.jpg');
+
+    this.logger.log(`이미지 경로 확인 - dist: ${distPath} (exists: ${fs.existsSync(distPath)})`);
+    this.logger.log(`이미지 경로 확인 - src: ${srcPath} (exists: ${fs.existsSync(srcPath)})`);
+
+    let imagePath = distPath;
     if (!fs.existsSync(imagePath)) {
-      imagePath = path.join(process.cwd(), 'src/assets/mms/guardian-consent.jpg');
+      imagePath = srcPath;
     }
 
     if (!fs.existsSync(imagePath)) {
       this.logger.warn(
-        `MMS 이미지 파일이 없습니다: ${imagePath}. LMS로 발송됩니다.`,
+        `MMS 이미지 파일이 없습니다. LMS로 발송됩니다. (dist: ${distPath}, src: ${srcPath})`,
       );
       return;
     }
 
+    // 파일 크기 확인
+    const stats = fs.statSync(imagePath);
+    this.logger.log(`MMS 이미지 파일 발견 - path: ${imagePath}, size: ${stats.size} bytes`);
+
     try {
       const result = await this.messageService.uploadFile(imagePath, 'MMS');
-      this.guardianConsentImageId = (result as { fileId?: string })?.fileId || null;
-      this.logger.log(`MMS 이미지 업로드 완료 - imageId: ${this.guardianConsentImageId}`);
+      this.logger.log(`Solapi uploadFile 응답: ${JSON.stringify(result)}`);
+
+      // Solapi SDK 응답 구조 확인 (fileId 또는 다른 필드일 수 있음)
+      const resultObj = result as Record<string, unknown>;
+      this.guardianConsentImageId =
+        (resultObj.fileId as string) ||
+        (resultObj.imageId as string) ||
+        (resultObj.file_id as string) ||
+        null;
+
+      if (this.guardianConsentImageId) {
+        this.logger.log(`MMS 이미지 업로드 완료 - imageId: ${this.guardianConsentImageId}`);
+      } else {
+        this.logger.warn(`MMS 이미지 업로드 응답에서 fileId를 찾을 수 없음: ${JSON.stringify(result)}`);
+      }
     } catch (error) {
-      this.logger.error(`MMS 이미지 업로드 실패: ${error}`);
+      this.logger.error(`MMS 이미지 업로드 실패: ${JSON.stringify(error, Object.getOwnPropertyNames(error as object))}`);
       this.guardianConsentImageId = null;
     }
   }
