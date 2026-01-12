@@ -55,9 +55,9 @@ async function bootstrap() {
       'http://localhost:3002',
       'http://localhost:3003', // yeirin-admin 프론트엔드
       // EC2 서버 (Yeirin, Soul-E, Yeirin-AI)
-      'http://3.38.162.252:3000',
-      'http://43.202.32.196:8000',
-      'http://43.203.210.136:8001',
+      'http://43.201.184.103:3000',
+      'http://3.34.93.211:8000',
+      'http://15.165.26.121:8001',
       // Vercel 배포 (yeirin-admin)
       'https://yeirin-admin.vercel.app',
       /\.vercel\.app$/,
