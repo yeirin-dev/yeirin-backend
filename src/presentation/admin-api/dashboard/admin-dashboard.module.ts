@@ -5,6 +5,7 @@ import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/c
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
+import { EducationWelfareSchoolEntity } from '@infrastructure/persistence/typeorm/entity/education-welfare-school.entity';
 import { AdminStatisticsRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/admin-statistics.repository.impl';
 import { AdminAuthModule } from '../auth/admin-auth.module';
 import { AdminDashboardController } from './admin-dashboard.controller';
@@ -22,6 +23,7 @@ import { AdminDashboardController } from './admin-dashboard.controller';
       ChildProfileEntity,
       CareFacilityEntity,
       CommunityChildCenterEntity,
+      EducationWelfareSchoolEntity,
     ]),
     forwardRef(() => AdminAuthModule),
   ],
