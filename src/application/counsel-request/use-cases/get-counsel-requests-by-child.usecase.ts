@@ -47,7 +47,9 @@ export class GetCounselRequestsByChildUseCase {
       (authContext.facilityType === 'CARE_FACILITY' &&
         child.careFacilityId === authContext.institutionId) ||
       (authContext.facilityType === 'COMMUNITY_CENTER' &&
-        child.communityChildCenterId === authContext.institutionId);
+        child.communityChildCenterId === authContext.institutionId) ||
+      (authContext.facilityType === 'EDUCATION_WELFARE_SCHOOL' &&
+        child.educationWelfareSchoolId === authContext.institutionId);
 
     if (!hasAccess) {
       throw new ForbiddenException('이 아동의 상담의뢰지를 조회할 권한이 없습니다.');

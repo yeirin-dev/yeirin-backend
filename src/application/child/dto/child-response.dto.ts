@@ -16,7 +16,7 @@ export class ChildResponseDto {
   @ApiProperty({
     description: '아동 유형',
     example: 'CARE_FACILITY',
-    enum: ['CARE_FACILITY', 'COMMUNITY_CENTER'],
+    enum: ['CARE_FACILITY', 'COMMUNITY_CENTER', 'EDUCATION_WELFARE_SCHOOL'],
   })
   childType: string;
 
@@ -59,6 +59,13 @@ export class ChildResponseDto {
     nullable: true,
   })
   communityChildCenterId: string | null;
+
+  @ApiPropertyOptional({
+    description: '교육복지사협회 학교 ID (EDUCATION_WELFARE_SCHOOL 유형만 해당)',
+    example: 'education-welfare-school-uuid-789',
+    nullable: true,
+  })
+  educationWelfareSchoolId: string | null;
 
   @ApiProperty({
     description: '고아 여부 (CARE_FACILITY 유형이면 true)',
@@ -116,6 +123,7 @@ export class ChildResponseDto {
     dto.age = child.getAge();
     dto.careFacilityId = child.careFacilityId;
     dto.communityChildCenterId = child.communityChildCenterId;
+    dto.educationWelfareSchoolId = child.educationWelfareSchoolId;
     dto.isOrphan = child.isOrphan;
     dto.medicalInfo = child.medicalInfo;
     dto.specialNeeds = child.specialNeeds;
