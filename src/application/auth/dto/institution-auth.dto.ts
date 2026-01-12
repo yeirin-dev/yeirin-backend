@@ -7,6 +7,7 @@ import { IsEnum, IsNotEmpty, IsString, MinLength } from 'class-validator';
 export enum FacilityType {
   CARE_FACILITY = 'CARE_FACILITY',
   COMMUNITY_CENTER = 'COMMUNITY_CENTER',
+  EDUCATION_WELFARE_SCHOOL = 'EDUCATION_WELFARE_SCHOOL',
 }
 
 /**

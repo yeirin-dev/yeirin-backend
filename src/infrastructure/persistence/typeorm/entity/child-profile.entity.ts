@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { CareFacilityEntity } from './care-facility.entity';
 import { CommunityChildCenterEntity } from './community-child-center.entity';
+import { EducationWelfareSchoolEntity } from './education-welfare-school.entity';
 import { ChildType } from './enums/child-type.enum';
 import { PsychologicalStatus } from './enums/psychological-status.enum';
 
@@ -19,6 +20,7 @@ import { PsychologicalStatus } from './enums/psychological-status.enum';
  * 아동 유형별 관계:
  * - CARE_FACILITY (양육시설 아동): careFacilityId로 연결
  * - COMMUNITY_CENTER (지역아동센터 아동): communityChildCenterId로 연결
+ * - EDUCATION_WELFARE_SCHOOL (교육복지사협회 학교 아동): educationWelfareSchoolId로 연결
  *
  * NOTE: 모든 아동은 시설(Institution)에 직접 연결됩니다.
  */
@@ -90,6 +92,20 @@ export class ChildProfileEntity {
   @ManyToOne(() => CommunityChildCenterEntity, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'communityChildCenterId' })
   communityChildCenter: CommunityChildCenterEntity | null;
+
+  /**
+   * 교육복지사협회 학교 ID (FK)
+   * - EDUCATION_WELFARE_SCHOOL 유형만 필수
+   */
+  @Column({ type: 'uuid', nullable: true })
+  educationWelfareSchoolId: string | null;
+
+  /**
+   * 교육복지사협회 학교와의 관계 (Many-to-One)
+   */
+  @ManyToOne(() => EducationWelfareSchoolEntity, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'educationWelfareSchoolId' })
+  educationWelfareSchool: EducationWelfareSchoolEntity | null;
 
   // ========== 추가 정보 ==========
 

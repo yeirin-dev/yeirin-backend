@@ -3,6 +3,8 @@ import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { CommunityChildCenterEntity } from '../typeorm/entity/community-child-center.entity';
+import { CareFacilityEntity } from '../typeorm/entity/care-facility.entity';
+import { EducationWelfareSchoolEntity } from '../typeorm/entity/education-welfare-school.entity';
 
 // .env 파일 로드
 dotenv.config();
@@ -24,22 +26,24 @@ async function seed() {
   console.log('📊 데이터베이스 연결 성공');
 
   const communityChildCenterRepo = dataSource.getRepository(CommunityChildCenterEntity);
+  const careFacilityRepo = dataSource.getRepository(CareFacilityEntity);
+  const educationWelfareSchoolRepo = dataSource.getRepository(EducationWelfareSchoolEntity);
 
   // 기존 데이터 삭제 (외래 키 제약 고려)
   await dataSource.query(
-    'TRUNCATE TABLE reviews, community_child_centers, child_profiles, care_facilities RESTART IDENTITY CASCADE',
+    'TRUNCATE TABLE reviews, community_child_centers, child_profiles, care_facilities, education_welfare_schools RESTART IDENTITY CASCADE',
   );
   console.log('🗑️  기존 데이터 삭제 완료');
-
-  // =====================================================
-  // 지역아동센터 시드 데이터 (73개 센터)
-  // =====================================================
-  console.log('\n🏫 지역아동센터 생성 중...');
 
   // 시설 기본 비밀번호: "1234" (bcrypt 해시)
   const facilityPassword = await bcrypt.hash('1234', 10);
 
-  // 지역아동센터 데이터 (엑셀에서 추출)
+  // =====================================================
+  // 1. 지역아동센터 시드 데이터 (62개 센터)
+  // =====================================================
+  console.log('\n🏫 지역아동센터 생성 중...');
+
+  // 지역아동센터 데이터 (참여기관 최종_77기관.xlsx 기반)
   const communityChildCenters = [
     // =====================================================
     // 원도심권 - 영도구 (10개)
@@ -166,7 +170,7 @@ async function seed() {
     },
 
     // =====================================================
-    // 서부산권 - 북구 (13개)
+    // 서부산권 - 북구 (11개)
     // =====================================================
     {
       name: '1318미래세대지역아동센터',
@@ -174,8 +178,8 @@ async function seed() {
       region: '서부산권',
       address: '부산시 북구 만덕대로 65번길 63, 2층',
       directorName: '문동민',
-      managerName: '문동민',
-      managerPhone: '010-6764-4008',
+      managerName: '이혜규',
+      managerPhone: '010-3901-5847',
       phoneNumber: '051-341-4008',
       email: 'mr1318@daum.net',
       expectedChildCount: 2,
@@ -277,18 +281,6 @@ async function seed() {
       expectedChildCount: 2,
     },
     {
-      name: '늘해랑지역아동센터',
-      district: '북구',
-      region: '서부산권',
-      address: '부산시 북구 모분재로120번길 20, 2층',
-      directorName: '박경령',
-      managerName: '박경령',
-      managerPhone: '010-4154-1467',
-      phoneNumber: '051-900-7303',
-      email: 'nhr5858@naver.com',
-      expectedChildCount: 10,
-    },
-    {
       name: '리틀스쿨지역아동센터',
       district: '북구',
       region: '서부산권',
@@ -314,7 +306,7 @@ async function seed() {
     },
 
     // =====================================================
-    // 서부산권 - 사상구 (12개)
+    // 서부산권 - 사상구 (10개)
     // =====================================================
     {
       name: '사상해오름',
@@ -389,18 +381,6 @@ async function seed() {
       expectedChildCount: 2,
     },
     {
-      name: '새생명',
-      district: '사상구',
-      region: '서부산권',
-      address: '부산시 사상구 주례로10번길 131 3층',
-      directorName: '정경화',
-      managerName: '오하영',
-      managerPhone: '010-9052-7197',
-      phoneNumber: '051-311-5199',
-      email: 'new2home@naver.com',
-      expectedChildCount: 3,
-    },
-    {
       name: '주례',
       district: '사상구',
       region: '서부산권',
@@ -423,18 +403,6 @@ async function seed() {
       phoneNumber: '051-312-2585',
       email: 'mh3122585@hanmail.net',
       expectedChildCount: 2,
-    },
-    {
-      name: '사랑의집',
-      district: '사상구',
-      region: '서부산권',
-      address: '부산시 사상구 광장로105번길17 1,2층',
-      directorName: '김경아',
-      managerName: '김혜린',
-      managerPhone: '010-7219-0104',
-      phoneNumber: '051-322-2832',
-      email: 'jesus5646@hanmail.net',
-      expectedChildCount: 1,
     },
     {
       name: '디딤돌',
@@ -462,7 +430,7 @@ async function seed() {
     },
 
     // =====================================================
-    // 중부산권 - 부산진구 (11개)
+    // 중부산권 - 부산진구 (9개)
     // =====================================================
     {
       name: '꿈꾸는',
@@ -489,18 +457,6 @@ async function seed() {
       expectedChildCount: 6,
     },
     {
-      name: '축복',
-      district: '부산진구',
-      region: '중부산권',
-      address: '당감서로 98번길20-22',
-      directorName: '강명자',
-      managerName: '이정화',
-      managerPhone: '010-6583-2714',
-      phoneNumber: '051-818-4252',
-      email: 'ainsin11@hanmail.net',
-      expectedChildCount: 7,
-    },
-    {
       name: '신애',
       district: '부산진구',
       region: '중부산권',
@@ -510,18 +466,6 @@ async function seed() {
       managerPhone: '010-7700-7200',
       phoneNumber: '051-817-8547',
       email: 'g8554@hanmail.net',
-      expectedChildCount: 5,
-    },
-    {
-      name: '에이스',
-      district: '부산진구',
-      region: '중부산권',
-      address: '부산진구가야대로 703번나길 23',
-      directorName: '김미연',
-      managerName: '강동훈',
-      managerPhone: '010-9927-5454',
-      phoneNumber: '051-897-633',
-      email: 'ooon455@naver.com',
       expectedChildCount: 5,
     },
     {
@@ -543,7 +487,7 @@ async function seed() {
       address: '부산진구 동평로94번길 28',
       directorName: '최은화',
       managerName: '이수정',
-      managerPhone: '010-2866-6770',
+      managerPhone: '010-8762-5006',
       phoneNumber: '051-898-500',
       email: 'sungji1994@hanmail.net',
       expectedChildCount: 5,
@@ -655,7 +599,7 @@ async function seed() {
       address: '부산 동래구 안락동 명안로 39번길 65(안락동,2층)',
       directorName: '신영미',
       managerName: '신영미',
-      managerPhone: '010-9774-0692',
+      managerPhone: '010-8182-7755',
       phoneNumber: '051-524-8155',
       email: 'sym8713@naver.com',
       expectedChildCount: 2,
@@ -770,7 +714,7 @@ async function seed() {
     },
 
     // =====================================================
-    // 동부산권 - 해운대구 (13개)
+    // 동부산권 - 해운대구 (8개)
     // =====================================================
     {
       name: '반여지역아동센터',
@@ -833,40 +777,16 @@ async function seed() {
       expectedChildCount: 14,
     },
     {
-      name: 'LH행복꿈터 해운대지역아동센터',
-      district: '해운대구',
-      region: '동부산권',
-      address: '부산 해운대구 재반로 12번길 16(재송동)',
-      directorName: '이미정',
-      managerName: '김성인',
-      managerPhone: '010-2889-1810',
-      phoneNumber: '051-724-5105',
-      email: 'hud2005@naver.com',
-      expectedChildCount: 6,
-    },
-    {
       name: '하늘가람',
       district: '해운대구',
       region: '동부산권',
       address: '부산시 해운대구 재반로85. 4층',
       directorName: '이경애',
       managerName: '최주현',
-      managerPhone: '051-783-1118',
+      managerPhone: '010-2574-8807',
       phoneNumber: '051-783-1118',
       email: 'dlruddo2768@hanmail.net',
       expectedChildCount: 10,
-    },
-    {
-      name: '희망스쿨지역아동센터',
-      district: '해운대구',
-      region: '동부산권',
-      address: '부산시 해운대구 아랫반송로 29번길 25, 29 3~4층',
-      directorName: '최슬아',
-      managerName: '노혜미',
-      managerPhone: '010-6213-0538',
-      phoneNumber: '051-542-3332',
-      email: 'busanhpeschool@daum.net',
-      expectedChildCount: 20,
     },
     {
       name: '가람뫼',
@@ -881,7 +801,7 @@ async function seed() {
       expectedChildCount: 6,
     },
     {
-      name: '1318해피존꿈앤꿈지역아동센터',
+      name: '1318해피존꿈앤꾼지역아동센터',
       district: '해운대구',
       region: '동부산권',
       address: '부산광역시 해운대구 신반송로 138-2 대성빌라 302호',
@@ -891,42 +811,6 @@ async function seed() {
       phoneNumber: '051-542-1813',
       email: 'dreamer1813@hanmail.net',
       expectedChildCount: 20,
-    },
-    {
-      name: '해봄지역아동센터',
-      district: '해운대구',
-      region: '동부산권',
-      address: '해운대구 신반송로200, 주공아파트 나동상가 2층',
-      directorName: '권채련',
-      managerName: '성시현',
-      managerPhone: '051-542-1391',
-      phoneNumber: '051-542-1391',
-      email: 'haebom98@hanmail.net',
-      expectedChildCount: 10,
-    },
-    {
-      name: '반송지역아동센터',
-      district: '해운대구',
-      region: '동부산권',
-      address: '부산광역시 해운대구 윗반송로 51번길 48-13',
-      directorName: '이지현',
-      managerName: '이지현',
-      managerPhone: '010-4562-5059',
-      phoneNumber: '051-545-3335',
-      email: 'bansong66@hanmail.net',
-      expectedChildCount: 5,
-    },
-    {
-      name: '예선지역아동센터',
-      district: '해운대구',
-      region: '동부산권',
-      address: '부산시 해운대구 우동2로 48 3층',
-      directorName: '조영희',
-      managerName: '박지은',
-      managerPhone: '010-6579-0311',
-      phoneNumber: '051-746-9100',
-      email: 'jyh5055@naver.com',
-      expectedChildCount: 19,
     },
   ];
 
@@ -942,21 +826,249 @@ async function seed() {
   console.log(`✅ ${savedCenters.length}개 지역아동센터 생성 완료`);
 
   // 구/군별 통계 출력
-  const districtStats = savedCenters.reduce(
+  const centerDistrictStats = savedCenters.reduce(
     (acc, center) => {
       acc[center.district] = (acc[center.district] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>,
   );
-  console.log('   📊 구/군별 센터 수:');
-  Object.entries(districtStats).forEach(([district, count]) => {
+  console.log('   📊 구/군별 지역아동센터 수:');
+  Object.entries(centerDistrictStats).forEach(([district, count]) => {
     console.log(`      - ${district}: ${count}개`);
   });
 
+  // =====================================================
+  // 2. 양육시설/그룹홈 시드 데이터 (9개 시설)
+  // =====================================================
+  console.log('\n🏠 양육시설/그룹홈 생성 중...');
+
+  // 양육시설/그룹홈 데이터
+  const careFacilities = [
+    // 아동양육시설 (4개)
+    {
+      name: '파랑새아이들집',
+      district: '영도구',
+      address: '부산광역시 영도구',
+      representativeName: '이지호',
+      phoneNumber: '010-9651-5565',
+      capacity: 10,
+      establishedDate: new Date('2010-01-01'),
+    },
+    {
+      name: '새들원',
+      district: '동래구',
+      address: '부산광역시 동래구',
+      representativeName: '이영숙',
+      phoneNumber: '010-5216-5936',
+      capacity: 3,
+      establishedDate: new Date('2010-01-01'),
+    },
+    {
+      name: '희락원',
+      district: '금정구',
+      address: '부산광역시 금정구',
+      representativeName: '이기라',
+      phoneNumber: '010-4825-2862',
+      capacity: 2,
+      establishedDate: new Date('2010-01-01'),
+    },
+    {
+      name: '새빛기독보육원',
+      district: '남구',
+      address: '부산광역시 남구',
+      representativeName: '최봉자',
+      phoneNumber: '010-6528-2256',
+      capacity: 3,
+      establishedDate: new Date('2010-01-01'),
+    },
+    // 그룹홈 (5개)
+    {
+      name: '온새미로',
+      district: '남구',
+      address: '부산광역시 남구',
+      representativeName: '장태순',
+      phoneNumber: '010-5624-8934',
+      capacity: 1,
+      establishedDate: new Date('2010-01-01'),
+    },
+    {
+      name: '이삭나래홈',
+      district: '남구',
+      address: '부산광역시 남구',
+      representativeName: '성숙정',
+      phoneNumber: '010-8859-8057',
+      capacity: 1,
+      establishedDate: new Date('2010-01-01'),
+    },
+    {
+      name: '하늘채그룹홈',
+      district: '사하구',
+      address: '부산광역시 사하구',
+      representativeName: '서금주',
+      phoneNumber: '010-6859-1567',
+      capacity: 3,
+      establishedDate: new Date('2010-01-01'),
+    },
+    {
+      name: '에바다리더홈',
+      district: '사상구',
+      address: '부산광역시 사상구',
+      representativeName: '조진선',
+      phoneNumber: '010-3300-4556',
+      capacity: 2,
+      establishedDate: new Date('2010-01-01'),
+    },
+    {
+      name: '부산해피홈',
+      district: '남구',
+      address: '부산광역시 남구',
+      representativeName: '송지영',
+      phoneNumber: '010-6425-5615',
+      capacity: 1,
+      establishedDate: new Date('2010-01-01'),
+    },
+  ];
+
+  // 양육시설/그룹홈 데이터 저장
+  const facilitiesToSave = careFacilities.map((facility) => ({
+    ...facility,
+    password: facilityPassword,
+    isPasswordChanged: false,
+    isActive: true,
+  }));
+
+  const savedFacilities = await careFacilityRepo.save(facilitiesToSave);
+  console.log(`✅ ${savedFacilities.length}개 양육시설/그룹홈 생성 완료`);
+
+  // 구/군별 통계 출력
+  const facilityDistrictStats = savedFacilities.reduce(
+    (acc, facility) => {
+      acc[facility.district] = (acc[facility.district] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+  console.log('   📊 구/군별 양육시설/그룹홈 수:');
+  Object.entries(facilityDistrictStats).forEach(([district, count]) => {
+    console.log(`      - ${district}: ${count}개`);
+  });
+
+  // =====================================================
+  // 3. 교육복지사협회 학교 시드 데이터 (6개 학교)
+  // =====================================================
+  console.log('\n🏫 교육복지사협회 학교 생성 중...');
+
+  // 교육복지사협회 학교 데이터
+  const educationWelfareSchools = [
+    {
+      name: '장림여자중학교',
+      district: '사하구',
+      address: '부산광역시 사하구 두송로 64',
+      welfareWorkerName: '이수정',
+      welfareWorkerPhone: '010-5179-1657',
+      phoneNumber: '051-260-4284',
+      email: 'crystal8708@daum.net',
+      expectedChildCount: 1,
+      linkedCenterName: '센소리발달센터',
+      linkedCenterAddress: '사하구 다송로 71 세인트마린 2층',
+    },
+    {
+      name: '반산초등학교',
+      district: '해운대구',
+      address: '부산시 해운대구 재반로 171',
+      welfareWorkerName: '곽유주',
+      welfareWorkerPhone: '010-2844-2388',
+      phoneNumber: '051-780-2078',
+      email: 'top7775@hanmail.net',
+      expectedChildCount: 11,
+      linkedCenterName: '다온심리상담센터',
+      linkedCenterAddress: '해운대구 재반로256번길 7-30, 402호',
+    },
+    {
+      name: '송도초등학교',
+      district: '서구',
+      address: '부산광역시 서구 충무대로25',
+      welfareWorkerName: '노정혜',
+      welfareWorkerPhone: '010-4083-2017',
+      phoneNumber: '051-250-5781',
+      email: 'nnjh0153@naver.com',
+      expectedChildCount: 4,
+      linkedCenterName: '해가언어심리상담센터',
+      linkedCenterAddress: '서구 구덕로 196, 201호(부민동1가, 허브센티움)',
+    },
+    {
+      name: '용호초등학교',
+      district: '남구',
+      address: '부산시 남구 용호로 42번길 94',
+      welfareWorkerName: '정희숙',
+      welfareWorkerPhone: '010-3833-7222',
+      phoneNumber: '051-718-2278',
+      email: 'gouni28@hanmail.net',
+      expectedChildCount: 5,
+      linkedCenterName: '강장심리발달연구소',
+      linkedCenterAddress: '남구 용호로 42번길 95',
+    },
+    {
+      name: '당감초등학교',
+      district: '부산진구',
+      address: '부산시 부산진구 당감로 22-5',
+      welfareWorkerName: '서혜승',
+      welfareWorkerPhone: '010-8573-2007',
+      phoneNumber: '070-5023-2528',
+      email: 'sseung80@gmail.com',
+      expectedChildCount: 5,
+      linkedCenterName: '아이꿈언어심리발달센',
+      linkedCenterAddress: '부산진구 동평로 82 태을의원 3층',
+    },
+    {
+      name: '금강초등학교',
+      district: '동래구',
+      address: '부산 동래구 사직북로28번길 125',
+      welfareWorkerName: '김지은',
+      welfareWorkerPhone: '010-9633-2252',
+      phoneNumber: '051-590-0684',
+      email: 'dfac003@hanmail.net',
+      expectedChildCount: 9,
+      linkedCenterName: '이누리심리상담센터',
+      linkedCenterAddress: '동래구 사직로14번길 15 2층',
+    },
+  ];
+
+  // 교육복지사협회 학교 데이터 저장
+  const schoolsToSave = educationWelfareSchools.map((school) => ({
+    ...school,
+    password: facilityPassword,
+    isPasswordChanged: false,
+    isActive: true,
+  }));
+
+  const savedSchools = await educationWelfareSchoolRepo.save(schoolsToSave);
+  console.log(`✅ ${savedSchools.length}개 교육복지사협회 학교 생성 완료`);
+
+  // 구/군별 통계 출력
+  const schoolDistrictStats = savedSchools.reduce(
+    (acc, school) => {
+      acc[school.district] = (acc[school.district] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+  console.log('   📊 구/군별 교육복지사협회 학교 수:');
+  Object.entries(schoolDistrictStats).forEach(([district, count]) => {
+    console.log(`      - ${district}: ${count}개`);
+  });
+
+  // =====================================================
+  // 최종 요약
+  // =====================================================
+  const totalInstitutions = savedCenters.length + savedFacilities.length + savedSchools.length;
   console.log('\n🎉 시드 데이터 생성 완료!');
   console.log(`   - 지역아동센터: ${savedCenters.length}개`);
-  console.log('\n📋 지역아동센터 로그인 정보:');
+  console.log(`   - 양육시설/그룹홈: ${savedFacilities.length}개`);
+  console.log(`   - 교육복지사협회 학교: ${savedSchools.length}개`);
+  console.log(`   - 총 기관 수: ${totalInstitutions}개`);
+  console.log('\n📋 로그인 정보:');
   console.log('   🔑 초기 비밀번호: 1234 (첫 로그인 시 변경 필요)');
 
   await dataSource.destroy();

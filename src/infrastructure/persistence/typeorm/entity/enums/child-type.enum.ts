@@ -2,6 +2,7 @@
  * 아동 유형 Enum
  * - CARE_FACILITY: 양육시설 아동 (고아)
  * - COMMUNITY_CENTER: 지역아동센터 아동 (비고아, 부모+센터)
+ * - EDUCATION_WELFARE_SCHOOL: 교육복지사협회 학교 아동
  * - REGULAR: 일반 아동 (부모 직접보호)
  */
 export enum ChildType {
@@ -10,6 +11,9 @@ export enum ChildType {
 
   /** 지역아동센터 아동 (비고아) - 지역아동센터 + 부모 연결 */
   COMMUNITY_CENTER = 'COMMUNITY_CENTER',
+
+  /** 교육복지사협회 학교 아동 - 학교 + 부모 연결 */
+  EDUCATION_WELFARE_SCHOOL = 'EDUCATION_WELFARE_SCHOOL',
 
   /** 일반 아동 - 부모만 연결 (직접보호) */
   REGULAR = 'REGULAR',
@@ -21,6 +25,7 @@ export enum ChildType {
 export const INSTITUTION_REQUIRED_CHILD_TYPES: ChildType[] = [
   ChildType.CARE_FACILITY,
   ChildType.COMMUNITY_CENTER,
+  ChildType.EDUCATION_WELFARE_SCHOOL,
 ];
 
 /**
@@ -28,6 +33,7 @@ export const INSTITUTION_REQUIRED_CHILD_TYPES: ChildType[] = [
  */
 export const GUARDIAN_REQUIRED_CHILD_TYPES: ChildType[] = [
   ChildType.COMMUNITY_CENTER,
+  ChildType.EDUCATION_WELFARE_SCHOOL,
   ChildType.REGULAR,
 ];
 
