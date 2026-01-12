@@ -54,6 +54,15 @@ export class ChangeInstitutionPasswordDto {
 }
 
 /**
+ * 시설 타입별 표시명
+ */
+export const FacilityTypeDisplayName: Record<FacilityType, string> = {
+  [FacilityType.CARE_FACILITY]: '양육시설/그룹홈',
+  [FacilityType.COMMUNITY_CENTER]: '지역아동센터',
+  [FacilityType.EDUCATION_WELFARE_SCHOOL]: '교육복지사협회',
+};
+
+/**
  * 시설 정보 응답 DTO (로그인 시설 선택용)
  */
 export class FacilityInfoDto {
@@ -65,6 +74,9 @@ export class FacilityInfoDto {
 
   @ApiProperty({ description: '시설 타입', enum: FacilityType })
   facilityType: FacilityType;
+
+  @ApiProperty({ description: '시설 타입 표시명 (양육시설/그룹홈, 지역아동센터, 교육복지사협회)' })
+  facilityTypeDisplayName: string;
 
   @ApiProperty({ description: '구/군' })
   district: string;
