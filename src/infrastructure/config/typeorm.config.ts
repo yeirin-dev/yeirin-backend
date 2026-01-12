@@ -10,6 +10,7 @@ import { ConsentHistoryEntity } from '../persistence/typeorm/entity/consent-hist
 import { CounselReportEntity } from '../persistence/typeorm/entity/counsel-report.entity';
 import { CounselRequestRecommendationEntity } from '../persistence/typeorm/entity/counsel-request-recommendation.entity';
 import { CounselRequestEntity } from '../persistence/typeorm/entity/counsel-request.entity';
+import { EducationWelfareSchoolEntity } from '../persistence/typeorm/entity/education-welfare-school.entity';
 import { PsychologicalStatusLogEntity } from '../persistence/typeorm/entity/psychological-status-log.entity';
 import { ReviewEntity } from '../persistence/typeorm/entity/review.entity';
 
@@ -33,6 +34,7 @@ export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOpt
       ChildProfileEntity,
       CareFacilityEntity,
       CommunityChildCenterEntity,
+      EducationWelfareSchoolEntity,
       // Consent (동의서)
       ChildConsentEntity,
       ConsentHistoryEntity,
