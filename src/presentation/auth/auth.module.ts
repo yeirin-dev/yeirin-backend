@@ -30,7 +30,7 @@ import { AuthController } from './auth.controller';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET', 'your-secret-key-change-this'),
-        signOptions: { expiresIn: '15m' },
+        signOptions: { expiresIn: configService.get('JWT_ACCESS_EXPIRATION', '24h') },
       }),
     }),
   ],

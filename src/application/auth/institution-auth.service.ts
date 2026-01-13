@@ -326,7 +326,7 @@ export class InstitutionAuthService {
         },
         {
           secret: this.configService.get('JWT_SECRET', 'your-secret-key-change-this'),
-          expiresIn: '15m',
+          expiresIn: this.configService.get('JWT_ACCESS_EXPIRATION', '24h'),
         },
       );
 
@@ -357,7 +357,7 @@ export class InstitutionAuthService {
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET', 'your-secret-key-change-this'),
-      expiresIn: '15m',
+      expiresIn: this.configService.get('JWT_ACCESS_EXPIRATION', '24h'),
     });
 
     const refreshToken = this.jwtService.sign(payload, {
