@@ -20,6 +20,7 @@ import { ConsentModule } from '@presentation/consent/consent.module';
 import { CounselReportModule } from '@presentation/counsel-report/counsel-report.module';
 import { CounselRequestModule } from '@presentation/counsel-request/counsel-request.module';
 import { InstitutionDashboardModule } from '@presentation/institution-dashboard/institution-dashboard.module';
+import { LandingModule } from '@presentation/landing/landing.module';
 import { MatchingModule } from '@presentation/matching/matching.module';
 import { ReviewModule } from '@presentation/review/review.module';
 import { SettingsModule } from '@presentation/settings/settings.module';
@@ -60,6 +61,8 @@ import { WebhookModule } from '@presentation/webhook/webhook.module';
     WebhookModule,
     InstitutionDashboardModule,
     ConsentModule,
+    // Landing Page API Module (Public)
+    LandingModule,
     // Admin API Module
     AdminApiModule,
   ],
