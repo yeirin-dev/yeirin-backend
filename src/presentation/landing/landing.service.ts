@@ -147,6 +147,7 @@ export class LandingService {
         facilityTypeDisplayName: FacilityTypeDisplayName[FacilityType.CARE_FACILITY],
         district: f.district,
         phoneNumber: f.phoneNumber || null,
+        address: f.address,
       })),
     );
 
@@ -159,6 +160,7 @@ export class LandingService {
         facilityTypeDisplayName: FacilityTypeDisplayName[FacilityType.COMMUNITY_CENTER],
         district: c.district,
         phoneNumber: c.phoneNumber || null,
+        address: c.address,
       })),
     );
 
@@ -171,6 +173,7 @@ export class LandingService {
         facilityTypeDisplayName: FacilityTypeDisplayName[FacilityType.EDUCATION_WELFARE_SCHOOL],
         district: s.district,
         phoneNumber: s.phoneNumber || null,
+        address: s.address,
       })),
     );
 

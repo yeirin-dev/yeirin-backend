@@ -30,6 +30,9 @@ export class PartnerDto {
 
   @ApiPropertyOptional({ description: '연락처', example: '051-123-4567' })
   phoneNumber: string | null;
+
+  @ApiProperty({ description: '주소', example: '부산광역시 해운대구 센텀중앙로 78' })
+  address: string;
 }
 
 /**
