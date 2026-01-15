@@ -164,7 +164,7 @@ export class LandingService {
       })),
     );
 
-    // 교육복지사협회 학교
+    // 교육복지사협회 학교 (전화번호 비노출)
     partners.push(
       ...educationWelfareSchools.map((s) => ({
         id: s.id,
@@ -172,7 +172,7 @@ export class LandingService {
         facilityType: FacilityType.EDUCATION_WELFARE_SCHOOL,
         facilityTypeDisplayName: FacilityTypeDisplayName[FacilityType.EDUCATION_WELFARE_SCHOOL],
         district: s.district,
-        phoneNumber: s.phoneNumber || null,
+        phoneNumber: null,
         address: s.address,
       })),
     );
