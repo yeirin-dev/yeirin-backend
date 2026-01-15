@@ -87,9 +87,10 @@ export class LandingService {
 
   /**
    * 구/군 목록 조회
+   * 참고: 교육복지사협회는 학교측 요청으로 외부 노출 제외
    */
   async getDistricts(): Promise<string[]> {
-    const [careFacilityDistricts, communityChildCenterDistricts, educationWelfareSchoolDistricts] =
+    const [careFacilityDistricts, communityChildCenterDistricts] =
       await Promise.all([
         this.careFacilityRepository
           .createQueryBuilder('facility')
@@ -101,36 +102,27 @@ export class LandingService {
           .select('DISTINCT center.district', 'district')
           .where('center.isActive = :isActive', { isActive: true })
           .getRawMany<{ district: string }>(),
-        this.educationWelfareSchoolRepository
-          .createQueryBuilder('school')
-          .select('DISTINCT school.district', 'district')
-          .where('school.isActive = :isActive', { isActive: true })
-          .getRawMany<{ district: string }>(),
       ]);
 
     const allDistricts = new Set<string>();
     careFacilityDistricts.forEach((r) => allDistricts.add(r.district));
     communityChildCenterDistricts.forEach((r) => allDistricts.add(r.district));
-    educationWelfareSchoolDistricts.forEach((r) => allDistricts.add(r.district));
 
     return Array.from(allDistricts).sort((a, b) => a.localeCompare(b, 'ko'));
   }
 
   /**
    * 모든 활성 기관 조회 (통합)
+   * 참고: 교육복지사협회는 학교측 요청으로 외부 노출 제외
    */
   private async fetchAllActivePartners(): Promise<PartnerDto[]> {
-    const [careFacilities, communityChildCenters, educationWelfareSchools] =
+    const [careFacilities, communityChildCenters] =
       await Promise.all([
         this.careFacilityRepository.find({
           where: { isActive: true },
           order: { name: 'ASC' },
         }),
         this.communityChildCenterRepository.find({
-          where: { isActive: true },
-          order: { name: 'ASC' },
-        }),
-        this.educationWelfareSchoolRepository.find({
           where: { isActive: true },
           order: { name: 'ASC' },
         }),
@@ -164,40 +156,29 @@ export class LandingService {
       })),
     );
 
-    // 교육복지사협회 학교 (전화번호 비노출)
-    partners.push(
-      ...educationWelfareSchools.map((s) => ({
-        id: s.id,
-        name: s.name,
-        facilityType: FacilityType.EDUCATION_WELFARE_SCHOOL,
-        facilityTypeDisplayName: FacilityTypeDisplayName[FacilityType.EDUCATION_WELFARE_SCHOOL],
-        district: s.district,
-        phoneNumber: null,
-        address: s.address,
-      })),
-    );
-
     return partners;
   }
 
   /**
    * 카테고리별 기관 수 계산
+   * 참고: 교육복지사협회는 학교측 요청으로 외부 노출 제외
    */
   private calculateCategoryCounts(partners: PartnerDto[]): CategoryCountDto[] {
-    const counts: Record<FacilityType, number> = {
+    const counts: Partial<Record<FacilityType, number>> = {
       [FacilityType.CARE_FACILITY]: 0,
       [FacilityType.COMMUNITY_CENTER]: 0,
-      [FacilityType.EDUCATION_WELFARE_SCHOOL]: 0,
     };
 
     partners.forEach((p) => {
-      counts[p.facilityType]++;
+      if (counts[p.facilityType] !== undefined) {
+        counts[p.facilityType]!++;
+      }
     });
 
     return Object.entries(counts).map(([type, count]) => ({
       facilityType: type as FacilityType,
       label: FacilityTypeDisplayName[type as FacilityType],
-      count,
+      count: count as number,
     }));
   }
 }
