@@ -1,6 +1,6 @@
-import { IsArray, IsBoolean, IsString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsArray, IsBoolean, IsString, ValidateNested } from 'class-validator';
 
 /**
  * 개별 검사 설정 DTO

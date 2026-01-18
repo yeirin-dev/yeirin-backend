@@ -15,15 +15,17 @@ import * as winston from 'winston';
 const koreaTimestamp = winston.format((info) => {
   const now = new Date();
   // TZ 환경변수가 설정되어 있으므로 toLocaleString 사용
-  info.timestamp = now.toLocaleString('sv-SE', {
-    timeZone: 'Asia/Seoul',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).replace('T', ' ');
+  info.timestamp = now
+    .toLocaleString('sv-SE', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    .replace('T', ' ');
   return info;
 });
 

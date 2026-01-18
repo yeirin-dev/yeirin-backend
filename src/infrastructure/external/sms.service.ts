@@ -1,8 +1,8 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SolapiMessageService } from 'solapi';
-import * as path from 'path';
-import * as fs from 'fs';
 
 /**
  * SMS 발송 결과 인터페이스
@@ -102,10 +102,14 @@ export class SmsService implements OnModuleInit {
       if (this.guardianConsentImageId) {
         this.logger.log(`MMS 이미지 업로드 완료 - imageId: ${this.guardianConsentImageId}`);
       } else {
-        this.logger.warn(`MMS 이미지 업로드 응답에서 fileId를 찾을 수 없음: ${JSON.stringify(result)}`);
+        this.logger.warn(
+          `MMS 이미지 업로드 응답에서 fileId를 찾을 수 없음: ${JSON.stringify(result)}`,
+        );
       }
     } catch (error) {
-      this.logger.error(`MMS 이미지 업로드 실패: ${JSON.stringify(error, Object.getOwnPropertyNames(error as object))}`);
+      this.logger.error(
+        `MMS 이미지 업로드 실패: ${JSON.stringify(error, Object.getOwnPropertyNames(error as object))}`,
+      );
       this.guardianConsentImageId = null;
     }
   }
@@ -161,9 +165,7 @@ export class SmsService implements OnModuleInit {
       const byteLength = Buffer.byteLength(text, 'utf8');
       const messageType = byteLength > 90 ? 'LMS' : 'SMS';
 
-      this.logger.log(
-        `${messageType} 발송 시작 - to: ${normalizedTo}, byteLength: ${byteLength}`,
-      );
+      this.logger.log(`${messageType} 발송 시작 - to: ${normalizedTo}, byteLength: ${byteLength}`);
 
       const result = await this.messageService.send({
         to: normalizedTo,
@@ -298,9 +300,7 @@ export class SmsService implements OnModuleInit {
           imageId: this.guardianConsentImageId,
         });
 
-        this.logger.log(
-          `MMS 발송 성공 - to: ${normalizedTo}, result: ${JSON.stringify(result)}`,
-        );
+        this.logger.log(`MMS 발송 성공 - to: ${normalizedTo}, result: ${JSON.stringify(result)}`);
 
         return {
           success: true,

@@ -1,20 +1,9 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Put,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Body, Controller, Get, Put, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Roles } from '@infrastructure/auth/decorators/roles.decorator';
+import { AssessmentSettingsEntity } from '@infrastructure/persistence/typeorm/entity/assessment-settings.entity';
 import {
   AdminPermissionGuard,
   AdminPermissions,
@@ -22,7 +11,6 @@ import {
   ADMIN_PERMISSIONS,
 } from '@yeirin/admin-common';
 import { AdminJwtAuthGuard } from '../auth/guards/admin-jwt-auth.guard';
-import { AssessmentSettingsEntity } from '@infrastructure/persistence/typeorm/entity/assessment-settings.entity';
 import {
   UpdateAssessmentSettingsDto,
   AssessmentSettingsResponseDto,
@@ -81,9 +69,7 @@ export class AdminSettingsController {
     });
 
     for (const setting of dto.settings) {
-      const existing = existingSettings.find(
-        (s) => s.assessmentType === setting.assessmentType,
-      );
+      const existing = existingSettings.find((s) => s.assessmentType === setting.assessmentType);
       if (existing) {
         existing.isEnabled = setting.isEnabled;
         await this.assessmentSettingsRepository.save(existing);

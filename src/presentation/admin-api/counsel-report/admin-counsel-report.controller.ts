@@ -14,8 +14,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, In } from 'typeorm';
 import { Roles } from '@infrastructure/auth/decorators/roles.decorator';
-import { CounselReportEntity } from '@infrastructure/persistence/typeorm/entity/counsel-report.entity';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
+import { CounselReportEntity } from '@infrastructure/persistence/typeorm/entity/counsel-report.entity';
 import {
   AdminPermissions,
   AdminPermissionGuard,
@@ -95,8 +95,7 @@ export class AdminCounselReportController {
 
     const items = data.map((report) => {
       const child = childMap.get(report.childId);
-      const institutionName =
-        child?.careFacility?.name || child?.communityChildCenter?.name || '';
+      const institutionName = child?.careFacility?.name || child?.communityChildCenter?.name || '';
 
       return {
         id: report.id,
@@ -154,8 +153,7 @@ export class AdminCounselReportController {
       relations: ['careFacility', 'communityChildCenter'],
     });
 
-    const institutionName =
-      child?.careFacility?.name || child?.communityChildCenter?.name || '';
+    const institutionName = child?.careFacility?.name || child?.communityChildCenter?.name || '';
 
     return {
       id: report.id,
@@ -198,10 +196,7 @@ export class AdminCounselReportController {
   })
   @ApiResponse({ status: 200, description: '상태 변경 성공' })
   @ApiResponse({ status: 404, description: '보고서를 찾을 수 없음' })
-  async updateStatus(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdateReportStatusDto,
-  ) {
+  async updateStatus(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateReportStatusDto) {
     const report = await this.reportRepository.findOne({ where: { id } });
 
     if (!report) {

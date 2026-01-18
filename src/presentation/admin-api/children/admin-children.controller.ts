@@ -13,8 +13,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, FindOptionsWhere, IsNull, Not } from 'typeorm';
 import { Roles } from '@infrastructure/auth/decorators/roles.decorator';
 import { calculateKoreanAge } from '@infrastructure/common/timezone';
-import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
 import { ChildConsentEntity } from '@infrastructure/persistence/typeorm/entity/child-consent.entity';
+import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { PsychologicalStatusLogEntity } from '@infrastructure/persistence/typeorm/entity/psychological-status-log.entity';
 import {
@@ -125,8 +125,7 @@ export class AdminChildrenController {
       const consentStatus = consentMap.get(child.id) || { guardian: false, child: false };
       const age = this.calculateAge(child.birthDate);
       const needsChildConsent = age >= 14;
-      const institutionName =
-        child.careFacility?.name || child.communityChildCenter?.name || '';
+      const institutionName = child.careFacility?.name || child.communityChildCenter?.name || '';
 
       let status: 'COMPLETE' | 'NEED_GUARDIAN' | 'NEED_CHILD' | 'NEED_BOTH' = 'NEED_BOTH';
       if (needsChildConsent) {
@@ -190,9 +189,7 @@ export class AdminChildrenController {
       where: { childId: id },
     });
 
-    const guardianConsent = consents.find(
-      (c) => c.role === 'GUARDIAN' && c.revokedAt === null,
-    );
+    const guardianConsent = consents.find((c) => c.role === 'GUARDIAN' && c.revokedAt === null);
     const childConsent = consents.find((c) => c.role === 'CHILD' && c.revokedAt === null);
 
     // 상담 의뢰 통계

@@ -11,10 +11,7 @@ import { AdminReviewController } from './admin-review.controller';
  * @route /admin/reviews
  */
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([ReviewEntity]),
-    forwardRef(() => AdminAuthModule),
-  ],
+  imports: [TypeOrmModule.forFeature([ReviewEntity]), forwardRef(() => AdminAuthModule)],
   controllers: [AdminReviewController],
   providers: [],
 })

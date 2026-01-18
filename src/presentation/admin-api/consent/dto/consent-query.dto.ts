@@ -1,6 +1,6 @@
-import { IsOptional, IsString, IsBoolean, IsInt, Min, IsEnum } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
+import { IsOptional, IsString, IsBoolean, IsInt, Min, IsEnum } from 'class-validator';
 import { ConsentRole } from '@infrastructure/persistence/typeorm/entity/enums/consent-role.enum';
 
 /**

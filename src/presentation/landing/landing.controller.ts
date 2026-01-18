@@ -14,17 +14,14 @@ export class LandingController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '파트너 기관 목록 조회',
-    description:
-      '랜딩 페이지용 파트너 기관 목록을 조회합니다. 인증이 필요하지 않습니다.',
+    description: '랜딩 페이지용 파트너 기관 목록을 조회합니다. 인증이 필요하지 않습니다.',
   })
   @ApiResponse({
     status: 200,
     description: '조회 성공',
     type: PartnerListResponseDto,
   })
-  async getPartners(
-    @Query() query: PartnerQueryDto,
-  ): Promise<PartnerListResponseDto> {
+  async getPartners(@Query() query: PartnerQueryDto): Promise<PartnerListResponseDto> {
     return await this.landingService.getPartners(query);
   }
 

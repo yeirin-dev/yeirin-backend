@@ -1,10 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
-import {
-  FacilityType,
-  FacilityTypeDisplayName,
-} from '@application/auth/dto/institution-auth.dto';
+import { FacilityType, FacilityTypeDisplayName } from '@application/auth/dto/institution-auth.dto';
 
 /**
  * 파트너 기관 정보 DTO (Landing 페이지용)

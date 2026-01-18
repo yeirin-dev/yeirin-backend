@@ -41,23 +41,17 @@ export class LandingService {
     let filteredPartners = allPartners;
 
     if (facilityType) {
-      filteredPartners = filteredPartners.filter(
-        (p) => p.facilityType === facilityType,
-      );
+      filteredPartners = filteredPartners.filter((p) => p.facilityType === facilityType);
     }
 
     if (district) {
-      filteredPartners = filteredPartners.filter(
-        (p) => p.district === district,
-      );
+      filteredPartners = filteredPartners.filter((p) => p.district === district);
     }
 
     // 정렬 (구/군 → 이름)
     filteredPartners.sort((a, b) => {
       const districtCompare = a.district.localeCompare(b.district, 'ko');
-      return districtCompare !== 0
-        ? districtCompare
-        : a.name.localeCompare(b.name, 'ko');
+      return districtCompare !== 0 ? districtCompare : a.name.localeCompare(b.name, 'ko');
     });
 
     // 페이지네이션
@@ -70,9 +64,9 @@ export class LandingService {
     const categoryCounts = this.calculateCategoryCounts(allPartners);
 
     // 사용 가능한 구/군 목록 (전체 데이터 기준)
-    const availableDistricts = [
-      ...new Set(allPartners.map((p) => p.district)),
-    ].sort((a, b) => a.localeCompare(b, 'ko'));
+    const availableDistricts = [...new Set(allPartners.map((p) => p.district))].sort((a, b) =>
+      a.localeCompare(b, 'ko'),
+    );
 
     return {
       partners: paginatedPartners,
@@ -90,19 +84,18 @@ export class LandingService {
    * 참고: 교육복지사협회는 학교측 요청으로 외부 노출 제외
    */
   async getDistricts(): Promise<string[]> {
-    const [careFacilityDistricts, communityChildCenterDistricts] =
-      await Promise.all([
-        this.careFacilityRepository
-          .createQueryBuilder('facility')
-          .select('DISTINCT facility.district', 'district')
-          .where('facility.isActive = :isActive', { isActive: true })
-          .getRawMany<{ district: string }>(),
-        this.communityChildCenterRepository
-          .createQueryBuilder('center')
-          .select('DISTINCT center.district', 'district')
-          .where('center.isActive = :isActive', { isActive: true })
-          .getRawMany<{ district: string }>(),
-      ]);
+    const [careFacilityDistricts, communityChildCenterDistricts] = await Promise.all([
+      this.careFacilityRepository
+        .createQueryBuilder('facility')
+        .select('DISTINCT facility.district', 'district')
+        .where('facility.isActive = :isActive', { isActive: true })
+        .getRawMany<{ district: string }>(),
+      this.communityChildCenterRepository
+        .createQueryBuilder('center')
+        .select('DISTINCT center.district', 'district')
+        .where('center.isActive = :isActive', { isActive: true })
+        .getRawMany<{ district: string }>(),
+    ]);
 
     const allDistricts = new Set<string>();
     careFacilityDistricts.forEach((r) => allDistricts.add(r.district));
@@ -116,17 +109,16 @@ export class LandingService {
    * 참고: 교육복지사협회는 학교측 요청으로 외부 노출 제외
    */
   private async fetchAllActivePartners(): Promise<PartnerDto[]> {
-    const [careFacilities, communityChildCenters] =
-      await Promise.all([
-        this.careFacilityRepository.find({
-          where: { isActive: true },
-          order: { name: 'ASC' },
-        }),
-        this.communityChildCenterRepository.find({
-          where: { isActive: true },
-          order: { name: 'ASC' },
-        }),
-      ]);
+    const [careFacilities, communityChildCenters] = await Promise.all([
+      this.careFacilityRepository.find({
+        where: { isActive: true },
+        order: { name: 'ASC' },
+      }),
+      this.communityChildCenterRepository.find({
+        where: { isActive: true },
+        order: { name: 'ASC' },
+      }),
+    ]);
 
     const partners: PartnerDto[] = [];
 

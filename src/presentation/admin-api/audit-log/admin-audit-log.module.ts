@@ -9,10 +9,7 @@ import { AdminAuditLogController } from './admin-audit-log.controller';
  * 감사 로그 조회 Admin API
  */
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([AuditLogEntity]),
-    forwardRef(() => AdminAuthModule),
-  ],
+  imports: [TypeOrmModule.forFeature([AuditLogEntity]), forwardRef(() => AdminAuthModule)],
   controllers: [AdminAuditLogController],
   providers: [],
 })

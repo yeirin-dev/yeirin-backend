@@ -15,8 +15,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere, IsNull, Not, In } from 'typeorm';
 import { Roles } from '@infrastructure/auth/decorators/roles.decorator';
 import { ChildConsentEntity } from '@infrastructure/persistence/typeorm/entity/child-consent.entity';
-import { ConsentHistoryEntity } from '@infrastructure/persistence/typeorm/entity/consent-history.entity';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
+import { ConsentHistoryEntity } from '@infrastructure/persistence/typeorm/entity/consent-history.entity';
 import { ConsentAction } from '@infrastructure/persistence/typeorm/entity/enums/consent-action.enum';
 import {
   AdminPermissions,
@@ -101,8 +101,7 @@ export class AdminConsentController {
 
     const items = data.map((consent) => {
       const child = childMap.get(consent.childId);
-      const institutionName =
-        child?.careFacility?.name || child?.communityChildCenter?.name || '';
+      const institutionName = child?.careFacility?.name || child?.communityChildCenter?.name || '';
 
       return {
         id: consent.id,
@@ -155,8 +154,7 @@ export class AdminConsentController {
       relations: ['careFacility', 'communityChildCenter'],
     });
 
-    const institutionName =
-      child?.careFacility?.name || child?.communityChildCenter?.name || '';
+    const institutionName = child?.careFacility?.name || child?.communityChildCenter?.name || '';
 
     return {
       id: consent.id,
@@ -223,10 +221,7 @@ export class AdminConsentController {
   })
   @ApiResponse({ status: 200, description: '철회 성공' })
   @ApiResponse({ status: 404, description: '동의를 찾을 수 없음' })
-  async revokeConsent(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: RevokeConsentDto,
-  ) {
+  async revokeConsent(@Param('id', ParseUUIDPipe) id: string, @Body() dto: RevokeConsentDto) {
     const consent = await this.consentRepository.findOne({ where: { id } });
 
     if (!consent) {

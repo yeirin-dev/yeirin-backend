@@ -221,10 +221,7 @@ export class EducationWelfareSchool {
   /**
    * 교육복지사 정보 변경
    */
-  changeWelfareWorker(
-    name: string,
-    phone: string,
-  ): Result<void, DomainError> {
+  changeWelfareWorker(name: string, phone: string): Result<void, DomainError> {
     if (!name?.trim()) {
       return Result.fail(new DomainError('교육복지사 성명은 필수입니다'));
     }

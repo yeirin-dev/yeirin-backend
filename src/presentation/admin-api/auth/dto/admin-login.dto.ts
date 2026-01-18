@@ -1,5 +1,5 @@
-import { IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString, MinLength } from 'class-validator';
 
 /**
  * Admin 로그인 요청 DTO

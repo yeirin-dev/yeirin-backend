@@ -59,8 +59,7 @@ export class SettingsController {
     const response = { ...defaultResponse };
     for (const setting of settings) {
       if (setting.assessmentType in response) {
-        response[setting.assessmentType as keyof AssessmentEnabledResponse] =
-          setting.isEnabled;
+        response[setting.assessmentType as keyof AssessmentEnabledResponse] = setting.isEnabled;
       }
     }
 

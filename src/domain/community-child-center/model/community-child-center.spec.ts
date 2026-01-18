@@ -53,7 +53,7 @@ describe('CommunityChildCenter Aggregate Root', () => {
       expect(result.getValue().operatingHours).toBeNull();
     });
 
-    it('대표자명이 없으면 실패한다', () => {
+    it('센터장명이 없으면 실패한다', () => {
       // Given
       const props = createValidProps();
       props.directorName = '';
@@ -63,7 +63,7 @@ describe('CommunityChildCenter Aggregate Root', () => {
 
       // Then
       expect(result.isFailure).toBe(true);
-      expect(result.getError().message).toContain('대표자명');
+      expect(result.getError().message).toContain('센터장명');
     });
 
     it('대표자명이 50자 초과면 실패한다', () => {
@@ -79,7 +79,7 @@ describe('CommunityChildCenter Aggregate Root', () => {
       expect(result.getError().message).toContain('50자');
     });
 
-    it('연락처가 없으면 실패한다', () => {
+    it('연락처가 없어도 생성 가능하다 (선택 필드)', () => {
       // Given
       const props = createValidProps();
       props.phoneNumber = '';
@@ -88,8 +88,8 @@ describe('CommunityChildCenter Aggregate Root', () => {
       const result = CommunityChildCenter.create(props);
 
       // Then
-      expect(result.isFailure).toBe(true);
-      expect(result.getError().message).toContain('연락처');
+      expect(result.isSuccess).toBe(true);
+      expect(result.getValue().phoneNumber).toBeNull();
     });
 
     it('연락처 형식이 잘못되면 실패한다', () => {

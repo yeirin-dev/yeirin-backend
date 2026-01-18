@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CounselReportEntity } from '@infrastructure/persistence/typeorm/entity/counsel-report.entity';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
+import { CounselReportEntity } from '@infrastructure/persistence/typeorm/entity/counsel-report.entity';
 import { AdminAuthModule } from '../auth/admin-auth.module';
 import { AdminCounselReportController } from './admin-counsel-report.controller';
 

@@ -2,8 +2,8 @@ import * as path from 'path';
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
-import { CommunityChildCenterEntity } from '../typeorm/entity/community-child-center.entity';
 import { CareFacilityEntity } from '../typeorm/entity/care-facility.entity';
+import { CommunityChildCenterEntity } from '../typeorm/entity/community-child-center.entity';
 import { EducationWelfareSchoolEntity } from '../typeorm/entity/education-welfare-school.entity';
 
 // .env 파일 로드

@@ -1,6 +1,6 @@
-import { IsOptional, IsString, IsInt, Min, IsEnum } from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsOptional, IsString, IsInt, Min, IsEnum } from 'class-validator';
 import { ReportStatus } from '@domain/counsel-report/model/value-objects/report-status';
 
 /**
