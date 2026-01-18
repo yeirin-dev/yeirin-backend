@@ -19,7 +19,7 @@ import {
  * 추천 조건 (3가지 중 1가지 이상 충족):
  * 1. CRTES-R: 중증도군(level 3) 또는 중증군(level 4)
  * 2. SDQ-A: 강점 또는 난점 중 경계선(level 2) 또는 위험군(level 3)
- * 3. KPRC: ERS ≤30T 또는 나머지 12개 척도 중 하나라도 ≥65T
+ * 3. KPRC: ERS ≤30T 또는 나머지 10개 척도 중 하나라도 ≥65T (ICN, F 제외)
  */
 @Injectable()
 export class CheckVoucherEligibilityUseCase {
@@ -196,7 +196,8 @@ export class CheckVoucherEligibilityUseCase {
 
   /**
    * KPRC 조건 판별
-   * ERS ≤30T 또는 나머지 12개 척도 중 하나라도 ≥65T 해당 시 충족
+   * ERS ≤30T 또는 나머지 10개 척도 중 하나라도 ≥65T 해당 시 충족
+   * (ICN, F 척도는 타당도 척도로 바우처 판별에서 제외)
    */
   private evaluateKprc(summary: ChildAssessmentSummary): CriteriaResultDto {
     const kprc = summary.kprc;
@@ -240,7 +241,7 @@ export class CheckVoucherEligibilityUseCase {
   /**
    * KPRC 위험 척도 탐지
    * ERS: ≤30T가 위험 (낮을수록 위험)
-   * 나머지 12개: ≥65T가 위험
+   * 나머지 10개: ≥65T가 위험 (ICN, F 제외 - 타당도 척도)
    */
   private findKprcRiskScales(tScores: KprcTScores): Array<{ name: string; value: number }> {
     const riskScales: Array<{ name: string; value: number }> = [];
@@ -250,10 +251,9 @@ export class CheckVoucherEligibilityUseCase {
       riskScales.push({ name: 'ERS(자아탄력성)', value: tScores.ers_t_score });
     }
 
-    // 나머지 12개 척도: ≥65T가 위험
+    // 나머지 10개 척도: ≥65T가 위험 (ICN, F 제외 - 타당도 척도)
     const otherScales: Array<{ key: keyof KprcTScores; name: string }> = [
-      { key: 'icn_t_score', name: 'ICN(비일관성)' },
-      { key: 'f_t_score', name: 'F(저빈도)' },
+      // ICN(비일관성), F(저빈도)는 타당도 척도로 바우처 판별에서 제외
       { key: 'vdl_t_score', name: 'VDL(긍정왜곡)' },
       { key: 'pdl_t_score', name: 'PDL(부정왜곡)' },
       { key: 'anx_t_score', name: 'ANX(불안)' },
