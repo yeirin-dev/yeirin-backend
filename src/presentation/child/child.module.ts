@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CheckVoucherEligibilityUseCase } from '@application/child/use-cases/check-voucher-eligibility/check-voucher-eligibility.use-case';
 import { RegisterChildUseCase } from '@application/child/use-cases/register-child/register-child.use-case';
 import { SmsService } from '@infrastructure/external/sms.service';
 import { SoulEClient } from '@infrastructure/external/soul-e.client';
@@ -53,6 +54,7 @@ import { ChildController } from './child.controller';
     SmsService,
     // Use Cases
     RegisterChildUseCase,
+    CheckVoucherEligibilityUseCase,
   ],
   exports: ['ChildRepository'],
 })

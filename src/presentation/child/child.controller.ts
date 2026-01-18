@@ -21,9 +21,9 @@ import { ChildName } from '@domain/child/model/value-objects/child-name.vo';
 import { Gender } from '@domain/child/model/value-objects/gender.vo';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { CommunityChildCenterRepository } from '@domain/community-child-center/repository/community-child-center.repository';
-import { EducationWelfareSchoolRepository } from '@domain/education-welfare-school/repository/education-welfare-school.repository';
 import { ConsentRole } from '@domain/consent/model/value-objects/consent-role';
 import { ChildConsentRepository } from '@domain/consent/repository/child-consent.repository';
+import { EducationWelfareSchoolRepository } from '@domain/education-welfare-school/repository/education-welfare-school.repository';
 import { ChildResponseDto } from '@application/child/dto/child-response.dto';
 import { RegisterChildDto } from '@application/child/dto/register-child.dto';
 import {
@@ -31,6 +31,8 @@ import {
   SendGuardianSmsResponseDto,
 } from '@application/child/dto/send-guardian-sms.dto';
 import { UpdateChildDto } from '@application/child/dto/update-child.dto';
+import { VoucherEligibilityResponseDto } from '@application/child/dto/voucher-eligibility.dto';
+import { CheckVoucherEligibilityUseCase } from '@application/child/use-cases/check-voucher-eligibility/check-voucher-eligibility.use-case';
 import { RegisterChildUseCase } from '@application/child/use-cases/register-child/register-child.use-case';
 import {
   CurrentUser,
@@ -56,6 +58,7 @@ export class ChildController {
 
   constructor(
     private readonly registerChildUseCase: RegisterChildUseCase,
+    private readonly checkVoucherEligibilityUseCase: CheckVoucherEligibilityUseCase,
     @Inject('ChildRepository')
     private readonly childRepository: ChildRepository,
     @Inject('CareFacilityRepository')
@@ -434,5 +437,53 @@ SMS에는 보호자 동의 페이지 URL이 포함됩니다.
       this.logger.error(`보호자 동의 SMS 발송 중 오류 - ${error}`);
       throw new InternalServerErrorException('보호자 동의 SMS 발송 중 오류가 발생했습니다.');
     }
+  }
+
+  @Get(':id/voucher-eligibility')
+  @ApiOperation({
+    summary: '바우처 추천 대상 여부 조회',
+    description: `
+아동의 바우처 추천 대상 여부를 조회합니다.
+
+**필수 조건**: CRTES-R, SDQ-A, KPRC 3가지 검사 모두 완료
+
+**추천 조건 (3가지 중 1가지 이상 충족)**:
+1. CRTES-R: 중증도군(level 3) 또는 중증군(level 4)
+2. SDQ-A: 강점 또는 난점 중 경계선(level 2) 또는 위험군(level 3)
+3. KPRC: ERS ≤30T 또는 나머지 12개 척도 중 하나라도 ≥65T
+    `,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '바우처 추천 대상 판별 결과',
+    type: VoucherEligibilityResponseDto,
+  })
+  @ApiResponse({ status: 403, description: '조회 권한 없음' })
+  @ApiResponse({ status: 404, description: '아동을 찾을 수 없음' })
+  async getVoucherEligibility(
+    @CurrentUser() user: CurrentUserData,
+    @Param('id') id: string,
+  ): Promise<VoucherEligibilityResponseDto> {
+    this.logger.log(`바우처 추천 대상 조회 요청 - childId: ${id}, userId: ${user.userId}`);
+
+    // 아동 존재 확인
+    const child = await this.childRepository.findById(id);
+    if (!child) {
+      throw new NotFoundException('아동을 찾을 수 없습니다.');
+    }
+
+    // 권한 확인: 시설 인증인 경우 해당 시설의 아동인지 확인
+    if (user.role === 'INSTITUTION' && user.institutionId) {
+      const hasPermission =
+        (child.careFacilityId && child.careFacilityId === user.institutionId) ||
+        (child.communityChildCenterId && child.communityChildCenterId === user.institutionId) ||
+        (child.educationWelfareSchoolId && child.educationWelfareSchoolId === user.institutionId);
+
+      if (!hasPermission) {
+        throw new ForbiddenException('이 아동의 바우처 대상 여부를 조회할 권한이 없습니다.');
+      }
+    }
+
+    return this.checkVoucherEligibilityUseCase.execute(id);
   }
 }
