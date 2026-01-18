@@ -260,11 +260,12 @@ export class KprcAssessmentSummaryDto extends BaseAssessmentSummaryDto {
   @ApiProperty({
     description: '검사 유형',
     example: 'KPRC_CO_SG_E',
+    enum: ['KPRC_CO_SG_E', 'KPRC_CO_TG'],
     required: false,
   })
   @IsString()
   @IsOptional()
-  assessmentType?: 'KPRC_CO_SG_E';
+  assessmentType?: 'KPRC_CO_SG_E' | 'KPRC_CO_TG';
 }
 
 /**

@@ -74,7 +74,8 @@ export interface RequestMotivation {
 // =============================================================================
 
 export const ASSESSMENT_TYPES = {
-  KPRC: 'KPRC_CO_SG_E',
+  KPRC: 'KPRC_CO_SG_E', // 초등 고학년용
+  KPRC_TEACHER: 'KPRC_CO_TG', // 초등 저학년용 교사평정형
   CRTES_R: 'CRTES_R',
   SDQ_A: 'SDQ_A',
 } as const;
@@ -100,7 +101,7 @@ export interface BaseAssessmentSummary {
  * KPRC 검사소견 (yeirin-ai 생성)
  */
 export interface KprcAssessmentSummary extends BaseAssessmentSummary {
-  assessmentType?: 'KPRC_CO_SG_E';
+  assessmentType?: 'KPRC_CO_SG_E' | 'KPRC_CO_TG'; // 고학년용 또는 교사평정형
 }
 
 /**
