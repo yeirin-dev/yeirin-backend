@@ -14,10 +14,10 @@ import {
 /**
  * 바우처 추천 대상 판별 조건
  *
- * 필수 조건: CRTES-R + SDQ-A + KPRC 모두 수행
+ * 필수 조건: CRTES-R, SDQ-A, KPRC 중 하나라도 수행
  *
  * 추천 조건 (3가지 중 1가지 이상 충족):
- * 1. CRTES-R: 중증도군(level 3) 또는 중증군(level 4)
+ * 1. CRTES-R: 중증도군(level 2) 또는 중증군(level 3)
  * 2. SDQ-A: 강점 또는 난점 중 경계선(level 2) 또는 위험군(level 3)
  * 3. KPRC: ERS ≤30T 또는 나머지 10개 척도 중 하나라도 ≥65T (ICN, F 제외)
  */
@@ -48,10 +48,11 @@ export class CheckVoucherEligibilityUseCase {
     // 검사 완료 현황 생성
     const assessmentStatus = this.buildAssessmentStatus(summary);
 
-    // 3가지 검사 모두 완료되지 않은 경우
-    if (!summary.has_all_required) {
+    // 검사가 하나도 없는 경우
+    const hasAnyAssessment = summary.has_crtes_r || summary.has_sdq_a || summary.has_kprc;
+    if (!hasAnyAssessment) {
       this.logger.log(
-        `필수 검사 미완료 - childId: ${childId}, ` +
+        `검사 결과 없음 - childId: ${childId}, ` +
           `CRTES-R: ${summary.has_crtes_r}, SDQ-A: ${summary.has_sdq_a}, KPRC: ${summary.has_kprc}`,
       );
       return {
@@ -125,7 +126,12 @@ export class CheckVoucherEligibilityUseCase {
 
   /**
    * CRTES-R 조건 판별
-   * 중증도군(level 3) 또는 중증군(level 4) 해당 시 충족
+   * 중증도군(level 2) 또는 중증군(level 3) 해당 시 충족
+   *
+   * CRTES-R 레벨 기준:
+   * - Level 1 (경증군): 0-22점 → 정상 범위
+   * - Level 2 (중증도군): 23-43점 → 바우처 대상
+   * - Level 3 (중증군): 44점 이상 → 바우처 대상
    */
   private evaluateCrtesR(summary: ChildAssessmentSummary): CriteriaResultDto {
     const crtesR = summary.crtes_r;
@@ -138,13 +144,13 @@ export class CheckVoucherEligibilityUseCase {
     }
 
     const severityLevel = crtesR.severity_level;
-    const isRisk = severityLevel >= 3; // 3: 중증도, 4: 중증
+    const isRisk = severityLevel >= 2; // 2: 중증도군, 3: 중증군
 
     return {
       met: isRisk,
       description: isRisk
         ? `CRTES-R ${crtesR.severity_label || `레벨 ${severityLevel}`} 해당`
-        : `CRTES-R ${crtesR.severity_label || `레벨 ${severityLevel}`} (정상 또는 경계)`,
+        : `CRTES-R ${crtesR.severity_label || `레벨 ${severityLevel}`} (경증군)`,
       details: {
         severity_level: severityLevel,
         severity_label: crtesR.severity_label,
