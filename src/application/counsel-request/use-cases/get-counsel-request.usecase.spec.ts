@@ -16,6 +16,7 @@ import {
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { S3Service } from '@infrastructure/storage/s3.service';
+import { SoulEClient } from '@infrastructure/external/soul-e.client';
 import { CounselRequestAuthContext, GetCounselRequestUseCase } from './get-counsel-request.usecase';
 
 describe('GetCounselRequestUseCase', () => {
@@ -23,6 +24,7 @@ describe('GetCounselRequestUseCase', () => {
   let mockRepository: jest.Mocked<CounselRequestRepository>;
   let mockChildRepository: jest.Mocked<ChildRepository>;
   let mockS3Service: jest.Mocked<S3Service>;
+  let mockSoulEClient: jest.Mocked<SoulEClient>;
 
   const mockAuthContext: CounselRequestAuthContext = {
     institutionId: 'institution-123',
@@ -60,6 +62,12 @@ describe('GetCounselRequestUseCase', () => {
       deleteFile: jest.fn(),
     } as unknown as jest.Mocked<S3Service>;
 
+    mockSoulEClient = {
+      getChildAssessmentSummary: jest.fn(),
+      getAssessmentResults: jest.fn(),
+      getConversationSummary: jest.fn(),
+    } as unknown as jest.Mocked<SoulEClient>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetCounselRequestUseCase,
@@ -74,6 +82,10 @@ describe('GetCounselRequestUseCase', () => {
         {
           provide: S3Service,
           useValue: mockS3Service,
+        },
+        {
+          provide: SoulEClient,
+          useValue: mockSoulEClient,
         },
       ],
     }).compile();

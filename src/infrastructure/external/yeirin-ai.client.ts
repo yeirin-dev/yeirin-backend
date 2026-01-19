@@ -20,6 +20,36 @@ export interface AssessmentSummaryDto {
 export type IntegratedReportKprcSummary = AssessmentSummaryDto;
 
 /**
+ * KPRC T점수 DTO (GPT Vision으로 PDF에서 추출)
+ * 바우처 추천 대상 판별 기준:
+ * - ERS ≤ 30T (자아탄력성 - 낮을수록 위험)
+ * - 나머지 12개 척도 중 하나라도 ≥ 65T
+ */
+export interface KprcTScoresDto {
+  ers_t_score?: number | null; // 자아탄력성 (≤30T 위험)
+  icn_t_score?: number | null; // 비일관성
+  f_t_score?: number | null; // 비전형
+  vdl_t_score?: number | null; // 자기보호
+  pdl_t_score?: number | null; // 타인보호
+  anx_t_score?: number | null; // 불안
+  dep_t_score?: number | null; // 우울
+  som_t_score?: number | null; // 신체화
+  dlq_t_score?: number | null; // 비행
+  hpr_t_score?: number | null; // 과잉행동
+  fam_t_score?: number | null; // 가족관계
+  soc_t_score?: number | null; // 사회관계
+  psy_t_score?: number | null; // 정신증
+}
+
+/**
+ * 바우처 기준 충족 정보
+ */
+export interface VoucherCriteriaDto {
+  meets_criteria: boolean;
+  risk_scales: string[]; // 기준 충족 척도 목록 (예: ['ERS', 'ANX'])
+}
+
+/**
  * 첨부된 검사 결과 DTO
  * KPRC, CRTES-R, SDQ-A 등 모든 심리검사 결과
  */
@@ -33,6 +63,9 @@ export interface AttachedAssessmentDto {
   overallLevel?: 'normal' | 'caution' | 'clinical' | null;
   scoredAt?: string | null;
   summary?: AssessmentSummaryDto;
+  // KPRC T점수 (GPT Vision 추출 결과)
+  kprcTScores?: KprcTScoresDto | null;
+  voucherCriteria?: VoucherCriteriaDto | null;
 }
 
 /**

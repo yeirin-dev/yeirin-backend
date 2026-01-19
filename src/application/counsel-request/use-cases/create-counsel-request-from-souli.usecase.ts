@@ -7,7 +7,10 @@ import {
   YeirinAIClient,
   IntegratedReportKprcSummary,
   AttachedAssessmentDto as YeirinAIAttachedAssessmentDto,
+  KprcTScoresDto,
+  VoucherCriteriaDto,
 } from '@infrastructure/external/yeirin-ai.client';
+import { KprcTScores, KprcResultDetail } from '@infrastructure/external/soul-e.client';
 import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
 import { KprcAssessmentSummaryDto, AttachedAssessmentDto } from '../dto/create-counsel-request.dto';
 import { SouliWebhookDto } from '../dto/souli-webhook.dto';
@@ -196,33 +199,65 @@ export class CreateCounselRequestFromSouliUseCase {
         `(${attachedAssessments.map((a) => a.assessmentType).join(', ') || 'legacy KPRC'})`,
     );
 
-    // 5. attached_assessments를 yeirin-ai 형식으로 변환
+    // 5. KPRC T점수 조회 (바우처 기준 판별용)
+    let kprcTScoresData: KprcTScores | null = null;
+    try {
+      const assessmentSummary = await this.soulEClient.getChildAssessmentSummary(dto.childId);
+      if (assessmentSummary?.kprc?.t_scores) {
+        kprcTScoresData = assessmentSummary.kprc.t_scores;
+        this.logger.log(
+          `✅ KPRC T점수 조회 성공 - childId: ${dto.childId}, ` +
+            `ERS: ${kprcTScoresData.ers_t_score ?? 'N/A'}`,
+        );
+      }
+    } catch (error) {
+      this.logger.warn(`⚠️ KPRC T점수 조회 실패 - childId: ${dto.childId}`, error);
+    }
+
+    // 6. attached_assessments를 yeirin-ai 형식으로 변환
     // NOTE: Pydantic은 int 타입에 float(예: 85.0)을 허용하지 않으므로 정수로 변환
     const attachedAssessmentsForReport: YeirinAIAttachedAssessmentDto[] = attachedAssessments.map(
-      (a) => ({
-        assessmentType: a.assessmentType,
-        assessmentName: a.assessmentName,
-        reportS3Key: a.reportS3Key,
-        resultId: a.resultId,
-        // Pydantic int 타입 호환성: number → int 변환
-        totalScore: a.totalScore != null ? Math.round(a.totalScore) : null,
-        maxScore: a.maxScore != null ? Math.round(a.maxScore) : null,
-        // overallLevel 정규화: 'normal'|'caution'|'clinical' 외의 값은 null로 변환
-        overallLevel: this.normalizeOverallLevel(a.overallLevel),
-        scoredAt: a.scoredAt,
-        summary: a.summary
-          ? {
-              summaryLines: a.summary.summaryLines,
-              expertOpinion: a.summary.expertOpinion,
-              keyFindings: a.summary.keyFindings,
-              recommendations: a.summary.recommendations,
-              confidenceScore: a.summary.confidenceScore,
-            }
-          : undefined,
-      }),
+      (a) => {
+        const baseDto: YeirinAIAttachedAssessmentDto = {
+          assessmentType: a.assessmentType,
+          assessmentName: a.assessmentName,
+          reportS3Key: a.reportS3Key,
+          resultId: a.resultId,
+          // Pydantic int 타입 호환성: number → int 변환
+          totalScore: a.totalScore != null ? Math.round(a.totalScore) : null,
+          maxScore: a.maxScore != null ? Math.round(a.maxScore) : null,
+          // overallLevel 정규화: 'normal'|'caution'|'clinical' 외의 값은 null로 변환
+          overallLevel: this.normalizeOverallLevel(a.overallLevel),
+          scoredAt: a.scoredAt,
+          summary: a.summary
+            ? {
+                summaryLines: a.summary.summaryLines,
+                expertOpinion: a.summary.expertOpinion,
+                keyFindings: a.summary.keyFindings,
+                recommendations: a.summary.recommendations,
+                confidenceScore: a.summary.confidenceScore,
+              }
+            : undefined,
+        };
+
+        // KPRC 검사에 T점수 및 바우처 기준 추가
+        if (a.assessmentType === 'KPRC_CO_SG_E' && kprcTScoresData) {
+          baseDto.kprcTScores = this.convertKprcTScores(kprcTScoresData);
+          baseDto.voucherCriteria = this.calculateVoucherCriteria(kprcTScoresData);
+
+          if (baseDto.voucherCriteria?.meets_criteria) {
+            this.logger.log(
+              `🎯 KPRC 바우처 기준 충족 - childId: ${dto.childId}, ` +
+                `riskScales: [${baseDto.voucherCriteria.risk_scales.join(', ')}]`,
+            );
+          }
+        }
+
+        return baseDto;
+      },
     );
 
-    // 6. Legacy 필드 처리 (하위 호환성을 위해 KPRC 정보 추출)
+    // 7. Legacy 필드 처리 (하위 호환성을 위해 KPRC 정보 추출)
     const kprcAssessment = attachedAssessments.find((a) => a.assessmentType === 'KPRC_CO_SG_E');
     const kprcSummaryForReport: IntegratedReportKprcSummary | undefined = kprcAssessment?.summary
       ? {
@@ -311,6 +346,74 @@ export class CreateCounselRequestFromSouliUseCase {
       matchedCounselorId: counselRequest.matchedCounselorId,
       createdAt: counselRequest.createdAt,
       updatedAt: counselRequest.updatedAt,
+    };
+  }
+
+  /**
+   * KPRC T점수를 yeirin-ai DTO 형식으로 변환
+   */
+  private convertKprcTScores(tScores: KprcTScores | null): KprcTScoresDto | null {
+    if (!tScores) return null;
+
+    return {
+      ers_t_score: tScores.ers_t_score,
+      icn_t_score: tScores.icn_t_score,
+      f_t_score: tScores.f_t_score,
+      vdl_t_score: tScores.vdl_t_score,
+      pdl_t_score: tScores.pdl_t_score,
+      anx_t_score: tScores.anx_t_score,
+      dep_t_score: tScores.dep_t_score,
+      som_t_score: tScores.som_t_score,
+      dlq_t_score: tScores.dlq_t_score,
+      hpr_t_score: tScores.hpr_t_score,
+      fam_t_score: tScores.fam_t_score,
+      soc_t_score: tScores.soc_t_score,
+      psy_t_score: tScores.psy_t_score,
+    };
+  }
+
+  /**
+   * KPRC T점수 기반 바우처 기준 충족 여부 계산
+   * 바우처 기준:
+   * - ERS ≤ 30T (자아탄력성 - 낮을수록 위험)
+   * - 나머지 12개 척도 중 하나라도 ≥ 65T
+   */
+  private calculateVoucherCriteria(tScores: KprcTScores | null): VoucherCriteriaDto | null {
+    if (!tScores) return null;
+
+    const riskScales: string[] = [];
+
+    // ERS (자아탄력성): ≤30T가 위험 (낮을수록 위험)
+    if (tScores.ers_t_score != null && tScores.ers_t_score <= 30) {
+      riskScales.push('ERS');
+    }
+
+    // 나머지 12개 척도: ≥65T가 위험
+    const highRiskScales: { key: keyof KprcTScores; name: string }[] = [
+      { key: 'icn_t_score', name: 'ICN' },
+      { key: 'f_t_score', name: 'F' },
+      { key: 'vdl_t_score', name: 'VDL' },
+      { key: 'pdl_t_score', name: 'PDL' },
+      { key: 'anx_t_score', name: 'ANX' },
+      { key: 'dep_t_score', name: 'DEP' },
+      { key: 'som_t_score', name: 'SOM' },
+      { key: 'dlq_t_score', name: 'DLQ' },
+      { key: 'hpr_t_score', name: 'HPR' },
+      { key: 'fam_t_score', name: 'FAM' },
+      { key: 'soc_t_score', name: 'SOC' },
+      { key: 'psy_t_score', name: 'PSY' },
+    ];
+
+    for (const scale of highRiskScales) {
+      const score = tScores[scale.key];
+      if (score != null && score >= 65) {
+        riskScales.push(scale.name);
+      }
+    }
+
+    return {
+      meets_criteria: riskScales.length > 0,
+      risk_scales: riskScales,
     };
   }
 }
