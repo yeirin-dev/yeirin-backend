@@ -144,6 +144,24 @@ export type AssessmentSummary =
 // =============================================================================
 
 /**
+ * SDQ-A 척도 점수 (강점/난점)
+ */
+export interface SdqAScaleScore {
+  score?: number;
+  maxScore?: number;
+  level?: number;
+  levelDescription?: string;
+}
+
+/**
+ * SDQ-A 척도 점수 컨테이너
+ */
+export interface SdqAScaleScores {
+  strengths?: SdqAScaleScore;
+  difficulties?: SdqAScaleScore;
+}
+
+/**
  * 첨부된 개별 검사 결과 정보
  */
 export interface AttachedAssessment {
@@ -156,6 +174,7 @@ export interface AttachedAssessment {
   overallLevel?: 'normal' | 'caution' | 'clinical' | null;
   scoredAt?: string | null;
   summary?: AssessmentSummary; // AI 생성 요약 (optional)
+  scaleScores?: SdqAScaleScores; // 척도별 점수 (SDQ-A: 강점/난점)
 }
 
 /**

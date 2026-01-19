@@ -459,6 +459,45 @@ export class ConversationAnalysisDto {
 }
 
 /**
+ * SDQ-A 척도 점수 DTO (강점/난점)
+ */
+export class SdqAScaleScoreDto {
+  @ApiProperty({ description: '점수', example: 7 })
+  @IsOptional()
+  score?: number;
+
+  @ApiProperty({ description: '만점', example: 10 })
+  @IsOptional()
+  maxScore?: number;
+
+  @ApiProperty({ description: '수준 (1-3)', example: 2 })
+  @IsOptional()
+  level?: number;
+
+  @ApiProperty({ description: '수준 설명', example: '평균적인 수준입니다.' })
+  @IsString()
+  @IsOptional()
+  levelDescription?: string;
+}
+
+/**
+ * SDQ-A 척도 점수 컨테이너 DTO
+ */
+export class SdqAScaleScoresDto {
+  @ApiProperty({ description: '강점 (사회지향 행동) 점수', required: false })
+  @ValidateNested()
+  @Type(() => SdqAScaleScoreDto)
+  @IsOptional()
+  strengths?: SdqAScaleScoreDto;
+
+  @ApiProperty({ description: '난점 (외현화 + 내현화) 점수', required: false })
+  @ValidateNested()
+  @Type(() => SdqAScaleScoreDto)
+  @IsOptional()
+  difficulties?: SdqAScaleScoreDto;
+}
+
+/**
  * 첨부된 검사 결과 DTO
  */
 export class AttachedAssessmentDto {
@@ -540,6 +579,16 @@ export class AttachedAssessmentDto {
   @Type(() => BaseAssessmentSummaryDto)
   @IsOptional()
   summary?: BaseAssessmentSummaryDto;
+
+  @ApiProperty({
+    description: '척도별 점수 (SDQ-A: 강점/난점)',
+    required: false,
+    type: SdqAScaleScoresDto,
+  })
+  @ValidateNested()
+  @Type(() => SdqAScaleScoresDto)
+  @IsOptional()
+  scaleScores?: SdqAScaleScoresDto;
 }
 
 /**

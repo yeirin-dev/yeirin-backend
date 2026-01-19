@@ -24,13 +24,16 @@ export class CreateCounselRequestFromSouliUseCase {
   ) {}
 
   async execute(dto: SouliWebhookDto): Promise<CounselRequestResponseDto> {
+    // SDQ-A scaleScores 보강: webhook에 scaleScores가 없는 경우 Soul-E API에서 조회
+    const enrichedTestResults = await this.enrichSdqAScaleScores(dto.childId, dto.testResults);
+
     // FormData 구성
     const formData = {
       coverInfo: dto.coverInfo,
       basicInfo: dto.basicInfo,
       psychologicalInfo: dto.psychologicalInfo,
       requestMotivation: dto.requestMotivation,
-      testResults: dto.testResults,
+      testResults: enrichedTestResults,
       consent: dto.consent,
     };
 
@@ -57,6 +60,62 @@ export class CreateCounselRequestFromSouliUseCase {
 
     // Response DTO 변환
     return this.toResponseDto(saved);
+  }
+
+  /**
+   * SDQ-A 검사 결과에 scaleScores가 없는 경우 Soul-E API에서 조회하여 추가
+   * webhook에서 scaleScores가 전달되지 않는 경우를 대비한 보강 로직
+   */
+  private async enrichSdqAScaleScores(
+    childId: string,
+    testResults: SouliWebhookDto['testResults'],
+  ): Promise<SouliWebhookDto['testResults']> {
+    if (!testResults?.attachedAssessments) {
+      return testResults;
+    }
+
+    // SDQ-A 검사 결과 찾기
+    const sdqaIndex = testResults.attachedAssessments.findIndex(
+      (a) => a.assessmentType === 'SDQ_A',
+    );
+
+    // SDQ-A가 없거나 이미 scaleScores가 있으면 그대로 반환
+    if (sdqaIndex === -1 || testResults.attachedAssessments[sdqaIndex].scaleScores) {
+      return testResults;
+    }
+
+    this.logger.log(`🔍 SDQ-A scaleScores 조회 시도 - childId: ${childId}`);
+
+    try {
+      // Soul-E API에서 아동의 검사 결과 목록 조회
+      const results = await this.soulEClient.getAssessmentResults(childId);
+
+      // SDQ-A 검사 결과 찾기
+      const sdqaResult = results.find((r) => r.assessment_type === 'SDQ_A');
+
+      if (sdqaResult?.scale_scores && 'strengths' in sdqaResult.scale_scores) {
+        this.logger.log(`✅ SDQ-A scaleScores 조회 성공 - childId: ${childId}`);
+
+        // scaleScores 추가
+        const enrichedAssessments = [...testResults.attachedAssessments];
+        enrichedAssessments[sdqaIndex] = {
+          ...enrichedAssessments[sdqaIndex],
+          scaleScores: sdqaResult.scale_scores as {
+            strengths?: { score?: number; maxScore?: number; level?: number; levelDescription?: string };
+            difficulties?: { score?: number; maxScore?: number; level?: number; levelDescription?: string };
+          },
+        };
+
+        return {
+          ...testResults,
+          attachedAssessments: enrichedAssessments,
+        };
+      }
+    } catch (error) {
+      this.logger.warn(`⚠️ SDQ-A scaleScores 조회 실패 - childId: ${childId}`, error);
+    }
+
+    return testResults;
   }
 
   /**
