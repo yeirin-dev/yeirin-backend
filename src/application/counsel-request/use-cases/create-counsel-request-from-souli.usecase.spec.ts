@@ -446,6 +446,7 @@ describe('CreateCounselRequestFromSouliUseCase', () => {
           strengths: ['강점 영역'],
           confidence_score: 0.9,
         },
+        scale_scores: null,
         scored_at: '2025-01-15T12:00:00Z',
         created_at: '2025-01-15T12:00:00Z',
       });

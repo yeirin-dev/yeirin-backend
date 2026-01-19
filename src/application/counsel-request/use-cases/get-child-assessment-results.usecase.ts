@@ -36,6 +36,7 @@ export class GetChildAssessmentResultsUseCase {
       overallLevel: result.overall_level,
       // s3_report_url (영구 URL) 우선 사용, 없으면 report_url (만료될 수 있음) 사용
       reportUrl: result.s3_report_url ?? result.report_url,
+      scaleScores: result.scale_scores, // SDQ-A: strengths/difficulties
       scoredAt: result.scored_at,
       createdAt: result.created_at,
     }));

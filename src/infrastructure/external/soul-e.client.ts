@@ -122,6 +122,24 @@ export interface ChildAssessmentSummary {
 }
 
 /**
+ * SDQ-A 척도 점수 인터페이스
+ */
+export interface SdqAScaleScores {
+  strengths: {
+    score: number;
+    maxScore: number;
+    level: number;
+    levelDescription: string;
+  };
+  difficulties: {
+    score: number;
+    maxScore: number;
+    level: number;
+    levelDescription: string;
+  };
+}
+
+/**
  * Soul-E 검사 결과 요약 인터페이스
  * Soul-E의 AssessmentResultSummaryOutput 스키마와 동일
  */
@@ -138,6 +156,7 @@ export interface SoulEAssessmentResultSummary {
   report_url: string | null; // Inpsyt 리포트 URL (만료됨)
   s3_report_url: string | null; // S3 영구 리포트 URL (S3 key)
   summary: KprcSummary | null; // KPRC 전문가 소견 요약 (yeirin-ai 생성)
+  scale_scores: SdqAScaleScores | Record<string, unknown> | null; // SDQ-A: strengths/difficulties
   scored_at: string | null;
   created_at: string;
 }
