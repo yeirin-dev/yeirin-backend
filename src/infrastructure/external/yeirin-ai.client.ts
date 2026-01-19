@@ -53,6 +53,24 @@ export interface VoucherCriteriaDto {
  * 첨부된 검사 결과 DTO
  * KPRC, CRTES-R, SDQ-A 등 모든 심리검사 결과
  */
+/**
+ * SDQ-A 강점/난점 점수 DTO
+ */
+export interface SdqScaleScoreDto {
+  score?: number | null;
+  maxScore?: number | null;
+  level?: number | null; // 1: 양호, 2: 경계선, 3: 위험
+  levelDescription?: string | null;
+}
+
+/**
+ * SDQ-A scaleScores DTO
+ */
+export interface SdqScaleScoresDto {
+  strengths?: SdqScaleScoreDto | null;
+  difficulties?: SdqScaleScoreDto | null;
+}
+
 export interface AttachedAssessmentDto {
   assessmentType: string; // 'KPRC_CO_SG_E' | 'CRTES_R' | 'SDQ_A'
   assessmentName: string;
@@ -66,6 +84,8 @@ export interface AttachedAssessmentDto {
   // KPRC T점수 (GPT Vision 추출 결과)
   kprcTScores?: KprcTScoresDto | null;
   voucherCriteria?: VoucherCriteriaDto | null;
+  // SDQ-A scaleScores (강점/난점 분리 점수)
+  sdqScaleScores?: SdqScaleScoresDto | null;
 }
 
 /**

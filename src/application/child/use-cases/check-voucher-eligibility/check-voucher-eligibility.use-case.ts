@@ -146,11 +146,15 @@ export class CheckVoucherEligibilityUseCase {
     const severityLevel = crtesR.severity_level;
     const isRisk = severityLevel >= 2; // 2: 중증도군, 3: 중증군
 
+    // 점수 문자열 생성 (점수가 있는 경우만)
+    const scoreText = crtesR.total_score !== null ? ` (${crtesR.total_score}/115점)` : '';
+    const levelLabel = crtesR.severity_label || `레벨 ${severityLevel}`;
+
     return {
       met: isRisk,
       description: isRisk
-        ? `CRTES-R ${crtesR.severity_label || `레벨 ${severityLevel}`} 해당`
-        : `CRTES-R ${crtesR.severity_label || `레벨 ${severityLevel}`} (경증군)`,
+        ? `CRTES-R ${levelLabel}${scoreText} 해당`
+        : `CRTES-R ${levelLabel}${scoreText}`,
       details: {
         severity_level: severityLevel,
         severity_label: crtesR.severity_label,

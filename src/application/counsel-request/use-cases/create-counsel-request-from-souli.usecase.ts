@@ -9,6 +9,7 @@ import {
   AttachedAssessmentDto as YeirinAIAttachedAssessmentDto,
   KprcTScoresDto,
   VoucherCriteriaDto,
+  SdqScaleScoresDto,
 } from '@infrastructure/external/yeirin-ai.client';
 import { KprcTScores, KprcResultDetail } from '@infrastructure/external/soul-e.client';
 import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
@@ -253,6 +254,16 @@ export class CreateCounselRequestFromSouliUseCase {
           }
         }
 
+        // SDQ-A 검사에 scaleScores 추가 (강점/난점 분리)
+        if (a.assessmentType === 'SDQ_A' && a.scaleScores) {
+          baseDto.sdqScaleScores = this.convertSdqScaleScores(a.scaleScores);
+          this.logger.log(
+            `✅ SDQ-A scaleScores 전달 - childId: ${dto.childId}, ` +
+              `강점: ${a.scaleScores.strengths?.score ?? 'N/A'}/10, ` +
+              `난점: ${a.scaleScores.difficulties?.score ?? 'N/A'}/40`,
+          );
+        }
+
         return baseDto;
       },
     );
@@ -346,6 +357,37 @@ export class CreateCounselRequestFromSouliUseCase {
       matchedCounselorId: counselRequest.matchedCounselorId,
       createdAt: counselRequest.createdAt,
       updatedAt: counselRequest.updatedAt,
+    };
+  }
+
+  /**
+   * SDQ-A scaleScores를 yeirin-ai DTO 형식으로 변환
+   */
+  private convertSdqScaleScores(
+    scaleScores: {
+      strengths?: { score?: number; maxScore?: number; level?: number; levelDescription?: string };
+      difficulties?: { score?: number; maxScore?: number; level?: number; levelDescription?: string };
+    } | null,
+  ): SdqScaleScoresDto | null {
+    if (!scaleScores) return null;
+
+    return {
+      strengths: scaleScores.strengths
+        ? {
+            score: scaleScores.strengths.score ?? null,
+            maxScore: scaleScores.strengths.maxScore ?? 10,
+            level: scaleScores.strengths.level ?? null,
+            levelDescription: scaleScores.strengths.levelDescription ?? null,
+          }
+        : null,
+      difficulties: scaleScores.difficulties
+        ? {
+            score: scaleScores.difficulties.score ?? null,
+            maxScore: scaleScores.difficulties.maxScore ?? 40,
+            level: scaleScores.difficulties.level ?? null,
+            levelDescription: scaleScores.difficulties.levelDescription ?? null,
+          }
+        : null,
     };
   }
 
