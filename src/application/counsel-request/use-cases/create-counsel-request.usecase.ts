@@ -168,8 +168,8 @@ export class CreateCounselRequestUseCase {
       }),
     );
 
-    // 6. Legacy 필드 처리 (하위 호환성을 위해 KPRC 정보 추출)
-    const kprcAssessment = attachedAssessments.find((a) => a.assessmentType === 'KPRC_CO_SG_E');
+    // 6. Legacy 필드 처리 (하위 호환성을 위해 KPRC 정보 추출 - 자가보고형/교사평정형 모두 지원)
+    const kprcAssessment = attachedAssessments.find((a) => a.assessmentType.startsWith('KPRC'));
     const kprcSummaryForReport: IntegratedReportKprcSummary | undefined = kprcAssessment?.summary
       ? {
           summaryLines: kprcAssessment.summary.summaryLines || [],
