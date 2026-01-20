@@ -129,9 +129,9 @@ export class CheckVoucherEligibilityUseCase {
    * 중증도군(level 2) 또는 중증군(level 3) 해당 시 충족
    *
    * CRTES-R 레벨 기준:
-   * - Level 1 (경증군): 0-22점 → 정상 범위
-   * - Level 2 (중증도군): 23-43점 → 바우처 대상
-   * - Level 3 (중증군): 44점 이상 → 바우처 대상
+   * - Level 1 (경증군): 0-14점 → 정상 범위
+   * - Level 2 (중증도군): 15-27점 → 바우처 대상
+   * - Level 3 (중증군): 28점 이상 → 바우처 대상
    */
   private evaluateCrtesR(summary: ChildAssessmentSummary): CriteriaResultDto {
     const crtesR = summary.crtes_r;
