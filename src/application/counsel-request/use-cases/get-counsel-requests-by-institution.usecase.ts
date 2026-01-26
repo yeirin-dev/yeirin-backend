@@ -28,7 +28,7 @@ export class GetCounselRequestsByInstitutionUseCase {
     institutionId: string,
     facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL',
     page: number = 1,
-    limit: number = 10,
+    limit: number = 50,
     status?: CounselRequestStatus,
   ): Promise<PaginatedResponseDto<CounselRequestResponseDto>> {
     // 1. 시설에 속한 아동 ID 목록 조회

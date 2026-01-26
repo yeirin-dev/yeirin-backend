@@ -15,8 +15,8 @@ import {
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
-import { S3Service } from '@infrastructure/storage/s3.service';
 import { SoulEClient } from '@infrastructure/external/soul-e.client';
+import { S3Service } from '@infrastructure/storage/s3.service';
 import { CounselRequestAuthContext, GetCounselRequestUseCase } from './get-counsel-request.usecase';
 
 describe('GetCounselRequestUseCase', () => {

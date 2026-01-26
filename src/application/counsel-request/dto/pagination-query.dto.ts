@@ -21,8 +21,8 @@ export class PaginationQueryDto {
 
   @ApiProperty({
     description: '페이지당 항목 수',
-    example: 10,
-    default: 10,
+    example: 50,
+    default: 50,
     minimum: 1,
     maximum: 100,
   })
@@ -31,7 +31,7 @@ export class PaginationQueryDto {
   @IsInt()
   @Min(1)
   @Max(100)
-  limit?: number = 10;
+  limit?: number = 50;
 
   @ApiProperty({
     description: '상태별 필터링 (선택)',

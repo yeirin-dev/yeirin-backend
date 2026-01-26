@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
 import { v4 as uuidv4 } from 'uuid';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
-import { SoulEClient } from '@infrastructure/external/soul-e.client';
+import { SoulEClient, KprcTScores, KprcResultDetail } from '@infrastructure/external/soul-e.client';
 import {
   YeirinAIClient,
   IntegratedReportKprcSummary,
@@ -11,7 +11,6 @@ import {
   VoucherCriteriaDto,
   SdqScaleScoresDto,
 } from '@infrastructure/external/yeirin-ai.client';
-import { KprcTScores, KprcResultDetail } from '@infrastructure/external/soul-e.client';
 import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
 import { KprcAssessmentSummaryDto, AttachedAssessmentDto } from '../dto/create-counsel-request.dto';
 import { SouliWebhookDto } from '../dto/souli-webhook.dto';
@@ -105,8 +104,18 @@ export class CreateCounselRequestFromSouliUseCase {
         enrichedAssessments[sdqaIndex] = {
           ...enrichedAssessments[sdqaIndex],
           scaleScores: sdqaResult.scale_scores as {
-            strengths?: { score?: number; maxScore?: number; level?: number; levelDescription?: string };
-            difficulties?: { score?: number; maxScore?: number; level?: number; levelDescription?: string };
+            strengths?: {
+              score?: number;
+              maxScore?: number;
+              level?: number;
+              levelDescription?: string;
+            };
+            difficulties?: {
+              score?: number;
+              maxScore?: number;
+              level?: number;
+              levelDescription?: string;
+            };
           },
         };
 
@@ -366,7 +375,12 @@ export class CreateCounselRequestFromSouliUseCase {
   private convertSdqScaleScores(
     scaleScores: {
       strengths?: { score?: number; maxScore?: number; level?: number; levelDescription?: string };
-      difficulties?: { score?: number; maxScore?: number; level?: number; levelDescription?: string };
+      difficulties?: {
+        score?: number;
+        maxScore?: number;
+        level?: number;
+        levelDescription?: string;
+      };
     } | null,
   ): SdqScaleScoresDto | null {
     if (!scaleScores) return null;

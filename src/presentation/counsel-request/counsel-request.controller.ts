@@ -87,7 +87,7 @@ export class CounselRequestController {
   @Get()
   @ApiOperation({ summary: '내 시설 상담의뢰지 목록 조회 (페이지네이션 + 필터)' })
   @ApiQuery({ name: 'page', required: false, description: '페이지 번호 (1부터 시작)', example: 1 })
-  @ApiQuery({ name: 'limit', required: false, description: '페이지당 항목 수', example: 10 })
+  @ApiQuery({ name: 'limit', required: false, description: '페이지당 항목 수', example: 50 })
   @ApiQuery({
     name: 'status',
     required: false,
@@ -104,7 +104,7 @@ export class CounselRequestController {
     @Query() query: PaginationQueryDto,
   ): Promise<PaginatedResponseDto<CounselRequestResponseDto>> {
     const page = query.page ?? 1;
-    const limit = query.limit ?? 10;
+    const limit = query.limit ?? 50;
     return await this.getCounselRequestsByInstitutionUseCase.execute(
       user.institutionId,
       user.facilityType,

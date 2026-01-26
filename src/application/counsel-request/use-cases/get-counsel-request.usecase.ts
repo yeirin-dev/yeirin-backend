@@ -1,10 +1,10 @@
 import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ChildRepository } from '@domain/child/repository/child.repository';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
-import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
-import { S3Service } from '@infrastructure/storage/s3.service';
+import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
 import { SoulEClient } from '@infrastructure/external/soul-e.client';
+import { S3Service } from '@infrastructure/storage/s3.service';
 import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
 
 export interface CounselRequestAuthContext {
@@ -155,8 +155,18 @@ export class GetCounselRequestUseCase {
         enrichedAssessments[sdqaIndex] = {
           ...enrichedAssessments[sdqaIndex],
           scaleScores: sdqaResult.scale_scores as {
-            strengths?: { score?: number; maxScore?: number; level?: number; levelDescription?: string };
-            difficulties?: { score?: number; maxScore?: number; level?: number; levelDescription?: string };
+            strengths?: {
+              score?: number;
+              maxScore?: number;
+              level?: number;
+              levelDescription?: string;
+            };
+            difficulties?: {
+              score?: number;
+              maxScore?: number;
+              level?: number;
+              levelDescription?: string;
+            };
           },
         };
 
