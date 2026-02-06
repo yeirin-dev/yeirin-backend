@@ -29,7 +29,10 @@ export type AuditActionType =
   | 'REVOKE'
   | 'RESET_PASSWORD'
   | 'HIDE'
-  | 'SHOW';
+  | 'SHOW'
+  | 'CREATE_VOUCHER_LINKAGE'
+  | 'UPDATE_VOUCHER_LINKAGE'
+  | 'COMPLETE_VOUCHER_LINKAGE';
 
 /**
  * 감사 로그 메타데이터 인터페이스

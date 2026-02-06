@@ -121,7 +121,7 @@ export class AdminCounselRequestController {
   @Post(':id/voucher-linkage')
   @AdminPermissions(ADMIN_PERMISSIONS.COUNSEL_REQUEST_UPDATE_STATUS)
   @AuditAction('CREATE_VOUCHER_LINKAGE', 'VoucherLinkage', {
-    level: 'MEDIUM',
+    level: 'NORMAL',
     description: '바우처 연계 정보 생성',
   })
   @ApiOperation({
@@ -145,7 +145,7 @@ export class AdminCounselRequestController {
   @Patch(':id/voucher-linkage')
   @AdminPermissions(ADMIN_PERMISSIONS.COUNSEL_REQUEST_UPDATE_STATUS)
   @AuditAction('UPDATE_VOUCHER_LINKAGE', 'VoucherLinkage', {
-    level: 'MEDIUM',
+    level: 'NORMAL',
     description: '바우처 연계 정보 수정',
   })
   @ApiOperation({
