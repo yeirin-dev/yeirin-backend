@@ -1,7 +1,10 @@
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { CounselRequest } from '@domain/counsel-request/model/counsel-request';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
+import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { SoulEClient, KprcTScores, KprcResultDetail } from '@infrastructure/external/soul-e.client';
 import {
   YeirinAIClient,
@@ -11,6 +14,7 @@ import {
   VoucherCriteriaDto,
   SdqScaleScoresDto,
 } from '@infrastructure/external/yeirin-ai.client';
+import { CheckVoucherEligibilityUseCase } from '@application/child/use-cases/check-voucher-eligibility/check-voucher-eligibility.use-case';
 import { CounselRequestResponseDto } from '../dto/counsel-request-response.dto';
 import { KprcAssessmentSummaryDto, AttachedAssessmentDto } from '../dto/create-counsel-request.dto';
 import { SouliWebhookDto } from '../dto/souli-webhook.dto';
@@ -22,8 +26,11 @@ export class CreateCounselRequestFromSouliUseCase {
   constructor(
     @Inject('CounselRequestRepository')
     private readonly counselRequestRepository: CounselRequestRepository,
+    @InjectRepository(CounselRequestEntity)
+    private readonly counselRequestEntityRepository: Repository<CounselRequestEntity>,
     private readonly yeirinAIClient: YeirinAIClient,
     private readonly soulEClient: SoulEClient,
+    private readonly checkVoucherEligibilityUseCase: CheckVoucherEligibilityUseCase,
   ) {}
 
   async execute(dto: SouliWebhookDto): Promise<CounselRequestResponseDto> {
@@ -58,11 +65,50 @@ export class CreateCounselRequestFromSouliUseCase {
 
     this.logger.log(`✅ 소울이 연동 성공 - Session ID: ${dto.souliSessionId}`);
 
+    // 바우처 추천 여부 계산 및 저장 (Fire-and-forget)
+    await this.calculateAndSaveVoucherEligibility(saved.id, dto.childId);
+
     // 통합 보고서 생성 요청
     await this.requestIntegratedReportGeneration(saved.id, dto);
 
     // Response DTO 변환
     return this.toResponseDto(saved);
+  }
+
+  /**
+   * 바우처 추천 대상 여부 계산 및 저장
+   */
+  private async calculateAndSaveVoucherEligibility(
+    counselRequestId: string,
+    childId: string,
+  ): Promise<void> {
+    try {
+      this.logger.log(`🎯 바우처 추천 대상 판별 시작 - counselRequestId: ${counselRequestId}`);
+
+      const eligibilityResult = await this.checkVoucherEligibilityUseCase.execute(childId);
+
+      // 상담의뢰지에 바우처 추천 정보 저장
+      await this.counselRequestEntityRepository.update(
+        { id: counselRequestId },
+        {
+          isVoucherEligible: eligibilityResult.isEligible,
+          voucherEligibilityReasons: eligibilityResult.eligibilityReasons ?? [],
+          voucherEligibilityCheckedAt: new Date(),
+        },
+      );
+
+      this.logger.log(
+        `✅ 바우처 추천 대상 판별 완료 - counselRequestId: ${counselRequestId}, ` +
+          `isEligible: ${eligibilityResult.isEligible}, ` +
+          `reasons: ${(eligibilityResult.eligibilityReasons ?? []).join(', ') || '없음'}`,
+      );
+    } catch (error) {
+      // Fire-and-forget: 실패해도 상담의뢰지 생성은 성공
+      this.logger.error(
+        `❌ 바우처 추천 대상 판별 실패 - counselRequestId: ${counselRequestId}`,
+        error,
+      );
+    }
   }
 
   /**

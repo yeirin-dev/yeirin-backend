@@ -19,6 +19,8 @@ import { ChildProfileEntity } from './child-profile.entity';
 @Index('idx_counsel_requests_status', ['status'])
 @Index('idx_counsel_requests_status_created', ['status', 'createdAt'])
 @Index('idx_counsel_requests_created_at', ['createdAt'])
+@Index('idx_counsel_requests_voucher_eligible', ['isVoucherEligible'])
+@Index('idx_counsel_requests_status_voucher', ['status', 'isVoucherEligible'])
 export class CounselRequestEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -72,6 +74,26 @@ export class CounselRequestEntity {
     name: 'integrated_report_status',
   })
   integratedReportStatus?: 'pending' | 'processing' | 'completed' | 'failed';
+
+  /**
+   * 바우처 추천대상 여부
+   * 상담의뢰지 생성 시 Soul-E 검사결과 기반으로 계산
+   */
+  @Column({ type: 'boolean', nullable: true, name: 'is_voucher_eligible' })
+  isVoucherEligible?: boolean;
+
+  /**
+   * 바우처 추천 사유 목록
+   * ex) ["CRTES-R 경계선 이상", "SDQ-A 난점 경계선 이상"]
+   */
+  @Column({ type: 'text', array: true, nullable: true, name: 'voucher_eligibility_reasons' })
+  voucherEligibilityReasons?: string[];
+
+  /**
+   * 바우처 추천 여부 계산 시점
+   */
+  @Column({ type: 'timestamp', nullable: true, name: 'voucher_eligibility_checked_at' })
+  voucherEligibilityCheckedAt?: Date;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

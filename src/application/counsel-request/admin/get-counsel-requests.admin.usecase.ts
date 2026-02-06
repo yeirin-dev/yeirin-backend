@@ -2,9 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
+import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
 import { AdminPaginatedResponseDto } from '@yeirin/admin-common';
 import { AdminCounselRequestQueryDto } from './dto/admin-counsel-request-query.dto';
 import { AdminCounselRequestResponseDto } from './dto/admin-counsel-request-response.dto';
+import { VoucherLinkageStatus as DomainVoucherLinkageStatus } from '@domain/voucher-linkage/model/voucher-linkage';
+import { VoucherLinkageStatus as EntityVoucherLinkageStatus } from '@infrastructure/persistence/typeorm/entity/enums/voucher-linkage-status.enum';
 
 /**
  * Admin 상담의뢰 목록 조회 Use Case
@@ -31,12 +34,20 @@ export class GetCounselRequestsAdminUseCase {
       endDate,
       sortBy,
       sortOrder,
+      isVoucherEligible,
+      voucherLinkageStatus,
     } = query;
 
-    // 쿼리 빌더
+    // 쿼리 빌더 - VoucherLinkage LEFT JOIN 추가
     const queryBuilder = this.counselRequestRepository
       .createQueryBuilder('cr')
-      .leftJoinAndSelect('cr.child', 'child');
+      .leftJoinAndSelect('cr.child', 'child')
+      .leftJoinAndMapOne(
+        'cr.voucherLinkage',
+        VoucherLinkageEntity,
+        'vl',
+        'vl.counselRequestId = cr.id',
+      );
 
     // 상태 필터
     if (status) {
@@ -73,6 +84,19 @@ export class GetCounselRequestsAdminUseCase {
       });
     }
 
+    // 바우처 추천대상 필터
+    if (isVoucherEligible !== undefined) {
+      queryBuilder.andWhere('cr.isVoucherEligible = :isVoucherEligible', { isVoucherEligible });
+    }
+
+    // 바우처 연계 상태 필터
+    if (voucherLinkageStatus) {
+      const entityStatus = this.toEntityVoucherLinkageStatus(voucherLinkageStatus);
+      queryBuilder.andWhere('vl.status = :voucherLinkageStatus', {
+        voucherLinkageStatus: entityStatus,
+      });
+    }
+
     // 정렬
     const orderField = sortBy || 'createdAt';
     const orderDirection = sortOrder || 'DESC';
@@ -90,7 +114,9 @@ export class GetCounselRequestsAdminUseCase {
     return AdminPaginatedResponseDto.of(data, total, page, limit);
   }
 
-  private toResponseDto(cr: CounselRequestEntity): AdminCounselRequestResponseDto {
+  private toResponseDto(
+    cr: CounselRequestEntity & { voucherLinkage?: VoucherLinkageEntity },
+  ): AdminCounselRequestResponseDto {
     return {
       id: cr.id,
       childId: cr.childId,
@@ -103,8 +129,46 @@ export class GetCounselRequestsAdminUseCase {
       matchedInstitutionName: undefined, // TODO: Institution 조회 추가 필요시 구현
       matchedCounselorId: cr.matchedCounselorId,
       matchedCounselorName: undefined, // TODO: Counselor 조회 추가 필요시 구현
+      isVoucherEligible: cr.isVoucherEligible,
+      voucherEligibilityReasons: cr.voucherEligibilityReasons,
+      voucherLinkageStatus: cr.voucherLinkage
+        ? this.toDomainVoucherLinkageStatus(cr.voucherLinkage.status)
+        : undefined,
+      voucherLinkedAt: cr.voucherLinkage?.linkedAt,
       createdAt: cr.createdAt,
       updatedAt: cr.updatedAt,
     };
+  }
+
+  /**
+   * Domain VoucherLinkageStatus → Entity VoucherLinkageStatus
+   */
+  private toEntityVoucherLinkageStatus(
+    domainStatus: DomainVoucherLinkageStatus,
+  ): EntityVoucherLinkageStatus {
+    switch (domainStatus) {
+      case DomainVoucherLinkageStatus.PENDING:
+        return EntityVoucherLinkageStatus.PENDING;
+      case DomainVoucherLinkageStatus.COMPLETED:
+        return EntityVoucherLinkageStatus.COMPLETED;
+      default:
+        return EntityVoucherLinkageStatus.PENDING;
+    }
+  }
+
+  /**
+   * Entity VoucherLinkageStatus → Domain VoucherLinkageStatus
+   */
+  private toDomainVoucherLinkageStatus(
+    entityStatus: EntityVoucherLinkageStatus,
+  ): DomainVoucherLinkageStatus {
+    switch (entityStatus) {
+      case EntityVoucherLinkageStatus.PENDING:
+        return DomainVoucherLinkageStatus.PENDING;
+      case EntityVoucherLinkageStatus.COMPLETED:
+        return DomainVoucherLinkageStatus.COMPLETED;
+      default:
+        return DomainVoucherLinkageStatus.PENDING;
+    }
   }
 }

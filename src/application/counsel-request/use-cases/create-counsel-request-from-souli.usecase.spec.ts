@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import {
   CareType,
   ConsentStatus,
@@ -8,16 +10,20 @@ import {
   ProtectedChildReason,
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestRepository } from '@domain/counsel-request/repository/counsel-request.repository';
+import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { SoulEClient } from '@infrastructure/external/soul-e.client';
 import { YeirinAIClient } from '@infrastructure/external/yeirin-ai.client';
+import { CheckVoucherEligibilityUseCase } from '@application/child/use-cases/check-voucher-eligibility/check-voucher-eligibility.use-case';
 import { SouliWebhookDto } from '../dto/souli-webhook.dto';
 import { CreateCounselRequestFromSouliUseCase } from './create-counsel-request-from-souli.usecase';
 
 describe('CreateCounselRequestFromSouliUseCase', () => {
   let useCase: CreateCounselRequestFromSouliUseCase;
   let mockRepository: jest.Mocked<CounselRequestRepository>;
+  let mockCounselRequestEntityRepository: jest.Mocked<Repository<CounselRequestEntity>>;
   let mockYeirinAIClient: jest.Mocked<YeirinAIClient>;
   let mockSoulEClient: jest.Mocked<SoulEClient>;
+  let mockCheckVoucherEligibilityUseCase: jest.Mocked<CheckVoucherEligibilityUseCase>;
 
   beforeEach(async () => {
     mockRepository = {
@@ -31,13 +37,27 @@ describe('CreateCounselRequestFromSouliUseCase', () => {
       delete: jest.fn(),
     };
 
+    mockCounselRequestEntityRepository = {
+      update: jest.fn().mockResolvedValue({ affected: 1 }),
+    } as unknown as jest.Mocked<Repository<CounselRequestEntity>>;
+
     mockYeirinAIClient = {
       requestIntegratedReport: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<YeirinAIClient>;
 
     mockSoulEClient = {
       getLatestAssessmentResult: jest.fn().mockResolvedValue(null),
+      getAssessmentResults: jest.fn().mockResolvedValue([]),
+      getChildAssessmentSummary: jest.fn().mockResolvedValue(null),
     } as unknown as jest.Mocked<SoulEClient>;
+
+    mockCheckVoucherEligibilityUseCase = {
+      execute: jest.fn().mockResolvedValue({
+        isEligible: false,
+        hasAllRequiredAssessments: false,
+        eligibilityReasons: null,
+      }),
+    } as unknown as jest.Mocked<CheckVoucherEligibilityUseCase>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -47,12 +67,20 @@ describe('CreateCounselRequestFromSouliUseCase', () => {
           useValue: mockRepository,
         },
         {
+          provide: getRepositoryToken(CounselRequestEntity),
+          useValue: mockCounselRequestEntityRepository,
+        },
+        {
           provide: YeirinAIClient,
           useValue: mockYeirinAIClient,
         },
         {
           provide: SoulEClient,
           useValue: mockSoulEClient,
+        },
+        {
+          provide: CheckVoucherEligibilityUseCase,
+          useValue: mockCheckVoucherEligibilityUseCase,
         },
       ],
     }).compile();

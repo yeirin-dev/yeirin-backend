@@ -4,6 +4,7 @@ import {
   CareType,
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
+import { VoucherLinkageStatus } from '@domain/voucher-linkage/model/voucher-linkage';
 
 /**
  * Admin 상담의뢰 목록 응답 DTO
@@ -42,6 +43,26 @@ export class AdminCounselRequestResponseDto {
   @ApiPropertyOptional({ description: '매칭된 상담사명' })
   matchedCounselorName?: string;
 
+  @ApiPropertyOptional({ description: '바우처 추천대상 여부' })
+  isVoucherEligible?: boolean;
+
+  @ApiPropertyOptional({
+    description: '바우처 추천 사유 목록',
+    type: [String],
+    example: ['CRTES-R 심각도 2등급 이상', 'SDQ-A 수준 2등급 이상'],
+  })
+  voucherEligibilityReasons?: string[];
+
+  @ApiPropertyOptional({
+    description: '바우처 연계 상태',
+    enum: VoucherLinkageStatus,
+    example: VoucherLinkageStatus.PENDING,
+  })
+  voucherLinkageStatus?: VoucherLinkageStatus;
+
+  @ApiPropertyOptional({ description: '바우처 연계 완료일' })
+  voucherLinkedAt?: Date;
+
   @ApiProperty({ description: '생성일' })
   createdAt: Date;
 
@@ -73,6 +94,41 @@ export class StatusHistoryItemDto {
 }
 
 /**
+ * 바우처 연계 정보 응답 DTO
+ */
+export class VoucherLinkageResponseDto {
+  @ApiProperty({ description: '바우처 연계 ID' })
+  id: string;
+
+  @ApiProperty({ description: '연계 상태', enum: VoucherLinkageStatus })
+  status: VoucherLinkageStatus;
+
+  @ApiPropertyOptional({ description: '연계 기관명' })
+  linkedInstitutionName?: string;
+
+  @ApiPropertyOptional({ description: '연계 기관 연락처' })
+  linkedInstitutionPhone?: string;
+
+  @ApiPropertyOptional({ description: '연계 기관 주소' })
+  linkedInstitutionAddress?: string;
+
+  @ApiPropertyOptional({ description: '담당 상담사명' })
+  linkedCounselorName?: string;
+
+  @ApiPropertyOptional({ description: '연계 완료일' })
+  linkedAt?: Date;
+
+  @ApiPropertyOptional({ description: '비고' })
+  notes?: string;
+
+  @ApiProperty({ description: '생성일' })
+  createdAt: Date;
+
+  @ApiProperty({ description: '수정일' })
+  updatedAt: Date;
+}
+
+/**
  * Admin 상담의뢰 상세 응답 DTO
  */
 export class AdminCounselRequestDetailResponseDto extends AdminCounselRequestResponseDto {
@@ -87,4 +143,10 @@ export class AdminCounselRequestDetailResponseDto extends AdminCounselRequestRes
 
   @ApiPropertyOptional({ description: '리뷰 평점' })
   reviewRating?: number;
+
+  @ApiPropertyOptional({ description: '바우처 추천대상 확인일' })
+  voucherEligibilityCheckedAt?: Date;
+
+  @ApiPropertyOptional({ description: '바우처 연계 정보', type: VoucherLinkageResponseDto })
+  voucherLinkage?: VoucherLinkageResponseDto;
 }

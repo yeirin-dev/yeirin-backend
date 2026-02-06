@@ -1,9 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsUUID, IsBoolean } from 'class-validator';
+import { Transform } from 'class-transformer';
 import {
   CounselRequestStatus,
   CareType,
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
+import { VoucherLinkageStatus } from '@domain/voucher-linkage/model/voucher-linkage';
 import { AdminDateRangeQueryDto } from '@yeirin/admin-common';
 
 /**
@@ -34,4 +36,19 @@ export class AdminCounselRequestQueryDto extends AdminDateRangeQueryDto {
   @IsOptional()
   @IsUUID()
   counselorId?: string;
+
+  @ApiPropertyOptional({ description: '바우처 추천대상 여부 필터', example: true })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  isVoucherEligible?: boolean;
+
+  @ApiPropertyOptional({
+    description: '바우처 연계 상태 필터',
+    enum: VoucherLinkageStatus,
+    example: VoucherLinkageStatus.PENDING,
+  })
+  @IsOptional()
+  @IsEnum(VoucherLinkageStatus)
+  voucherLinkageStatus?: VoucherLinkageStatus;
 }

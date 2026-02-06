@@ -5,9 +5,13 @@ import { AuditLogEntity } from '@infrastructure/persistence/typeorm/entity/audit
 import { CounselReportEntity } from '@infrastructure/persistence/typeorm/entity/counsel-report.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { ReviewEntity } from '@infrastructure/persistence/typeorm/entity/review.entity';
+import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
+import { VoucherLinkageStatus as EntityVoucherLinkageStatus } from '@infrastructure/persistence/typeorm/entity/enums/voucher-linkage-status.enum';
+import { VoucherLinkageStatus as DomainVoucherLinkageStatus } from '@domain/voucher-linkage/model/voucher-linkage';
 import {
   AdminCounselRequestDetailResponseDto,
   StatusHistoryItemDto,
+  VoucherLinkageResponseDto,
 } from './dto/admin-counsel-request-response.dto';
 
 /**
@@ -24,6 +28,8 @@ export class GetCounselRequestDetailAdminUseCase {
     private readonly reviewRepository: Repository<ReviewEntity>,
     @InjectRepository(AuditLogEntity)
     private readonly auditLogRepository: Repository<AuditLogEntity>,
+    @InjectRepository(VoucherLinkageEntity)
+    private readonly voucherLinkageRepository: Repository<VoucherLinkageEntity>,
   ) {}
 
   async execute(id: string): Promise<AdminCounselRequestDetailResponseDto> {
@@ -55,6 +61,14 @@ export class GetCounselRequestDetailAdminUseCase {
     // 상태 변경 히스토리 조회 (AuditLog에서)
     const statusHistory = await this.getStatusHistory(id);
 
+    // 바우처 연계 정보 조회
+    const voucherLinkageEntity = await this.voucherLinkageRepository.findOne({
+      where: { counselRequestId: id },
+    });
+    const voucherLinkage = voucherLinkageEntity
+      ? this.toVoucherLinkageDto(voucherLinkageEntity)
+      : undefined;
+
     return {
       id: counselRequest.id,
       childId: counselRequest.childId,
@@ -67,12 +81,18 @@ export class GetCounselRequestDetailAdminUseCase {
       matchedInstitutionName: undefined, // TODO: Institution 조회 추가 필요시 구현
       matchedCounselorId: counselRequest.matchedCounselorId,
       matchedCounselorName: undefined, // TODO: Counselor 조회 추가 필요시 구현
+      isVoucherEligible: counselRequest.isVoucherEligible,
+      voucherEligibilityReasons: counselRequest.voucherEligibilityReasons,
+      voucherLinkageStatus: voucherLinkage?.status,
+      voucherLinkedAt: voucherLinkageEntity?.linkedAt,
       createdAt: counselRequest.createdAt,
       updatedAt: counselRequest.updatedAt,
       formData: counselRequest.formData,
       statusHistory,
       reportCount,
       reviewRating,
+      voucherEligibilityCheckedAt: counselRequest.voucherEligibilityCheckedAt,
+      voucherLinkage,
     };
   }
 
@@ -99,5 +119,39 @@ export class GetCounselRequestDetailAdminUseCase {
         changedAt: log.createdAt,
       };
     });
+  }
+
+  /**
+   * VoucherLinkageEntity → VoucherLinkageResponseDto 변환
+   */
+  private toVoucherLinkageDto(entity: VoucherLinkageEntity): VoucherLinkageResponseDto {
+    return {
+      id: entity.id,
+      status: this.toDomainVoucherLinkageStatus(entity.status),
+      linkedInstitutionName: entity.linkedInstitutionName,
+      linkedInstitutionPhone: entity.linkedInstitutionPhone,
+      linkedInstitutionAddress: entity.linkedInstitutionAddress,
+      linkedCounselorName: entity.linkedCounselorName,
+      linkedAt: entity.linkedAt,
+      notes: entity.notes,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    };
+  }
+
+  /**
+   * Entity VoucherLinkageStatus → Domain VoucherLinkageStatus
+   */
+  private toDomainVoucherLinkageStatus(
+    entityStatus: EntityVoucherLinkageStatus,
+  ): DomainVoucherLinkageStatus {
+    switch (entityStatus) {
+      case EntityVoucherLinkageStatus.PENDING:
+        return DomainVoucherLinkageStatus.PENDING;
+      case EntityVoucherLinkageStatus.COMPLETED:
+        return DomainVoucherLinkageStatus.COMPLETED;
+      default:
+        return DomainVoucherLinkageStatus.PENDING;
+    }
   }
 }

@@ -13,6 +13,7 @@ import { CounselRequestEntity } from '../persistence/typeorm/entity/counsel-requ
 import { EducationWelfareSchoolEntity } from '../persistence/typeorm/entity/education-welfare-school.entity';
 import { PsychologicalStatusLogEntity } from '../persistence/typeorm/entity/psychological-status-log.entity';
 import { ReviewEntity } from '../persistence/typeorm/entity/review.entity';
+import { VoucherLinkageEntity } from '../persistence/typeorm/entity/voucher-linkage.entity';
 
 export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => {
   const isDevelopment = configService.get<string>('NODE_ENV') !== 'production';
@@ -49,6 +50,8 @@ export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOpt
       AuditLogEntity,
       // Settings
       AssessmentSettingsEntity,
+      // Voucher Linkage
+      VoucherLinkageEntity,
     ],
     synchronize: isDevelopment,
     logging: isDevelopment,
