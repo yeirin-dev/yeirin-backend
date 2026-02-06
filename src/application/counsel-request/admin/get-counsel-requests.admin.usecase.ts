@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
+import { S3Service } from '@infrastructure/storage/s3.service';
 import { AdminPaginatedResponseDto } from '@yeirin/admin-common';
 import { AdminCounselRequestQueryDto } from './dto/admin-counsel-request-query.dto';
 import { AdminCounselRequestResponseDto } from './dto/admin-counsel-request-response.dto';
@@ -17,6 +18,7 @@ export class GetCounselRequestsAdminUseCase {
   constructor(
     @InjectRepository(CounselRequestEntity)
     private readonly counselRequestRepository: Repository<CounselRequestEntity>,
+    private readonly s3Service: S3Service,
   ) {}
 
   async execute(
@@ -108,15 +110,30 @@ export class GetCounselRequestsAdminUseCase {
     // 쿼리 실행
     const [counselRequests, total] = await queryBuilder.getManyAndCount();
 
-    // DTO 변환
-    const data = counselRequests.map((cr) => this.toResponseDto(cr));
+    // DTO 변환 (presigned URL 생성 포함)
+    const data = await Promise.all(
+      counselRequests.map((cr) => this.toResponseDto(cr)),
+    );
 
     return AdminPaginatedResponseDto.of(data, total, page, limit);
   }
 
-  private toResponseDto(
+  private async toResponseDto(
     cr: CounselRequestEntity & { voucherLinkage?: VoucherLinkageEntity },
-  ): AdminCounselRequestResponseDto {
+  ): Promise<AdminCounselRequestResponseDto> {
+    // 통합보고서 presigned URL 생성
+    let integratedReportUrl: string | undefined;
+    if (cr.integratedReportS3Key && cr.integratedReportStatus === 'completed') {
+      try {
+        integratedReportUrl = await this.s3Service.getPresignedUrl(
+          cr.integratedReportS3Key,
+          3600, // 1시간
+        );
+      } catch {
+        // URL 생성 실패 시 undefined 유지
+      }
+    }
+
     return {
       id: cr.id,
       childId: cr.childId,
@@ -135,6 +152,9 @@ export class GetCounselRequestsAdminUseCase {
         ? this.toDomainVoucherLinkageStatus(cr.voucherLinkage.status)
         : undefined,
       voucherLinkedAt: cr.voucherLinkage?.linkedAt,
+      integratedReportS3Key: cr.integratedReportS3Key,
+      integratedReportStatus: cr.integratedReportStatus,
+      integratedReportUrl,
       createdAt: cr.createdAt,
       updatedAt: cr.updatedAt,
     };

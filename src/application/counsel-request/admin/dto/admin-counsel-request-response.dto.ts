@@ -63,6 +63,15 @@ export class AdminCounselRequestResponseDto {
   @ApiPropertyOptional({ description: '바우처 연계 완료일' })
   voucherLinkedAt?: Date;
 
+  @ApiPropertyOptional({ description: '통합보고서 S3 키' })
+  integratedReportS3Key?: string;
+
+  @ApiPropertyOptional({ description: '통합보고서 상태' })
+  integratedReportStatus?: string;
+
+  @ApiPropertyOptional({ description: '통합보고서 Presigned URL' })
+  integratedReportUrl?: string;
+
   @ApiProperty({ description: '생성일' })
   createdAt: Date;
 

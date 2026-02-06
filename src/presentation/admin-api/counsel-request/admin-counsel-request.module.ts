@@ -13,6 +13,7 @@ import { ReviewEntity } from '@infrastructure/persistence/typeorm/entity/review.
 import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
 import { CounselRequestRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-request.repository.impl';
 import { VoucherLinkageRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/voucher-linkage.repository.impl';
+import { S3Service } from '@infrastructure/storage/s3.service';
 import { AdminAuthModule } from '../auth/admin-auth.module';
 import { AdminCounselRequestController } from './admin-counsel-request.controller';
 
@@ -35,6 +36,8 @@ import { AdminCounselRequestController } from './admin-counsel-request.controlle
   ],
   controllers: [AdminCounselRequestController],
   providers: [
+    // Infrastructure Services
+    S3Service,
     // Repositories
     {
       provide: 'CounselRequestRepository',
