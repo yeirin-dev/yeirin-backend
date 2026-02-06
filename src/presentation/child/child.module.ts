@@ -56,6 +56,6 @@ import { ChildController } from './child.controller';
     RegisterChildUseCase,
     CheckVoucherEligibilityUseCase,
   ],
-  exports: ['ChildRepository'],
+  exports: ['ChildRepository', CheckVoucherEligibilityUseCase],
 })
 export class ChildModule {}
