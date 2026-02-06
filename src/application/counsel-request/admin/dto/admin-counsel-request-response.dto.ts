@@ -5,6 +5,7 @@ import {
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { CounselRequestFormData } from '@domain/counsel-request/model/value-objects/counsel-request-form-data';
 import { VoucherLinkageStatus } from '@domain/voucher-linkage/model/voucher-linkage';
+import { ChildType } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';
 
 /**
  * Admin 상담의뢰 목록 응답 DTO
@@ -27,6 +28,13 @@ export class AdminCounselRequestResponseDto {
 
   @ApiPropertyOptional({ description: '구/군' })
   district?: string;
+
+  @ApiPropertyOptional({
+    description: '시설 구분',
+    enum: ChildType,
+    example: ChildType.COMMUNITY_CENTER,
+  })
+  childType?: ChildType;
 
   @ApiProperty({ description: '돌봄 유형', enum: CareType })
   careType: CareType;

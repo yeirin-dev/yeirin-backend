@@ -6,6 +6,7 @@ import {
   CareType,
 } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 import { VoucherLinkageStatus } from '@domain/voucher-linkage/model/voucher-linkage';
+import { ChildType } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';
 import { AdminDateRangeQueryDto } from '@yeirin/admin-common';
 
 /**
@@ -31,6 +32,15 @@ export class AdminCounselRequestQueryDto extends AdminDateRangeQueryDto {
   @IsOptional()
   @IsEnum(CareType)
   careType?: CareType;
+
+  @ApiPropertyOptional({
+    description: '시설 구분 필터',
+    enum: ChildType,
+    example: ChildType.COMMUNITY_CENTER,
+  })
+  @IsOptional()
+  @IsEnum(ChildType)
+  childType?: ChildType;
 
   @ApiPropertyOptional({ description: '기관 ID 필터' })
   @IsOptional()

@@ -12,6 +12,7 @@ import { AdminCounselRequestQueryDto } from './dto/admin-counsel-request-query.d
 import { AdminCounselRequestResponseDto } from './dto/admin-counsel-request-response.dto';
 import { VoucherLinkageStatus as DomainVoucherLinkageStatus } from '@domain/voucher-linkage/model/voucher-linkage';
 import { VoucherLinkageStatus as EntityVoucherLinkageStatus } from '@infrastructure/persistence/typeorm/entity/enums/voucher-linkage-status.enum';
+import { ChildType } from '@infrastructure/persistence/typeorm/entity/enums/child-type.enum';
 
 /**
  * Admin 상담의뢰 목록 조회 Use Case
@@ -73,6 +74,7 @@ export class GetCounselRequestsAdminUseCase {
       search,
       status,
       careType,
+      childType,
       institutionId,
       counselorId,
       startDate,
@@ -122,6 +124,11 @@ export class GetCounselRequestsAdminUseCase {
     // 돌봄 유형 필터
     if (careType) {
       queryBuilder.andWhere('cr.careType = :careType', { careType });
+    }
+
+    // 시설 구분 필터 (아동 유형 기반)
+    if (childType) {
+      queryBuilder.andWhere('child.childType = :childType', { childType });
     }
 
     // 기관 ID 필터
@@ -194,6 +201,7 @@ export class GetCounselRequestsAdminUseCase {
       voucherLinkage?: VoucherLinkageEntity;
       child?: {
         name?: string;
+        childType?: ChildType;
         careFacility?: { district?: string } | null;
         communityChildCenter?: { district?: string } | null;
         educationWelfareSchool?: { district?: string } | null;
@@ -223,6 +231,7 @@ export class GetCounselRequestsAdminUseCase {
       id: cr.id,
       childId: cr.childId,
       childName: cr.child?.name || '',
+      childType: cr.child?.childType,
       status: cr.status,
       centerName: cr.centerName,
       district,
