@@ -17,6 +17,11 @@ export class AdminCounselRequestQueryDto extends AdminDateRangeQueryDto {
   @IsString()
   search?: string;
 
+  @ApiPropertyOptional({ description: '구/군 필터', example: '해운대구' })
+  @IsOptional()
+  @IsString()
+  district?: string;
+
   @ApiPropertyOptional({ description: '상태 필터', enum: CounselRequestStatus })
   @IsOptional()
   @IsEnum(CounselRequestStatus)

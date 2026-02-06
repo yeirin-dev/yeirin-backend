@@ -25,6 +25,9 @@ export class AdminCounselRequestResponseDto {
   @ApiProperty({ description: '센터명' })
   centerName: string;
 
+  @ApiPropertyOptional({ description: '구/군' })
+  district?: string;
+
   @ApiProperty({ description: '돌봄 유형', enum: CareType })
   careType: CareType;
 

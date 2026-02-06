@@ -57,6 +57,21 @@ export class AdminCounselRequestController {
   ) {}
 
   /**
+   * 구/군 목록 조회
+   */
+  @Get('districts')
+  @AdminPermissions(ADMIN_PERMISSIONS.COUNSEL_REQUEST_READ)
+  @SkipAdminAudit()
+  @ApiOperation({
+    summary: '구/군 목록 조회',
+    description: '상담의뢰 필터링에 사용할 구/군 목록을 조회합니다.',
+  })
+  @ApiResponse({ status: 200, description: '조회 성공' })
+  async getDistricts(): Promise<string[]> {
+    return this.getCounselRequestsUseCase.getDistricts();
+  }
+
+  /**
    * 상담의뢰 목록 조회
    */
   @Get()

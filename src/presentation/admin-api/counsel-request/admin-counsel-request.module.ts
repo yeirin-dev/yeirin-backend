@@ -7,8 +7,11 @@ import { UpdateCounselRequestStatusAdminUseCase } from '@application/counsel-req
 import { UpdateVoucherLinkageAdminUseCase } from '@application/counsel-request/admin/update-voucher-linkage.admin.usecase';
 import { VOUCHER_LINKAGE_REPOSITORY } from '@domain/voucher-linkage/repository/voucher-linkage.repository';
 import { AuditLogEntity } from '@infrastructure/persistence/typeorm/entity/audit-log.entity';
+import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
+import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
 import { CounselReportEntity } from '@infrastructure/persistence/typeorm/entity/counsel-report.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
+import { EducationWelfareSchoolEntity } from '@infrastructure/persistence/typeorm/entity/education-welfare-school.entity';
 import { ReviewEntity } from '@infrastructure/persistence/typeorm/entity/review.entity';
 import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
 import { CounselRequestRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-request.repository.impl';
@@ -31,6 +34,9 @@ import { AdminCounselRequestController } from './admin-counsel-request.controlle
       ReviewEntity,
       AuditLogEntity,
       VoucherLinkageEntity,
+      CareFacilityEntity,
+      CommunityChildCenterEntity,
+      EducationWelfareSchoolEntity,
     ]),
     forwardRef(() => AdminAuthModule),
   ],

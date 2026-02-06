@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
+import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
+import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
+import { EducationWelfareSchoolEntity } from '@infrastructure/persistence/typeorm/entity/education-welfare-school.entity';
 import { S3Service } from '@infrastructure/storage/s3.service';
 import { AdminPaginatedResponseDto } from '@yeirin/admin-common';
 import { AdminCounselRequestQueryDto } from './dto/admin-counsel-request-query.dto';
@@ -18,8 +21,48 @@ export class GetCounselRequestsAdminUseCase {
   constructor(
     @InjectRepository(CounselRequestEntity)
     private readonly counselRequestRepository: Repository<CounselRequestEntity>,
+    @InjectRepository(CareFacilityEntity)
+    private readonly careFacilityRepository: Repository<CareFacilityEntity>,
+    @InjectRepository(CommunityChildCenterEntity)
+    private readonly communityChildCenterRepository: Repository<CommunityChildCenterEntity>,
+    @InjectRepository(EducationWelfareSchoolEntity)
+    private readonly educationWelfareSchoolRepository: Repository<EducationWelfareSchoolEntity>,
     private readonly s3Service: S3Service,
   ) {}
+
+  /**
+   * 구/군 목록 조회
+   */
+  async getDistricts(): Promise<string[]> {
+    // CareFacility 구/군 조회
+    const careFacilityDistricts = await this.careFacilityRepository
+      .createQueryBuilder('facility')
+      .select('DISTINCT facility.district', 'district')
+      .where('facility.isActive = :isActive', { isActive: true })
+      .getRawMany<{ district: string }>();
+
+    // CommunityChildCenter 구/군 조회
+    const communityChildCenterDistricts = await this.communityChildCenterRepository
+      .createQueryBuilder('center')
+      .select('DISTINCT center.district', 'district')
+      .where('center.isActive = :isActive', { isActive: true })
+      .getRawMany<{ district: string }>();
+
+    // EducationWelfareSchool 구/군 조회
+    const educationWelfareSchoolDistricts = await this.educationWelfareSchoolRepository
+      .createQueryBuilder('school')
+      .select('DISTINCT school.district', 'district')
+      .where('school.isActive = :isActive', { isActive: true })
+      .getRawMany<{ district: string }>();
+
+    // 중복 제거 및 정렬
+    const allDistricts = new Set<string>();
+    careFacilityDistricts.forEach((r) => allDistricts.add(r.district));
+    communityChildCenterDistricts.forEach((r) => allDistricts.add(r.district));
+    educationWelfareSchoolDistricts.forEach((r) => allDistricts.add(r.district));
+
+    return Array.from(allDistricts).sort();
+  }
 
   async execute(
     query: AdminCounselRequestQueryDto,
@@ -38,9 +81,10 @@ export class GetCounselRequestsAdminUseCase {
       sortOrder,
       isVoucherEligible,
       voucherLinkageStatus,
+      district,
     } = query;
 
-    // 쿼리 빌더 - VoucherLinkage LEFT JOIN 추가
+    // 쿼리 빌더 - VoucherLinkage LEFT JOIN 및 기관 LEFT JOIN 추가
     const queryBuilder = this.counselRequestRepository
       .createQueryBuilder('cr')
       .leftJoinAndSelect('cr.child', 'child')
@@ -49,6 +93,25 @@ export class GetCounselRequestsAdminUseCase {
         VoucherLinkageEntity,
         'vl',
         'vl.counselRequestId = cr.id',
+      )
+      // 기관 테이블 JOIN (district 조회용)
+      .leftJoinAndMapOne(
+        'child.careFacility',
+        CareFacilityEntity,
+        'cf',
+        'cf.id = child.careFacilityId',
+      )
+      .leftJoinAndMapOne(
+        'child.communityChildCenter',
+        CommunityChildCenterEntity,
+        'ccc',
+        'ccc.id = child.communityChildCenterId',
+      )
+      .leftJoinAndMapOne(
+        'child.educationWelfareSchool',
+        EducationWelfareSchoolEntity,
+        'ews',
+        'ews.id = child.educationWelfareSchoolId',
       );
 
     // 상태 필터
@@ -99,6 +162,14 @@ export class GetCounselRequestsAdminUseCase {
       });
     }
 
+    // 구/군 필터 (3개 기관 테이블 중 하나라도 매칭되면 됨)
+    if (district) {
+      queryBuilder.andWhere(
+        '(cf.district = :district OR ccc.district = :district OR ews.district = :district)',
+        { district },
+      );
+    }
+
     // 정렬
     const orderField = sortBy || 'createdAt';
     const orderDirection = sortOrder || 'DESC';
@@ -119,7 +190,15 @@ export class GetCounselRequestsAdminUseCase {
   }
 
   private async toResponseDto(
-    cr: CounselRequestEntity & { voucherLinkage?: VoucherLinkageEntity },
+    cr: CounselRequestEntity & {
+      voucherLinkage?: VoucherLinkageEntity;
+      child?: {
+        name?: string;
+        careFacility?: { district?: string } | null;
+        communityChildCenter?: { district?: string } | null;
+        educationWelfareSchool?: { district?: string } | null;
+      };
+    },
   ): Promise<AdminCounselRequestResponseDto> {
     // 통합보고서 presigned URL 생성
     let integratedReportUrl: string | undefined;
@@ -134,12 +213,19 @@ export class GetCounselRequestsAdminUseCase {
       }
     }
 
+    // 구/군 정보 추출 (3개 기관 중 연결된 기관에서)
+    const district =
+      cr.child?.careFacility?.district ||
+      cr.child?.communityChildCenter?.district ||
+      cr.child?.educationWelfareSchool?.district;
+
     return {
       id: cr.id,
       childId: cr.childId,
       childName: cr.child?.name || '',
       status: cr.status,
       centerName: cr.centerName,
+      district,
       careType: cr.careType,
       requestDate: cr.requestDate,
       matchedInstitutionId: cr.matchedInstitutionId,
