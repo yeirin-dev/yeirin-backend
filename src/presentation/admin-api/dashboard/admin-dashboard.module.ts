@@ -8,6 +8,7 @@ import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity
 import { EducationWelfareSchoolEntity } from '@infrastructure/persistence/typeorm/entity/education-welfare-school.entity';
 import { AdminStatisticsRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/admin-statistics.repository.impl';
 import { AdminAuthModule } from '../auth/admin-auth.module';
+import { AdminSessionModule } from '../sessions/admin-session.module';
 import { AdminDashboardController } from './admin-dashboard.controller';
 
 /**
@@ -26,6 +27,7 @@ import { AdminDashboardController } from './admin-dashboard.controller';
       EducationWelfareSchoolEntity,
     ]),
     forwardRef(() => AdminAuthModule),
+    AdminSessionModule,
   ],
   controllers: [AdminDashboardController],
   providers: [

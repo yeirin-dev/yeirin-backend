@@ -162,6 +162,77 @@ export interface SoulEAssessmentResultSummary {
 }
 
 /**
+ * 어드민 세션 필터 인터페이스
+ */
+export interface AdminSessionFilters {
+  childName?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+/**
+ * 어드민 세션 응답 인터페이스
+ */
+export interface AdminChatSessionResponse {
+  id: string;
+  userId: string | null;
+  title: string | null;
+  status: string;
+  messageCount: number;
+  childName: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+  duration: number | null;
+}
+
+/**
+ * 페이지네이션 세션 목록 응답
+ */
+export interface PaginatedAdminSessions {
+  data: AdminChatSessionResponse[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+/**
+ * 어드민 세션 통계 응답
+ */
+export interface AdminSessionStats {
+  totalSessions: number;
+  activeSessions: number;
+  todayCreated: number;
+  todayClosed: number;
+  totalMessages: number;
+}
+
+/**
+ * 어드민 세션 메시지 응답
+ */
+export interface AdminChatMessageResponse {
+  id: string;
+  sessionId: string;
+  role: string;
+  content: string;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+/**
+ * 어드민 세션 상세 응답 (메시지 포함)
+ */
+export interface AdminSessionDetailResponse extends AdminChatSessionResponse {
+  messages: AdminChatMessageResponse[];
+}
+
+/**
  * Soul-E MSA 클라이언트
  * FastAPI Soul-E 서비스와 HTTP 통신
  */
@@ -427,5 +498,95 @@ export class SoulEClient {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  /**
+   * 어드민 세션 목록 조회
+   */
+  async getAdminSessions(filters: AdminSessionFilters = {}): Promise<PaginatedAdminSessions> {
+    this.logger.log(`Soul-E 어드민 세션 목록 조회 요청`);
+
+    try {
+      const response = await this.client.get<PaginatedAdminSessions>(
+        '/api/v1/admin/sessions',
+        { params: filters },
+      );
+
+      this.logger.log(`Soul-E 어드민 세션 목록 조회 성공 - ${response.data.total}건`);
+      return response.data;
+    } catch (error) {
+      this.handleSoulEError(error, '어드민 세션 목록 조회');
+      throw error; // unreachable, for TS
+    }
+  }
+
+  /**
+   * 어드민 세션 통계 조회
+   */
+  async getAdminSessionStats(): Promise<AdminSessionStats> {
+    this.logger.log(`Soul-E 어드민 세션 통계 조회 요청`);
+
+    try {
+      const response = await this.client.get<AdminSessionStats>(
+        '/api/v1/admin/sessions/stats',
+      );
+
+      this.logger.log(`Soul-E 어드민 세션 통계 조회 성공`);
+      return response.data;
+    } catch (error) {
+      this.handleSoulEError(error, '어드민 세션 통계 조회');
+      throw error;
+    }
+  }
+
+  /**
+   * 어드민 세션 상세 조회 (메시지 포함)
+   */
+  async getAdminSessionDetail(sessionId: string): Promise<AdminSessionDetailResponse> {
+    this.logger.log(`Soul-E 어드민 세션 상세 조회 요청 - sessionId: ${sessionId}`);
+
+    try {
+      const response = await this.client.get<AdminSessionDetailResponse>(
+        `/api/v1/admin/sessions/${sessionId}`,
+      );
+
+      this.logger.log(`Soul-E 어드민 세션 상세 조회 성공 - sessionId: ${sessionId}`);
+      return response.data;
+    } catch (error) {
+      this.handleSoulEError(error, '어드민 세션 상세 조회');
+      throw error;
+    }
+  }
+
+  /**
+   * Soul-E API 에러 공통 처리
+   */
+  private handleSoulEError(error: unknown, context: string): never {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError;
+      const status = axiosError.response?.status || HttpStatus.INTERNAL_SERVER_ERROR;
+      const message =
+        (axiosError.response?.data as { detail?: string })?.detail ||
+        axiosError.message ||
+        'Soul-E service failed';
+
+      this.logger.error(`Soul-E ${context} 실패 - Status: ${status}, Message: ${message}`);
+
+      throw new HttpException(
+        { statusCode: status, message, service: 'soul-e' },
+        status,
+      );
+    }
+
+    this.logger.error(`Soul-E ${context} 예상치 못한 에러`, error);
+
+    throw new HttpException(
+      {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Unexpected error calling Soul-E service',
+        service: 'soul-e',
+      },
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 }

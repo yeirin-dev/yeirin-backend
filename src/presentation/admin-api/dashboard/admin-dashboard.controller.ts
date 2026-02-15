@@ -1,7 +1,8 @@
-import { Controller, Get, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Logger, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { GetDashboardOverviewUseCase } from '@application/admin-statistics/get-dashboard-overview.usecase';
 import { Roles } from '@infrastructure/auth/decorators/roles.decorator';
+import { SoulEClient } from '@infrastructure/external/soul-e.client';
 import {
   AdminPermissions,
   AdminPermissionGuard,
@@ -47,6 +48,7 @@ interface DashboardStatsResponse {
     active: number;
     todayCreated: number;
     todayClosed: number;
+    totalMessages: number;
   };
   assessments: {
     total: number;
@@ -85,7 +87,12 @@ interface AlertItemResponse {
 @Roles('ADMIN')
 @ApiBearerAuth()
 export class AdminDashboardController {
-  constructor(private readonly getDashboardOverviewUseCase: GetDashboardOverviewUseCase) {}
+  private readonly logger = new Logger(AdminDashboardController.name);
+
+  constructor(
+    private readonly getDashboardOverviewUseCase: GetDashboardOverviewUseCase,
+    private readonly soulEClient: SoulEClient,
+  ) {}
 
   /**
    * 대시보드 통계 조회
@@ -100,6 +107,14 @@ export class AdminDashboardController {
   @ApiResponse({ status: 200, description: '조회 성공' })
   async getDashboardStats(@Query() query: AdminDateRangeQueryDto): Promise<DashboardStatsResponse> {
     const overview = await this.getDashboardOverviewUseCase.execute(query);
+
+    // Soul-E 세션 통계 비동기 조회 (실패 시 기본값)
+    let sessionStats = { totalSessions: 0, activeSessions: 0, todayCreated: 0, todayClosed: 0, totalMessages: 0 };
+    try {
+      sessionStats = await this.soulEClient.getAdminSessionStats();
+    } catch (error) {
+      this.logger.warn('Soul-E 세션 통계 조회 실패, 기본값 사용', error);
+    }
 
     // 프론트엔드 형식에 맞게 변환
     return {
@@ -130,9 +145,10 @@ export class AdminDashboardController {
         pending: 0,
       },
       sessions: {
-        active: 0, // NOTE: Session stats from soul-e API
-        todayCreated: 0,
-        todayClosed: 0,
+        active: sessionStats.activeSessions,
+        todayCreated: sessionStats.todayCreated,
+        todayClosed: sessionStats.todayClosed,
+        totalMessages: sessionStats.totalMessages,
       },
       assessments: {
         total: 0, // NOTE: Assessment stats from soul-e API
