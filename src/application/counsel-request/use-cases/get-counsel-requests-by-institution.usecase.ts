@@ -30,6 +30,7 @@ export class GetCounselRequestsByInstitutionUseCase {
     page: number = 1,
     limit: number = 50,
     status?: CounselRequestStatus,
+    isVoucherEligible?: boolean,
   ): Promise<PaginatedResponseDto<CounselRequestResponseDto>> {
     // 1. 시설에 속한 아동 ID 목록 조회
     let children;
@@ -60,10 +61,13 @@ export class GetCounselRequestsByInstitutionUseCase {
       allCounselRequests.push(...requests);
     }
 
-    // 3. 상태 필터 적용
+    // 3. 필터 적용 (상태, 바우처 적격 여부)
     let filteredRequests = allCounselRequests;
     if (status) {
-      filteredRequests = allCounselRequests.filter((cr) => cr.status === status);
+      filteredRequests = filteredRequests.filter((cr) => cr.status === status);
+    }
+    if (isVoucherEligible !== undefined) {
+      filteredRequests = filteredRequests.filter((cr) => cr.isVoucherEligible === isVoucherEligible);
     }
 
     // 4. 최신순 정렬
@@ -111,6 +115,8 @@ export class GetCounselRequestsByInstitutionUseCase {
       matchedCounselorId: counselRequest.matchedCounselorId,
       integratedReportStatus: counselRequest.integratedReportStatus,
       integratedReportUrl,
+      isVoucherEligible: counselRequest.isVoucherEligible,
+      voucherEligibilityReasons: counselRequest.voucherEligibilityReasons,
       createdAt: counselRequest.createdAt,
       updatedAt: counselRequest.updatedAt,
     };

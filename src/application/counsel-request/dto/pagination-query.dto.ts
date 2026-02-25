@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsBoolean, IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 import { CounselRequestStatus } from '@domain/counsel-request/model/value-objects/counsel-request-enums';
 
 /**
@@ -42,4 +42,14 @@ export class PaginationQueryDto {
   @IsOptional()
   @IsEnum(CounselRequestStatus)
   status?: CounselRequestStatus;
+
+  @ApiProperty({
+    description: '바우처 추천 대상 필터링 (선택)',
+    required: false,
+    example: true,
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  isVoucherEligible?: boolean;
 }

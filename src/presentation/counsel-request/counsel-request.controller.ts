@@ -94,6 +94,12 @@ export class CounselRequestController {
     description: '상태별 필터',
     enum: ['PENDING', 'MATCHED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED'],
   })
+  @ApiQuery({
+    name: 'isVoucherEligible',
+    required: false,
+    description: '바우처 추천 대상 필터',
+    type: Boolean,
+  })
   @ApiResponse({
     status: 200,
     description: '조회 성공 (본인 시설의 아동 상담의뢰지만 반환)',
@@ -111,6 +117,7 @@ export class CounselRequestController {
       page,
       limit,
       query.status,
+      query.isVoucherEligible,
     );
   }
 

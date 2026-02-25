@@ -27,6 +27,8 @@ export class CounselRequestMapper {
       integratedReportStatus: entity.integratedReportStatus as IntegratedReportStatus | undefined,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      isVoucherEligible: entity.isVoucherEligible,
+      voucherEligibilityReasons: entity.voucherEligibilityReasons,
     });
   }
 

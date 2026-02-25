@@ -26,6 +26,8 @@ export class CounselRequest {
     private _integratedReportStatus?: IntegratedReportStatus,
     private readonly _createdAt: Date = new Date(),
     private _updatedAt: Date = new Date(),
+    private readonly _isVoucherEligible?: boolean,
+    private readonly _voucherEligibilityReasons?: string[],
   ) {}
 
   // ============================================
@@ -82,6 +84,14 @@ export class CounselRequest {
 
   get updatedAt(): Date {
     return this._updatedAt;
+  }
+
+  get isVoucherEligible(): boolean | undefined {
+    return this._isVoucherEligible;
+  }
+
+  get voucherEligibilityReasons(): string[] | undefined {
+    return this._voucherEligibilityReasons;
   }
 
   // ============================================
@@ -160,6 +170,8 @@ export class CounselRequest {
     integratedReportStatus?: IntegratedReportStatus;
     createdAt: Date;
     updatedAt: Date;
+    isVoucherEligible?: boolean;
+    voucherEligibilityReasons?: string[];
   }): CounselRequest {
     return new CounselRequest(
       props.id,
@@ -175,6 +187,8 @@ export class CounselRequest {
       props.integratedReportStatus,
       props.createdAt,
       props.updatedAt,
+      props.isVoucherEligible,
+      props.voucherEligibilityReasons,
     );
   }
 

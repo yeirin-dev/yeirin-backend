@@ -52,6 +52,12 @@ export class CounselRequestResponseDto {
   })
   integratedReportUrl?: string;
 
+  @ApiProperty({ description: '바우처 추천 대상 여부', nullable: true })
+  isVoucherEligible?: boolean;
+
+  @ApiProperty({ description: '바우처 추천 사유 목록', nullable: true, type: [String] })
+  voucherEligibilityReasons?: string[];
+
   @ApiProperty({ description: '생성일' })
   createdAt: Date;
 
