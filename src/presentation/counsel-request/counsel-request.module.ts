@@ -15,10 +15,14 @@ import { RequestCounselRequestRecommendationUseCase } from '@application/counsel
 import { SelectRecommendedInstitutionUseCase } from '@application/counsel-request/use-cases/select-recommended-institution.usecase';
 import { StartCounselingUseCase } from '@application/counsel-request/use-cases/start-counseling.usecase';
 import { UpdateCounselRequestUseCase } from '@application/counsel-request/use-cases/update-counsel-request.usecase';
+import { SubmitLinkageInfoUseCase } from '@application/counsel-request/use-cases/submit-linkage-info.usecase';
+import { VOUCHER_LINKAGE_REPOSITORY } from '@domain/voucher-linkage/repository/voucher-linkage.repository';
 import { SoulEClient } from '@infrastructure/external/soul-e.client';
 import { YeirinAIClient } from '@infrastructure/external/yeirin-ai.client';
 import { CounselRequestRecommendationEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request-recommendation.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
+import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
+import { VoucherLinkageRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/voucher-linkage.repository.impl';
 import { CounselRequestRecommendationRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-request-recommendation.repository.impl';
 import { CounselRequestRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-request.repository.impl';
 import { ChildModule } from '@presentation/child/child.module';
@@ -28,7 +32,7 @@ import { CounselRequestController } from './counsel-request.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CounselRequestEntity, CounselRequestRecommendationEntity]),
+    TypeOrmModule.forFeature([CounselRequestEntity, CounselRequestRecommendationEntity, VoucherLinkageEntity]),
     ConfigModule,
     ChildModule, // ChildRepository 사용 (권한 검증)
     MatchingModule, // Matching Domain Service 사용 (DDD 패턴)
@@ -43,6 +47,10 @@ import { CounselRequestController } from './counsel-request.controller';
     {
       provide: 'CounselRequestRecommendationRepository',
       useClass: CounselRequestRecommendationRepositoryImpl,
+    },
+    {
+      provide: VOUCHER_LINKAGE_REPOSITORY,
+      useClass: VoucherLinkageRepositoryImpl,
     },
     // AIRecommendationClient 제거 - MatchingModule을 통해 Domain Service 사용
     // Soul-E MSA 클라이언트
@@ -63,6 +71,7 @@ import { CounselRequestController } from './counsel-request.controller';
     StartCounselingUseCase,
     CompleteCounselingUseCase,
     GetChildAssessmentResultsUseCase,
+    SubmitLinkageInfoUseCase,
   ],
   exports: ['CounselRequestRepository', 'CounselRequestRecommendationRepository'],
 })

@@ -41,6 +41,11 @@ import { SelectRecommendedInstitutionUseCase } from '@application/counsel-reques
 import { StartCounselingUseCase } from '@application/counsel-request/use-cases/start-counseling.usecase';
 import { UpdateCounselRequestUseCase } from '@application/counsel-request/use-cases/update-counsel-request.usecase';
 import {
+  SubmitLinkageInfoUseCase,
+  SubmitLinkageInfoDto,
+  LinkageInfoResponseDto,
+} from '@application/counsel-request/use-cases/submit-linkage-info.usecase';
+import {
   CurrentUser,
   CurrentUserData,
 } from '@infrastructure/auth/decorators/current-user.decorator';
@@ -67,6 +72,7 @@ export class CounselRequestController {
     private readonly startCounselingUseCase: StartCounselingUseCase,
     private readonly completeCounselingUseCase: CompleteCounselingUseCase,
     private readonly getChildAssessmentResultsUseCase: GetChildAssessmentResultsUseCase,
+    private readonly submitLinkageInfoUseCase: SubmitLinkageInfoUseCase,
   ) {}
 
   @Public()
@@ -322,5 +328,28 @@ export class CounselRequestController {
     @Param('childId') childId: string,
   ): Promise<AssessmentResultResponseDto[]> {
     return await this.getChildAssessmentResultsUseCase.execute(childId);
+  }
+
+  @Post(':id/linkage-info')
+  @ApiOperation({ summary: '바우처 연계 정보 제출 (Guardian)' })
+  @ApiParam({ name: 'id', description: '상담의뢰지 ID (UUID)' })
+  @ApiResponse({ status: 201, description: '연계 정보 제출 성공' })
+  @ApiResponse({ status: 404, description: '상담의뢰지를 찾을 수 없음' })
+  @ApiResponse({ status: 409, description: '바우처 추천대상이 아님' })
+  async submitLinkageInfo(
+    @Param('id') id: string,
+    @Body() dto: SubmitLinkageInfoDto,
+  ): Promise<LinkageInfoResponseDto> {
+    return await this.submitLinkageInfoUseCase.execute(id, dto);
+  }
+
+  @Get(':id/linkage-info')
+  @ApiOperation({ summary: '바우처 연계 정보 조회 (Guardian)' })
+  @ApiParam({ name: 'id', description: '상담의뢰지 ID (UUID)' })
+  @ApiResponse({ status: 200, description: '조회 성공' })
+  async getLinkageInfo(
+    @Param('id') id: string,
+  ): Promise<LinkageInfoResponseDto | null> {
+    return await this.submitLinkageInfoUseCase.getLinkageInfo(id);
   }
 }

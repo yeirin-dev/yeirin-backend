@@ -266,6 +266,170 @@ describe('VoucherLinkage', () => {
     });
   });
 
+  describe('submitLinkageInfo', () => {
+    it('Guardian이 바우처 선정 및 플랫폼 연계 희망 정보를 제출한다', () => {
+      // Given
+      const linkage = VoucherLinkage.create({
+        id: 'linkage-123',
+        counselRequestId: 'counsel-request-456',
+      }).getValue();
+
+      // When
+      const result = linkage.submitLinkageInfo({
+        isVoucherConfirmed: true,
+        voucherType: '심리치유',
+        wantsPlatformLinkage: true,
+      });
+
+      // Then
+      expect(result.isSuccess).toBe(true);
+      expect(linkage.isVoucherConfirmed).toBe(true);
+      expect(linkage.voucherType).toBe('심리치유');
+      expect(linkage.wantsPlatformLinkage).toBe(true);
+      expect(linkage.linkageDeclineReason).toBeUndefined();
+      expect(linkage.linkageInfoSubmitted).toBe(true);
+    });
+
+    it('Guardian이 바우처 미선정 정보를 제출한다', () => {
+      // Given
+      const linkage = VoucherLinkage.create({
+        id: 'linkage-123',
+        counselRequestId: 'counsel-request-456',
+      }).getValue();
+
+      // When
+      const result = linkage.submitLinkageInfo({
+        isVoucherConfirmed: false,
+        wantsPlatformLinkage: false,
+        linkageDeclineReason: '바우처 미선정',
+      });
+
+      // Then
+      expect(result.isSuccess).toBe(true);
+      expect(linkage.isVoucherConfirmed).toBe(false);
+      expect(linkage.voucherType).toBeUndefined();
+      expect(linkage.wantsPlatformLinkage).toBe(false);
+      expect(linkage.linkageDeclineReason).toBe('바우처 미선정');
+      expect(linkage.linkageInfoSubmitted).toBe(true);
+    });
+
+    it('연계 미희망 사유와 함께 제출한다', () => {
+      // Given
+      const linkage = VoucherLinkage.create({
+        id: 'linkage-123',
+        counselRequestId: 'counsel-request-456',
+      }).getValue();
+
+      // When
+      const result = linkage.submitLinkageInfo({
+        isVoucherConfirmed: true,
+        voucherType: '정서발달',
+        wantsPlatformLinkage: false,
+        linkageDeclineReason: '이미 다른 기관과 상담 중입니다',
+      });
+
+      // Then
+      expect(result.isSuccess).toBe(true);
+      expect(linkage.isVoucherConfirmed).toBe(true);
+      expect(linkage.voucherType).toBe('정서발달');
+      expect(linkage.wantsPlatformLinkage).toBe(false);
+      expect(linkage.linkageDeclineReason).toBe('이미 다른 기관과 상담 중입니다');
+      expect(linkage.linkageInfoSubmitted).toBe(true);
+    });
+
+    it('이미 제출된 정보를 다시 제출하면 덮어쓴다', () => {
+      // Given
+      const linkage = VoucherLinkage.create({
+        id: 'linkage-123',
+        counselRequestId: 'counsel-request-456',
+      }).getValue();
+
+      linkage.submitLinkageInfo({
+        isVoucherConfirmed: false,
+        wantsPlatformLinkage: false,
+        linkageDeclineReason: '초기 사유',
+      });
+
+      // When
+      const result = linkage.submitLinkageInfo({
+        isVoucherConfirmed: true,
+        voucherType: '심리치유',
+        wantsPlatformLinkage: true,
+      });
+
+      // Then
+      expect(result.isSuccess).toBe(true);
+      expect(linkage.isVoucherConfirmed).toBe(true);
+      expect(linkage.voucherType).toBe('심리치유');
+      expect(linkage.wantsPlatformLinkage).toBe(true);
+      expect(linkage.linkageDeclineReason).toBeUndefined();
+      expect(linkage.linkageInfoSubmitted).toBe(true);
+    });
+
+    it('제출 시 updatedAt이 갱신된다', () => {
+      // Given
+      const linkage = VoucherLinkage.create({
+        id: 'linkage-123',
+        counselRequestId: 'counsel-request-456',
+      }).getValue();
+      const beforeUpdate = linkage.updatedAt;
+
+      // When (약간의 시간 차이를 위해)
+      const result = linkage.submitLinkageInfo({
+        isVoucherConfirmed: true,
+        voucherType: '심리치유',
+        wantsPlatformLinkage: true,
+      });
+
+      // Then
+      expect(result.isSuccess).toBe(true);
+      expect(linkage.updatedAt.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime());
+    });
+  });
+
+  describe('restore with linkage info', () => {
+    it('제출된 연계 정보가 포함된 상태로 복원한다', () => {
+      // Given
+      const props = {
+        id: 'linkage-123',
+        counselRequestId: 'counsel-request-456',
+        status: VoucherLinkageStatus.PENDING,
+        isVoucherConfirmed: true,
+        voucherType: '심리치유',
+        wantsPlatformLinkage: true,
+        linkageInfoSubmitted: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-15'),
+      };
+
+      // When
+      const linkage = VoucherLinkage.restore(props);
+
+      // Then
+      expect(linkage.isVoucherConfirmed).toBe(true);
+      expect(linkage.voucherType).toBe('심리치유');
+      expect(linkage.wantsPlatformLinkage).toBe(true);
+      expect(linkage.linkageInfoSubmitted).toBe(true);
+    });
+
+    it('linkageInfoSubmitted가 undefined이면 false로 기본값 설정된다', () => {
+      // Given
+      const props = {
+        id: 'linkage-123',
+        counselRequestId: 'counsel-request-456',
+        status: VoucherLinkageStatus.PENDING,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // When
+      const linkage = VoucherLinkage.restore(props);
+
+      // Then
+      expect(linkage.linkageInfoSubmitted).toBe(false);
+    });
+  });
+
   describe('상태 확인 메서드', () => {
     it('PENDING 상태이면 isPending()이 true를 반환한다', () => {
       // Given

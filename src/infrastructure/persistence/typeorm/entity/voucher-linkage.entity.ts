@@ -79,6 +79,40 @@ export class VoucherLinkageEntity {
   @Column({ type: 'text', nullable: true })
   notes?: string;
 
+  // ============================================
+  // Guardian 제출 필드 (바우처 선정 여부 폼)
+  // ============================================
+
+  /**
+   * 바우처 선정 확인 여부 (1번 질문)
+   */
+  @Column({ type: 'boolean', nullable: true, name: 'is_voucher_confirmed' })
+  isVoucherConfirmed?: boolean;
+
+  /**
+   * 선정된 바우처 종류 (2번 질문: 심리치유 / 정서발달)
+   */
+  @Column({ type: 'varchar', length: 50, nullable: true, name: 'voucher_type' })
+  voucherType?: string;
+
+  /**
+   * 예이린 플랫폼 연계 희망 여부 (3번 질문)
+   */
+  @Column({ type: 'boolean', nullable: true, name: 'wants_platform_linkage' })
+  wantsPlatformLinkage?: boolean;
+
+  /**
+   * 연계 미희망 사유 (3-1번 질문)
+   */
+  @Column({ type: 'text', nullable: true, name: 'linkage_decline_reason' })
+  linkageDeclineReason?: string;
+
+  /**
+   * Guardian 연계 정보 제출 완료 여부
+   */
+  @Column({ type: 'boolean', default: false, name: 'linkage_info_submitted' })
+  linkageInfoSubmitted: boolean;
+
   /**
    * 생성자 (관리자 ID)
    */

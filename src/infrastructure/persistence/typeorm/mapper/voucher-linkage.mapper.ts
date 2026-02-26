@@ -49,6 +49,11 @@ export class VoucherLinkageMapper {
       linkedCounselorName: entity.linkedCounselorName,
       linkedAt: entity.linkedAt,
       notes: entity.notes,
+      isVoucherConfirmed: entity.isVoucherConfirmed,
+      voucherType: entity.voucherType,
+      wantsPlatformLinkage: entity.wantsPlatformLinkage,
+      linkageDeclineReason: entity.linkageDeclineReason,
+      linkageInfoSubmitted: entity.linkageInfoSubmitted,
       createdBy: entity.createdBy,
       updatedBy: entity.updatedBy,
       createdAt: entity.createdAt,
@@ -70,6 +75,11 @@ export class VoucherLinkageMapper {
     entity.linkedCounselorName = domain.linkedCounselorName;
     entity.linkedAt = domain.linkedAt;
     entity.notes = domain.notes;
+    entity.isVoucherConfirmed = domain.isVoucherConfirmed;
+    entity.voucherType = domain.voucherType;
+    entity.wantsPlatformLinkage = domain.wantsPlatformLinkage;
+    entity.linkageDeclineReason = domain.linkageDeclineReason;
+    entity.linkageInfoSubmitted = domain.linkageInfoSubmitted;
     entity.createdBy = domain.createdBy;
     entity.updatedBy = domain.updatedBy;
     entity.createdAt = domain.createdAt;

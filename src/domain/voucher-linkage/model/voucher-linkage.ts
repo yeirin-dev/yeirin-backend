@@ -21,6 +21,12 @@ export interface VoucherLinkageProps {
   linkedCounselorName?: string;
   linkedAt?: Date;
   notes?: string;
+  // Guardian 제출 필드
+  isVoucherConfirmed?: boolean;
+  voucherType?: string;
+  wantsPlatformLinkage?: boolean;
+  linkageDeclineReason?: string;
+  linkageInfoSubmitted?: boolean;
   createdBy?: string;
   updatedBy?: string;
   createdAt: Date;
@@ -42,6 +48,11 @@ export class VoucherLinkage {
     private _linkedCounselorName?: string,
     private _linkedAt?: Date,
     private _notes?: string,
+    private _isVoucherConfirmed?: boolean,
+    private _voucherType?: string,
+    private _wantsPlatformLinkage?: boolean,
+    private _linkageDeclineReason?: string,
+    private _linkageInfoSubmitted: boolean = false,
     private _createdBy?: string,
     private _updatedBy?: string,
     private readonly _createdAt: Date = new Date(),
@@ -86,6 +97,26 @@ export class VoucherLinkage {
 
   get notes(): string | undefined {
     return this._notes;
+  }
+
+  get isVoucherConfirmed(): boolean | undefined {
+    return this._isVoucherConfirmed;
+  }
+
+  get voucherType(): string | undefined {
+    return this._voucherType;
+  }
+
+  get wantsPlatformLinkage(): boolean | undefined {
+    return this._wantsPlatformLinkage;
+  }
+
+  get linkageDeclineReason(): string | undefined {
+    return this._linkageDeclineReason;
+  }
+
+  get linkageInfoSubmitted(): boolean {
+    return this._linkageInfoSubmitted;
   }
 
   get createdBy(): string | undefined {
@@ -138,6 +169,11 @@ export class VoucherLinkage {
         undefined, // linkedCounselorName
         undefined, // linkedAt
         notes,
+        undefined, // isVoucherConfirmed
+        undefined, // voucherType
+        undefined, // wantsPlatformLinkage
+        undefined, // linkageDeclineReason
+        false, // linkageInfoSubmitted
         createdBy,
         undefined, // updatedBy
         new Date(),
@@ -160,6 +196,11 @@ export class VoucherLinkage {
       props.linkedCounselorName,
       props.linkedAt,
       props.notes,
+      props.isVoucherConfirmed,
+      props.voucherType,
+      props.wantsPlatformLinkage,
+      props.linkageDeclineReason,
+      props.linkageInfoSubmitted ?? false,
       props.createdBy,
       props.updatedBy,
       props.createdAt,
@@ -267,5 +308,24 @@ export class VoucherLinkage {
    */
   isPending(): boolean {
     return this._status === VoucherLinkageStatus.PENDING;
+  }
+
+  /**
+   * Guardian 연계 정보 제출
+   */
+  submitLinkageInfo(props: {
+    isVoucherConfirmed: boolean;
+    voucherType?: string;
+    wantsPlatformLinkage: boolean;
+    linkageDeclineReason?: string;
+  }): Result<void, DomainError> {
+    this._isVoucherConfirmed = props.isVoucherConfirmed;
+    this._voucherType = props.voucherType;
+    this._wantsPlatformLinkage = props.wantsPlatformLinkage;
+    this._linkageDeclineReason = props.linkageDeclineReason;
+    this._linkageInfoSubmitted = true;
+    this._updatedAt = new Date();
+
+    return Result.ok(undefined);
   }
 }
