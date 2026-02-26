@@ -2,6 +2,7 @@ import { Inject, Injectable, NotFoundException, ConflictException } from '@nestj
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { VoucherLinkage } from '@domain/voucher-linkage/model/voucher-linkage';
 import {
@@ -10,9 +11,18 @@ import {
 } from '@domain/voucher-linkage/repository/voucher-linkage.repository';
 
 export class SubmitLinkageInfoDto {
+  @IsBoolean()
   isVoucherConfirmed: boolean;
+
+  @IsOptional()
+  @IsString()
   voucherType?: string;
+
+  @IsBoolean()
   wantsPlatformLinkage: boolean;
+
+  @IsOptional()
+  @IsString()
   linkageDeclineReason?: string;
 }
 
