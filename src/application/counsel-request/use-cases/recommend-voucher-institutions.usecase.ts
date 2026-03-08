@@ -83,12 +83,16 @@ export class RecommendVoucherInstitutionsUseCase {
     }
 
     // 4. 같은 district의 기관 조회
-    const [bImpactInstitutions, commonInstitutions] = await Promise.all([
+    const [allBImpact, allCommon] = await Promise.all([
       this.bImpactRepository.find({ where: { district } }),
       this.commonRepository.find({ where: { district } }),
     ]);
 
-    // 5. OpenAI 추천 사유 생성
+    // 5. 기관 수 제한: B-IMPACT 2개 이하면 전부, 아니면 최대 3개 / 일반 최대 3개
+    const bImpactInstitutions = allBImpact.length <= 2 ? allBImpact : allBImpact.slice(0, 3);
+    const commonInstitutions = allCommon.slice(0, 3);
+
+    // 6. OpenAI 추천 사유 생성
     const allInstitutions = [
       ...bImpactInstitutions.map((inst) => ({
         id: inst.id,
@@ -118,7 +122,7 @@ export class RecommendVoucherInstitutionsUseCase {
       allInstitutions,
     );
 
-    // 6. 응답 조합
+    // 7. 응답 조합
     return {
       bImpactInstitutions: bImpactInstitutions.map((inst) => ({
         id: inst.id,
