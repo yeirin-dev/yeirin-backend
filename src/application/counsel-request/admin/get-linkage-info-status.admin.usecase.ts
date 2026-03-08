@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { AdminPaginatedResponseDto } from '@yeirin/admin-common';
 import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
@@ -23,11 +23,11 @@ interface LinkageInfoStatusResponseDto {
   contactPhone: string;
 }
 
-interface RawAggregation {
+interface InstitutionAggregation {
   institutionId: string;
-  institutionType: string;
-  totalChildren: string;
-  submittedCount: string;
+  institutionType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL';
+  totalChildren: number;
+  submittedCount: number;
 }
 
 /**
@@ -39,6 +39,8 @@ export class GetLinkageInfoStatusAdminUseCase {
   constructor(
     @InjectRepository(VoucherLinkageEntity)
     private readonly voucherLinkageRepository: Repository<VoucherLinkageEntity>,
+    @InjectRepository(ChildProfileEntity)
+    private readonly childProfileRepository: Repository<ChildProfileEntity>,
     @InjectRepository(CareFacilityEntity)
     private readonly careFacilityRepository: Repository<CareFacilityEntity>,
     @InjectRepository(CommunityChildCenterEntity)
@@ -52,145 +54,123 @@ export class GetLinkageInfoStatusAdminUseCase {
   ): Promise<AdminPaginatedResponseDto<LinkageInfoStatusResponseDto>> {
     const { page = 1, limit = 20, childType, district } = query;
 
-    // 기관별 집계 쿼리 작성
-    // VoucherLinkage → CounselRequest → ChildProfile 조인 후
-    // 소속 기관 ID 기준으로 GROUP BY
-    const qb = this.voucherLinkageRepository
-      .createQueryBuilder('vl')
-      .innerJoin(CounselRequestEntity, 'cr', 'cr.id = vl.counselRequestId')
-      .innerJoin(ChildProfileEntity, 'child', 'child.id = cr.childId')
-      .select(
-        `CASE
-          WHEN child.careFacilityId IS NOT NULL THEN child.careFacilityId
-          WHEN child.communityChildCenterId IS NOT NULL THEN child.communityChildCenterId
-          WHEN child.educationWelfareSchoolId IS NOT NULL THEN child.educationWelfareSchoolId
-        END`,
-        'institutionId',
-      )
-      .addSelect(
-        `CASE
-          WHEN child.careFacilityId IS NOT NULL THEN 'CARE_FACILITY'
-          WHEN child.communityChildCenterId IS NOT NULL THEN 'COMMUNITY_CENTER'
-          WHEN child.educationWelfareSchoolId IS NOT NULL THEN 'EDUCATION_WELFARE_SCHOOL'
-        END`,
-        'institutionType',
-      )
-      .addSelect('COUNT(*)', 'totalChildren')
-      .addSelect('SUM(CASE WHEN vl.linkage_info_submitted = true THEN 1 ELSE 0 END)', 'submittedCount')
-      .groupBy(
-        `CASE
-          WHEN child.careFacilityId IS NOT NULL THEN child.careFacilityId
-          WHEN child.communityChildCenterId IS NOT NULL THEN child.communityChildCenterId
-          WHEN child.educationWelfareSchoolId IS NOT NULL THEN child.educationWelfareSchoolId
-        END`,
-      )
-      .addGroupBy(
-        `CASE
-          WHEN child.careFacilityId IS NOT NULL THEN 'CARE_FACILITY'
-          WHEN child.communityChildCenterId IS NOT NULL THEN 'COMMUNITY_CENTER'
-          WHEN child.educationWelfareSchoolId IS NOT NULL THEN 'EDUCATION_WELFARE_SCHOOL'
-        END`,
-      );
+    // 1. VoucherLinkage 전체 조회 (counselRequest 관계 포함)
+    const linkages = await this.voucherLinkageRepository.find({
+      relations: ['counselRequest'],
+    });
 
-    // 기관 소속이 없는 아동(REGULAR) 제외
-    qb.andWhere(
-      `(child.careFacilityId IS NOT NULL OR child.communityChildCenterId IS NOT NULL OR child.educationWelfareSchoolId IS NOT NULL)`,
-    );
-
-    // childType 필터
-    if (childType) {
-      qb.andWhere('child.childType = :childType', { childType });
+    if (linkages.length === 0) {
+      return AdminPaginatedResponseDto.of([], 0, page, limit);
     }
 
-    // district 필터 — 기관 테이블 LEFT JOIN 필요
-    if (district) {
-      qb.leftJoin(CareFacilityEntity, 'cf', 'cf.id = child.careFacilityId')
-        .leftJoin(CommunityChildCenterEntity, 'ccc', 'ccc.id = child.communityChildCenterId')
-        .leftJoin(EducationWelfareSchoolEntity, 'ews', 'ews.id = child.educationWelfareSchoolId')
-        .andWhere(
-          '(cf.district = :district OR ccc.district = :district OR ews.district = :district)',
-          { district },
-        );
+    // 2. ChildProfile 배치 조회 (기관 ID 포함)
+    const childIds = linkages.map((vl) => vl.counselRequest.childId);
+    const children = await this.childProfileRepository.find({
+      where: { id: In(childIds) },
+    });
+    const childMap = new Map(children.map((c) => [c.id, c]));
+
+    // 3. childType 필터 적용
+    const filteredLinkages = linkages.filter((vl) => {
+      const child = childMap.get(vl.counselRequest.childId);
+      if (!child) return false;
+      if (childType && child.childType !== childType) return false;
+      // 기관 소속이 없는 아동(REGULAR) 제외
+      if (!child.careFacilityId && !child.communityChildCenterId && !child.educationWelfareSchoolId) {
+        return false;
+      }
+      return true;
+    });
+
+    // 4. 기관별 집계 (TypeScript에서 GROUP BY)
+    const aggregationMap = new Map<string, InstitutionAggregation>();
+
+    for (const vl of filteredLinkages) {
+      const child = childMap.get(vl.counselRequest.childId);
+      if (!child) continue;
+
+      let institutionId: string;
+      let institutionType: InstitutionAggregation['institutionType'];
+
+      if (child.careFacilityId) {
+        institutionId = child.careFacilityId;
+        institutionType = 'CARE_FACILITY';
+      } else if (child.communityChildCenterId) {
+        institutionId = child.communityChildCenterId;
+        institutionType = 'COMMUNITY_CENTER';
+      } else if (child.educationWelfareSchoolId) {
+        institutionId = child.educationWelfareSchoolId;
+        institutionType = 'EDUCATION_WELFARE_SCHOOL';
+      } else {
+        continue;
+      }
+
+      const existing = aggregationMap.get(institutionId);
+      if (existing) {
+        existing.totalChildren += 1;
+        if (vl.linkageInfoSubmitted) existing.submittedCount += 1;
+      } else {
+        aggregationMap.set(institutionId, {
+          institutionId,
+          institutionType,
+          totalChildren: 1,
+          submittedCount: vl.linkageInfoSubmitted ? 1 : 0,
+        });
+      }
     }
 
-    // 기관 ID가 null인 행 제외
-    qb.having(
-      `CASE
-        WHEN child.careFacilityId IS NOT NULL THEN child.careFacilityId
-        WHEN child.communityChildCenterId IS NOT NULL THEN child.communityChildCenterId
-        WHEN child.educationWelfareSchoolId IS NOT NULL THEN child.educationWelfareSchoolId
-      END IS NOT NULL`,
-    );
-
-    // 전체 개수 조회 (페이지네이션용)
-    const allAggregations = await qb.getRawMany<RawAggregation>();
-    const total = allAggregations.length;
-
-    // 페이지네이션 적용
-    const offset = (page - 1) * limit;
-    const paginatedAggregations = allAggregations.slice(offset, offset + limit);
-
-    // 기관 ID들 추출 → 배치 조회
+    // 5. 기관 정보 배치 조회
     const careFacilityIds: string[] = [];
     const communityCenterIds: string[] = [];
     const educationWelfareSchoolIds: string[] = [];
 
-    for (const row of paginatedAggregations) {
-      switch (row.institutionType) {
+    for (const agg of aggregationMap.values()) {
+      switch (agg.institutionType) {
         case 'CARE_FACILITY':
-          careFacilityIds.push(row.institutionId);
+          careFacilityIds.push(agg.institutionId);
           break;
         case 'COMMUNITY_CENTER':
-          communityCenterIds.push(row.institutionId);
+          communityCenterIds.push(agg.institutionId);
           break;
         case 'EDUCATION_WELFARE_SCHOOL':
-          educationWelfareSchoolIds.push(row.institutionId);
+          educationWelfareSchoolIds.push(agg.institutionId);
           break;
       }
     }
 
-    // 기관 정보 배치 조회
     const [careFacilities, communityCenters, educationWelfareSchools] = await Promise.all([
       careFacilityIds.length > 0
-        ? this.careFacilityRepository
-            .createQueryBuilder('cf')
-            .where('cf.id IN (:...ids)', { ids: careFacilityIds })
-            .getMany()
+        ? this.careFacilityRepository.find({ where: { id: In(careFacilityIds) } })
         : Promise.resolve([]),
       communityCenterIds.length > 0
-        ? this.communityChildCenterRepository
-            .createQueryBuilder('ccc')
-            .where('ccc.id IN (:...ids)', { ids: communityCenterIds })
-            .getMany()
+        ? this.communityChildCenterRepository.find({ where: { id: In(communityCenterIds) } })
         : Promise.resolve([]),
       educationWelfareSchoolIds.length > 0
-        ? this.educationWelfareSchoolRepository
-            .createQueryBuilder('ews')
-            .where('ews.id IN (:...ids)', { ids: educationWelfareSchoolIds })
-            .getMany()
+        ? this.educationWelfareSchoolRepository.find({ where: { id: In(educationWelfareSchoolIds) } })
         : Promise.resolve([]),
     ]);
 
-    // Map으로 변환
     const cfMap = new Map(careFacilities.map((cf) => [cf.id, cf]));
     const cccMap = new Map(communityCenters.map((ccc) => [ccc.id, ccc]));
     const ewsMap = new Map(educationWelfareSchools.map((ews) => [ews.id, ews]));
 
-    // 응답 DTO 매핑
-    const data: LinkageInfoStatusResponseDto[] = paginatedAggregations.map((row) => {
-      const totalChildren = parseInt(row.totalChildren, 10);
-      const submittedCount = parseInt(row.submittedCount, 10);
-      const notSubmittedCount = totalChildren - submittedCount;
-      const submissionRate = totalChildren > 0 ? (submittedCount / totalChildren) * 100 : 0;
+    // 6. 응답 DTO 매핑 + district 필터 적용
+    let results: LinkageInfoStatusResponseDto[] = [];
+
+    for (const agg of aggregationMap.values()) {
+      const notSubmittedCount = agg.totalChildren - agg.submittedCount;
+      const submissionRate = agg.totalChildren > 0
+        ? Math.round((agg.submittedCount / agg.totalChildren) * 1000) / 10
+        : 0;
 
       let institutionName = '';
       let institutionDistrict = '';
       let contactPersonName = '';
       let contactPhone = '';
 
-      switch (row.institutionType) {
+      switch (agg.institutionType) {
         case 'CARE_FACILITY': {
-          const cf = cfMap.get(row.institutionId);
+          const cf = cfMap.get(agg.institutionId);
           institutionName = cf?.name || '';
           institutionDistrict = cf?.district || '';
           contactPersonName = cf?.representativeName || '';
@@ -198,7 +178,7 @@ export class GetLinkageInfoStatusAdminUseCase {
           break;
         }
         case 'COMMUNITY_CENTER': {
-          const ccc = cccMap.get(row.institutionId);
+          const ccc = cccMap.get(agg.institutionId);
           institutionName = ccc?.name || '';
           institutionDistrict = ccc?.district || '';
           contactPersonName = ccc?.managerName || ccc?.directorName || '';
@@ -206,7 +186,7 @@ export class GetLinkageInfoStatusAdminUseCase {
           break;
         }
         case 'EDUCATION_WELFARE_SCHOOL': {
-          const ews = ewsMap.get(row.institutionId);
+          const ews = ewsMap.get(agg.institutionId);
           institutionName = ews?.name || '';
           institutionDistrict = ews?.district || '';
           contactPersonName = ews?.welfareWorkerName || '';
@@ -215,20 +195,31 @@ export class GetLinkageInfoStatusAdminUseCase {
         }
       }
 
-      return {
-        institutionId: row.institutionId,
+      // district 필터 적용
+      if (district && institutionDistrict !== district) continue;
+
+      results.push({
+        institutionId: agg.institutionId,
         institutionName,
-        institutionType: row.institutionType as LinkageInfoStatusResponseDto['institutionType'],
+        institutionType: agg.institutionType,
         district: institutionDistrict,
-        totalChildren,
-        submittedCount,
+        totalChildren: agg.totalChildren,
+        submittedCount: agg.submittedCount,
         notSubmittedCount,
-        submissionRate: Math.round(submissionRate * 10) / 10,
+        submissionRate,
         contactPersonName,
         contactPhone,
-      };
-    });
+      });
+    }
 
-    return AdminPaginatedResponseDto.of(data, total, page, limit);
+    // 7. 정렬 (기관명 기준)
+    results.sort((a, b) => a.institutionName.localeCompare(b.institutionName, 'ko'));
+
+    // 8. 페이지네이션
+    const total = results.length;
+    const offset = (page - 1) * limit;
+    const paginatedData = results.slice(offset, offset + limit);
+
+    return AdminPaginatedResponseDto.of(paginatedData, total, page, limit);
   }
 }

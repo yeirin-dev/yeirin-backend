@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { AdminPaginatedResponseDto } from '@yeirin/admin-common';
 import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
-import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
 import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
@@ -41,6 +40,14 @@ export class GetVoucherLinkageStatusAdminUseCase {
   constructor(
     @InjectRepository(VoucherLinkageEntity)
     private readonly voucherLinkageRepository: Repository<VoucherLinkageEntity>,
+    @InjectRepository(ChildProfileEntity)
+    private readonly childProfileRepository: Repository<ChildProfileEntity>,
+    @InjectRepository(CareFacilityEntity)
+    private readonly careFacilityRepository: Repository<CareFacilityEntity>,
+    @InjectRepository(CommunityChildCenterEntity)
+    private readonly communityChildCenterRepository: Repository<CommunityChildCenterEntity>,
+    @InjectRepository(EducationWelfareSchoolEntity)
+    private readonly educationWelfareSchoolRepository: Repository<EducationWelfareSchoolEntity>,
     @InjectRepository(BImpactVoucherInstitutionEntity)
     private readonly bImpactRepository: Repository<BImpactVoucherInstitutionEntity>,
     @InjectRepository(CommonVoucherInstitutionEntity)
@@ -61,59 +68,24 @@ export class GetVoucherLinkageStatusAdminUseCase {
       wantsPlatformLinkage,
       startDate,
       endDate,
-      sortBy,
       sortOrder,
     } = query;
 
+    // 1. VoucherLinkage 조회 (counselRequest 관계 포함, 기본 필터 적용)
     const qb = this.voucherLinkageRepository
       .createQueryBuilder('vl')
-      .innerJoinAndSelect('vl.counselRequest', 'cr')
-      .innerJoin(ChildProfileEntity, 'child', 'child.id = cr.childId')
-      .addSelect(['child.id', 'child.name', 'child.childType', 'child.careFacilityId', 'child.communityChildCenterId', 'child.educationWelfareSchoolId'])
-      .leftJoin(CareFacilityEntity, 'cf', 'cf.id = child.careFacilityId')
-      .addSelect(['cf.id', 'cf.name', 'cf.district'])
-      .leftJoin(CommunityChildCenterEntity, 'ccc', 'ccc.id = child.communityChildCenterId')
-      .addSelect(['ccc.id', 'ccc.name', 'ccc.district'])
-      .leftJoin(EducationWelfareSchoolEntity, 'ews', 'ews.id = child.educationWelfareSchoolId')
-      .addSelect(['ews.id', 'ews.name', 'ews.district']);
+      .innerJoinAndSelect('vl.counselRequest', 'cr');
 
-    // 필터: 연계 상태
+    // VoucherLinkage 필드 필터
     if (status) {
       qb.andWhere('vl.status = :status', { status });
     }
-
-    // 필터: 연계정보 제출 여부
     if (linkageInfoSubmitted !== undefined) {
       qb.andWhere('vl.linkageInfoSubmitted = :linkageInfoSubmitted', { linkageInfoSubmitted });
     }
-
-    // 필터: 플랫폼 연계 희망 여부
     if (wantsPlatformLinkage !== undefined) {
       qb.andWhere('vl.wantsPlatformLinkage = :wantsPlatformLinkage', { wantsPlatformLinkage });
     }
-
-    // 필터: 시설 구분
-    if (childType) {
-      qb.andWhere('child.childType = :childType', { childType });
-    }
-
-    // 필터: 구/군
-    if (district) {
-      qb.andWhere(
-        '(cf.district = :district OR ccc.district = :district OR ews.district = :district)',
-        { district },
-      );
-    }
-
-    // 필터: 검색어
-    if (search) {
-      qb.andWhere(
-        '(child.name ILIKE :search OR cf.name ILIKE :search OR ccc.name ILIKE :search OR ews.name ILIKE :search)',
-        { search: `%${search}%` },
-      );
-    }
-
-    // 필터: 날짜 범위
     if (startDate && endDate) {
       qb.andWhere('vl.createdAt BETWEEN :startDate AND :endDate', {
         startDate: new Date(startDate),
@@ -122,63 +94,87 @@ export class GetVoucherLinkageStatusAdminUseCase {
     }
 
     // 정렬
-    const orderField = sortBy || 'createdAt';
     const orderDirection = sortOrder || 'DESC';
-    qb.orderBy(`vl.${orderField}`, orderDirection);
+    qb.orderBy('vl.createdAt', orderDirection);
 
-    // 페이지네이션
-    qb.skip((page - 1) * limit).take(limit);
+    // 먼저 전체 조회 (child/institution 필터는 TypeScript에서 적용)
+    const allLinkages = await qb.getMany();
 
-    // 쿼리 실행 — raw + entity 방식으로 조회
-    const [rawResults, total] = await qb.getManyAndCount();
-
-    // linkedVoucherInstitutionId가 있는 레코드에서 기관명 배치 조회
-    const bImpactIds: string[] = [];
-    const commonIds: string[] = [];
-
-    // rawResults에서는 voucherLinkage와 counselRequest는 entity로 가져와지지만
-    // child, cf, ccc, ews는 addSelect로 가져왔으므로 raw 쿼리가 필요합니다.
-    // 대신 별도 쿼리로 처리합니다.
-
-    // VoucherLinkage ID 목록으로 필요한 데이터를 raw로 다시 가져옵니다.
-    const vlIds = rawResults.map((vl) => vl.id);
-    let detailRows: Array<{
-      vl_id: string;
-      child_name: string;
-      child_childType: string;
-      cf_name: string | null;
-      cf_district: string | null;
-      ccc_name: string | null;
-      ccc_district: string | null;
-      ews_name: string | null;
-      ews_district: string | null;
-    }> = [];
-
-    if (vlIds.length > 0) {
-      detailRows = await this.voucherLinkageRepository
-        .createQueryBuilder('vl')
-        .innerJoin(CounselRequestEntity, 'cr', 'cr.id = vl.counselRequestId')
-        .innerJoin(ChildProfileEntity, 'child', 'child.id = cr.childId')
-        .leftJoin(CareFacilityEntity, 'cf', 'cf.id = child.careFacilityId')
-        .leftJoin(CommunityChildCenterEntity, 'ccc', 'ccc.id = child.communityChildCenterId')
-        .leftJoin(EducationWelfareSchoolEntity, 'ews', 'ews.id = child.educationWelfareSchoolId')
-        .select('vl.id', 'vl_id')
-        .addSelect('child.name', 'child_name')
-        .addSelect('child.childType', 'child_childType')
-        .addSelect('cf.name', 'cf_name')
-        .addSelect('cf.district', 'cf_district')
-        .addSelect('ccc.name', 'ccc_name')
-        .addSelect('ccc.district', 'ccc_district')
-        .addSelect('ews.name', 'ews_name')
-        .addSelect('ews.district', 'ews_district')
-        .where('vl.id IN (:...vlIds)', { vlIds })
-        .getRawMany();
+    if (allLinkages.length === 0) {
+      return AdminPaginatedResponseDto.of([], 0, page, limit);
     }
 
-    const detailMap = new Map(detailRows.map((row) => [row.vl_id, row]));
+    // 2. ChildProfile 배치 조회
+    const childIds = [...new Set(allLinkages.map((vl) => vl.counselRequest.childId))];
+    const children = await this.childProfileRepository.find({
+      where: { id: In(childIds) },
+    });
+    const childMap = new Map(children.map((c) => [c.id, c]));
 
-    // B-IMPACT / COMMON 기관 ID 수집
-    for (const vl of rawResults) {
+    // 3. 기관 정보 배치 조회
+    const cfIds = [...new Set(children.filter((c) => c.careFacilityId).map((c) => c.careFacilityId as string))];
+    const cccIds = [...new Set(children.filter((c) => c.communityChildCenterId).map((c) => c.communityChildCenterId as string))];
+    const ewsIds = [...new Set(children.filter((c) => c.educationWelfareSchoolId).map((c) => c.educationWelfareSchoolId as string))];
+
+    const [careFacilities, communityCenters, educationWelfareSchools] = await Promise.all([
+      cfIds.length > 0
+        ? this.careFacilityRepository.find({ where: { id: In(cfIds) } })
+        : Promise.resolve([]),
+      cccIds.length > 0
+        ? this.communityChildCenterRepository.find({ where: { id: In(cccIds) } })
+        : Promise.resolve([]),
+      ewsIds.length > 0
+        ? this.educationWelfareSchoolRepository.find({ where: { id: In(ewsIds) } })
+        : Promise.resolve([]),
+    ]);
+
+    const cfMap = new Map(careFacilities.map((cf) => [cf.id, cf]));
+    const cccMap = new Map(communityCenters.map((ccc) => [ccc.id, ccc]));
+    const ewsMap = new Map(educationWelfareSchools.map((ews) => [ews.id, ews]));
+
+    // 4. child/institution 기반 필터 적용
+    let filteredLinkages = allLinkages.filter((vl) => {
+      const child = childMap.get(vl.counselRequest.childId);
+      if (!child) return false;
+
+      // childType 필터
+      if (childType && child.childType !== childType) return false;
+
+      // district 필터
+      if (district) {
+        const cf = child.careFacilityId ? cfMap.get(child.careFacilityId) : null;
+        const ccc = child.communityChildCenterId ? cccMap.get(child.communityChildCenterId) : null;
+        const ews = child.educationWelfareSchoolId ? ewsMap.get(child.educationWelfareSchoolId) : null;
+        const childDistrict = cf?.district || ccc?.district || ews?.district;
+        if (childDistrict !== district) return false;
+      }
+
+      // search 필터
+      if (search) {
+        const searchLower = search.toLowerCase();
+        const cf = child.careFacilityId ? cfMap.get(child.careFacilityId) : null;
+        const ccc = child.communityChildCenterId ? cccMap.get(child.communityChildCenterId) : null;
+        const ews = child.educationWelfareSchoolId ? ewsMap.get(child.educationWelfareSchoolId) : null;
+        const instName = cf?.name || ccc?.name || ews?.name || '';
+        const matched =
+          child.name.toLowerCase().includes(searchLower) ||
+          instName.toLowerCase().includes(searchLower);
+        if (!matched) return false;
+      }
+
+      return true;
+    });
+
+    const total = filteredLinkages.length;
+
+    // 5. 페이지네이션
+    const offset = (page - 1) * limit;
+    const paginatedLinkages = filteredLinkages.slice(offset, offset + limit);
+
+    // 6. B-IMPACT / COMMON 기관명 배치 조회
+    const bImpactIds: string[] = [];
+    const commonIds: string[] = [];
+    for (const vl of paginatedLinkages) {
       if (vl.linkedVoucherInstitutionId && vl.linkedVoucherInstitutionType) {
         if (vl.linkedVoucherInstitutionType === 'B_IMPACT') {
           bImpactIds.push(vl.linkedVoucherInstitutionId);
@@ -188,30 +184,27 @@ export class GetVoucherLinkageStatusAdminUseCase {
       }
     }
 
-    // 바우처 기관명 배치 조회
     const [bImpactInstitutions, commonInstitutions] = await Promise.all([
       bImpactIds.length > 0
-        ? this.bImpactRepository.find({
-            where: { id: In(bImpactIds) },
-            select: ['id', 'name'],
-          })
+        ? this.bImpactRepository.find({ where: { id: In(bImpactIds) }, select: ['id', 'name'] })
         : Promise.resolve([]),
       commonIds.length > 0
-        ? this.commonRepository.find({
-            where: { id: In(commonIds) },
-            select: ['id', 'name'],
-          })
+        ? this.commonRepository.find({ where: { id: In(commonIds) }, select: ['id', 'name'] })
         : Promise.resolve([]),
     ]);
 
     const bImpactMap = new Map(bImpactInstitutions.map((i) => [i.id, i.name]));
     const commonMap = new Map(commonInstitutions.map((i) => [i.id, i.name]));
 
-    // 응답 매핑
-    const data: VoucherLinkageStatusResponseDto[] = rawResults.map((vl) => {
-      const detail = detailMap.get(vl.id);
-      const institutionName = detail?.cf_name || detail?.ccc_name || detail?.ews_name || '';
-      const institutionDistrict = detail?.cf_district || detail?.ccc_district || detail?.ews_district || '';
+    // 7. 응답 매핑
+    const data: VoucherLinkageStatusResponseDto[] = paginatedLinkages.map((vl) => {
+      const child = childMap.get(vl.counselRequest.childId);
+      const cf = child?.careFacilityId ? cfMap.get(child.careFacilityId) : null;
+      const ccc = child?.communityChildCenterId ? cccMap.get(child.communityChildCenterId) : null;
+      const ews = child?.educationWelfareSchoolId ? ewsMap.get(child.educationWelfareSchoolId) : null;
+
+      const institutionName = cf?.name || ccc?.name || ews?.name || '';
+      const institutionDistrict = cf?.district || ccc?.district || ews?.district || '';
 
       let linkedVoucherInstitutionName: string | null = null;
       if (vl.linkedVoucherInstitutionId && vl.linkedVoucherInstitutionType) {
@@ -226,8 +219,8 @@ export class GetVoucherLinkageStatusAdminUseCase {
         linkageId: vl.id,
         counselRequestId: vl.counselRequestId,
         status: vl.status,
-        childName: detail?.child_name || '',
-        childType: detail?.child_childType || '',
+        childName: child?.name || '',
+        childType: child?.childType || '',
         institutionName,
         district: institutionDistrict,
         linkageInfoSubmitted: vl.linkageInfoSubmitted,
