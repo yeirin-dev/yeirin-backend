@@ -16,11 +16,17 @@ import { SelectRecommendedInstitutionUseCase } from '@application/counsel-reques
 import { StartCounselingUseCase } from '@application/counsel-request/use-cases/start-counseling.usecase';
 import { UpdateCounselRequestUseCase } from '@application/counsel-request/use-cases/update-counsel-request.usecase';
 import { SubmitLinkageInfoUseCase } from '@application/counsel-request/use-cases/submit-linkage-info.usecase';
+import { RecommendVoucherInstitutionsUseCase } from '@application/counsel-request/use-cases/recommend-voucher-institutions.usecase';
+import { SelectVoucherInstitutionUseCase } from '@application/counsel-request/use-cases/select-voucher-institution.usecase';
 import { VOUCHER_LINKAGE_REPOSITORY } from '@domain/voucher-linkage/repository/voucher-linkage.repository';
+import { OpenAIClient } from '@infrastructure/external/openai.client';
 import { SoulEClient } from '@infrastructure/external/soul-e.client';
 import { YeirinAIClient } from '@infrastructure/external/yeirin-ai.client';
 import { CounselRequestRecommendationEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request-recommendation.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
+import { BImpactVoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/b-impact-voucher-institution.entity';
+import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
+import { CommonVoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/common-voucher-institution.entity';
 import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
 import { VoucherLinkageRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/voucher-linkage.repository.impl';
 import { CounselRequestRecommendationRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-request-recommendation.repository.impl';
@@ -32,7 +38,14 @@ import { CounselRequestController } from './counsel-request.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CounselRequestEntity, CounselRequestRecommendationEntity, VoucherLinkageEntity]),
+    TypeOrmModule.forFeature([
+      CounselRequestEntity,
+      CounselRequestRecommendationEntity,
+      VoucherLinkageEntity,
+      BImpactVoucherInstitutionEntity,
+      CommonVoucherInstitutionEntity,
+      ChildProfileEntity,
+    ]),
     ConfigModule,
     ChildModule, // ChildRepository 사용 (권한 검증)
     MatchingModule, // Matching Domain Service 사용 (DDD 패턴)
@@ -53,6 +66,8 @@ import { CounselRequestController } from './counsel-request.controller';
       useClass: VoucherLinkageRepositoryImpl,
     },
     // AIRecommendationClient 제거 - MatchingModule을 통해 Domain Service 사용
+    // OpenAI 클라이언트 (바우처 기관 추천 사유 생성)
+    OpenAIClient,
     // Soul-E MSA 클라이언트
     SoulEClient,
     // Yeirin-AI MSA 클라이언트 (통합 보고서 생성)
@@ -72,6 +87,8 @@ import { CounselRequestController } from './counsel-request.controller';
     CompleteCounselingUseCase,
     GetChildAssessmentResultsUseCase,
     SubmitLinkageInfoUseCase,
+    RecommendVoucherInstitutionsUseCase,
+    SelectVoucherInstitutionUseCase,
   ],
   exports: ['CounselRequestRepository', 'CounselRequestRecommendationRepository'],
 })

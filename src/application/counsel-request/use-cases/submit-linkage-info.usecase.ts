@@ -34,6 +34,8 @@ export interface LinkageInfoResponseDto {
   wantsPlatformLinkage?: boolean;
   linkageDeclineReason?: string;
   linkageInfoSubmitted: boolean;
+  linkedVoucherInstitutionId?: string;
+  linkedVoucherInstitutionType?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -128,6 +130,8 @@ export class SubmitLinkageInfoUseCase {
       wantsPlatformLinkage: linkage.wantsPlatformLinkage,
       linkageDeclineReason: linkage.linkageDeclineReason,
       linkageInfoSubmitted: linkage.linkageInfoSubmitted,
+      linkedVoucherInstitutionId: linkage.linkedVoucherInstitutionId,
+      linkedVoucherInstitutionType: linkage.linkedVoucherInstitutionType,
       createdAt: linkage.createdAt,
       updatedAt: linkage.updatedAt,
     };

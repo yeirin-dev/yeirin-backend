@@ -46,6 +46,15 @@ import {
   LinkageInfoResponseDto,
 } from '@application/counsel-request/use-cases/submit-linkage-info.usecase';
 import {
+  RecommendVoucherInstitutionsUseCase,
+  VoucherInstitutionRecommendationResponseDto,
+} from '@application/counsel-request/use-cases/recommend-voucher-institutions.usecase';
+import {
+  SelectVoucherInstitutionUseCase,
+  SelectVoucherInstitutionDto,
+  SelectVoucherInstitutionResponseDto,
+} from '@application/counsel-request/use-cases/select-voucher-institution.usecase';
+import {
   CurrentUser,
   CurrentUserData,
 } from '@infrastructure/auth/decorators/current-user.decorator';
@@ -73,6 +82,8 @@ export class CounselRequestController {
     private readonly completeCounselingUseCase: CompleteCounselingUseCase,
     private readonly getChildAssessmentResultsUseCase: GetChildAssessmentResultsUseCase,
     private readonly submitLinkageInfoUseCase: SubmitLinkageInfoUseCase,
+    private readonly recommendVoucherInstitutionsUseCase: RecommendVoucherInstitutionsUseCase,
+    private readonly selectVoucherInstitutionUseCase: SelectVoucherInstitutionUseCase,
   ) {}
 
   @Public()
@@ -163,6 +174,29 @@ export class CounselRequestController {
     @Param('id') id: string,
   ): Promise<LinkageInfoResponseDto | null> {
     return await this.submitLinkageInfoUseCase.getLinkageInfo(id);
+  }
+
+  @Get(':id/voucher-recommendations')
+  @ApiOperation({ summary: '바우처 기관 추천 조회' })
+  @ApiParam({ name: 'id', description: '상담의뢰지 ID (UUID)' })
+  @ApiResponse({ status: 200, description: '추천 기관 목록 반환' })
+  @ApiResponse({ status: 404, description: '상담의뢰지를 찾을 수 없음' })
+  async getVoucherRecommendations(
+    @Param('id') id: string,
+  ): Promise<VoucherInstitutionRecommendationResponseDto> {
+    return await this.recommendVoucherInstitutionsUseCase.execute(id);
+  }
+
+  @Post(':id/select-voucher-institution')
+  @ApiOperation({ summary: '바우처 기관 선택' })
+  @ApiParam({ name: 'id', description: '상담의뢰지 ID (UUID)' })
+  @ApiResponse({ status: 201, description: '기관 선택 성공' })
+  @ApiResponse({ status: 404, description: '상담의뢰지 또는 기관을 찾을 수 없음' })
+  async selectVoucherInstitution(
+    @Param('id') id: string,
+    @Body() dto: SelectVoucherInstitutionDto,
+  ): Promise<SelectVoucherInstitutionResponseDto> {
+    return await this.selectVoucherInstitutionUseCase.execute(id, dto);
   }
 
   @Get(':id')

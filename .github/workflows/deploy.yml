@@ -93,6 +93,7 @@ jobs:
             echo "SOLAPI_SENDER_NUMBER=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/solapi-sender-number' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
             echo "SOLAPI_ENABLED=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/solapi-enabled' --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
             echo "ADMIN_PASSWORD=$(aws ssm get-parameter --name '/yeirin/dev/yeirin/admin-password' --with-decryption --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
+            echo "OPENAI_API_KEY=$(aws ssm get-parameter --name '/yeirin/dev/common/openai-api-key' --with-decryption --query 'Parameter.Value' --output text --region ap-northeast-2)" >> .env
 
             echo "Environment file created."
             cat .env | head -5

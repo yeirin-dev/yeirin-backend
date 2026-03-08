@@ -15,7 +15,18 @@ import {
   AdminDateRangeQueryDto,
   AdminPaginatedResponseDto,
 } from '@yeirin/admin-common';
+import { IsOptional, IsString } from 'class-validator';
 import { AdminJwtAuthGuard } from '../auth/guards/admin-jwt-auth.guard';
+
+export class AdminAuditLogQueryDto extends AdminDateRangeQueryDto {
+  @IsOptional()
+  @IsString()
+  action?: string;
+
+  @IsOptional()
+  @IsString()
+  entityType?: string;
+}
 
 /**
  * Admin Audit Log Controller
@@ -46,13 +57,21 @@ export class AdminAuditLogController {
     description: '시스템 전체 감사 로그를 조회합니다.',
   })
   @ApiResponse({ status: 200, description: '조회 성공' })
-  async getAuditLogs(@Query() query: AdminDateRangeQueryDto) {
-    const { page = 1, limit = 20, startDate, endDate, sortBy, sortOrder } = query;
+  async getAuditLogs(@Query() query: AdminAuditLogQueryDto) {
+    const { page = 1, limit = 20, startDate, endDate, sortBy, sortOrder, action, entityType } = query;
 
     const whereCondition: Record<string, unknown> = {};
 
     if (startDate && endDate) {
       whereCondition.createdAt = Between(new Date(startDate), new Date(endDate));
+    }
+
+    if (action) {
+      whereCondition.action = action;
+    }
+
+    if (entityType) {
+      whereCondition.entityType = entityType;
     }
 
     const [data, total] = await this.auditLogRepository.findAndCount({

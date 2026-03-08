@@ -114,6 +114,18 @@ export class VoucherLinkageEntity {
   linkageInfoSubmitted: boolean;
 
   /**
+   * 선택된 바우처 기관 ID
+   */
+  @Column({ type: 'varchar', nullable: true, name: 'linked_voucher_institution_id' })
+  linkedVoucherInstitutionId?: string;
+
+  /**
+   * 선택된 바우처 기관 유형 (B_IMPACT / COMMON)
+   */
+  @Column({ type: 'varchar', length: 20, nullable: true, name: 'linked_voucher_institution_type' })
+  linkedVoucherInstitutionType?: string;
+
+  /**
    * 생성자 (관리자 ID)
    */
   @Column({ type: 'uuid', nullable: true, name: 'created_by' })

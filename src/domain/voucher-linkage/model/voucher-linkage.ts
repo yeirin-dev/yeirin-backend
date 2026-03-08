@@ -27,6 +27,9 @@ export interface VoucherLinkageProps {
   wantsPlatformLinkage?: boolean;
   linkageDeclineReason?: string;
   linkageInfoSubmitted?: boolean;
+  // 바우처 기관 선택 필드
+  linkedVoucherInstitutionId?: string;
+  linkedVoucherInstitutionType?: string;
   createdBy?: string;
   updatedBy?: string;
   createdAt: Date;
@@ -53,6 +56,8 @@ export class VoucherLinkage {
     private _wantsPlatformLinkage?: boolean,
     private _linkageDeclineReason?: string,
     private _linkageInfoSubmitted: boolean = false,
+    private _linkedVoucherInstitutionId?: string,
+    private _linkedVoucherInstitutionType?: string,
     private _createdBy?: string,
     private _updatedBy?: string,
     private readonly _createdAt: Date = new Date(),
@@ -119,6 +124,14 @@ export class VoucherLinkage {
     return this._linkageInfoSubmitted;
   }
 
+  get linkedVoucherInstitutionId(): string | undefined {
+    return this._linkedVoucherInstitutionId;
+  }
+
+  get linkedVoucherInstitutionType(): string | undefined {
+    return this._linkedVoucherInstitutionType;
+  }
+
   get createdBy(): string | undefined {
     return this._createdBy;
   }
@@ -174,6 +187,8 @@ export class VoucherLinkage {
         undefined, // wantsPlatformLinkage
         undefined, // linkageDeclineReason
         false, // linkageInfoSubmitted
+        undefined, // linkedVoucherInstitutionId
+        undefined, // linkedVoucherInstitutionType
         createdBy,
         undefined, // updatedBy
         new Date(),
@@ -201,6 +216,8 @@ export class VoucherLinkage {
       props.wantsPlatformLinkage,
       props.linkageDeclineReason,
       props.linkageInfoSubmitted ?? false,
+      props.linkedVoucherInstitutionId,
+      props.linkedVoucherInstitutionType,
       props.createdBy,
       props.updatedBy,
       props.createdAt,
@@ -324,6 +341,28 @@ export class VoucherLinkage {
     this._wantsPlatformLinkage = props.wantsPlatformLinkage;
     this._linkageDeclineReason = props.linkageDeclineReason;
     this._linkageInfoSubmitted = true;
+    this._updatedAt = new Date();
+
+    return Result.ok(undefined);
+  }
+
+  /**
+   * 바우처 기관 선택
+   */
+  selectVoucherInstitution(
+    institutionId: string,
+    institutionType: string,
+  ): Result<void, DomainError> {
+    if (!institutionId || institutionId.trim().length === 0) {
+      return Result.fail(new DomainError('바우처 기관 ID는 필수입니다'));
+    }
+
+    if (institutionType !== 'B_IMPACT' && institutionType !== 'COMMON') {
+      return Result.fail(new DomainError('바우처 기관 유형은 B_IMPACT 또는 COMMON이어야 합니다'));
+    }
+
+    this._linkedVoucherInstitutionId = institutionId;
+    this._linkedVoucherInstitutionType = institutionType;
     this._updatedAt = new Date();
 
     return Result.ok(undefined);
