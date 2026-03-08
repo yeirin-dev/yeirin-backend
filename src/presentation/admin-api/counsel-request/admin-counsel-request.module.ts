@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CreateVoucherLinkageAdminUseCase } from '@application/counsel-request/admin/create-voucher-linkage.admin.usecase';
 import { GetCounselRequestDetailAdminUseCase } from '@application/counsel-request/admin/get-counsel-request-detail.admin.usecase';
 import { GetCounselRequestsAdminUseCase } from '@application/counsel-request/admin/get-counsel-requests.admin.usecase';
+import { GetLinkageInfoStatusAdminUseCase } from '@application/counsel-request/admin/get-linkage-info-status.admin.usecase';
+import { GetVoucherLinkageStatusAdminUseCase } from '@application/counsel-request/admin/get-voucher-linkage-status.admin.usecase';
 import { UpdateCounselRequestStatusAdminUseCase } from '@application/counsel-request/admin/update-status.admin.usecase';
 import { UpdateVoucherLinkageAdminUseCase } from '@application/counsel-request/admin/update-voucher-linkage.admin.usecase';
 import { VOUCHER_LINKAGE_REPOSITORY } from '@domain/voucher-linkage/repository/voucher-linkage.repository';
@@ -11,6 +13,9 @@ import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/c
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
 import { CounselReportEntity } from '@infrastructure/persistence/typeorm/entity/counsel-report.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
+import { BImpactVoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/b-impact-voucher-institution.entity';
+import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
+import { CommonVoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/common-voucher-institution.entity';
 import { EducationWelfareSchoolEntity } from '@infrastructure/persistence/typeorm/entity/education-welfare-school.entity';
 import { ReviewEntity } from '@infrastructure/persistence/typeorm/entity/review.entity';
 import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
@@ -37,6 +42,9 @@ import { AdminCounselRequestController } from './admin-counsel-request.controlle
       CareFacilityEntity,
       CommunityChildCenterEntity,
       EducationWelfareSchoolEntity,
+      BImpactVoucherInstitutionEntity,
+      CommonVoucherInstitutionEntity,
+      ChildProfileEntity,
     ]),
     forwardRef(() => AdminAuthModule),
   ],
@@ -59,6 +67,8 @@ import { AdminCounselRequestController } from './admin-counsel-request.controlle
     UpdateCounselRequestStatusAdminUseCase,
     CreateVoucherLinkageAdminUseCase,
     UpdateVoucherLinkageAdminUseCase,
+    GetLinkageInfoStatusAdminUseCase,
+    GetVoucherLinkageStatusAdminUseCase,
   ],
 })
 export class AdminCounselRequestModule {}

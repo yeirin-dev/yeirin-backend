@@ -20,9 +20,13 @@ import {
 } from '@application/counsel-request/admin/dto/voucher-linkage.dto';
 import { GetCounselRequestDetailAdminUseCase } from '@application/counsel-request/admin/get-counsel-request-detail.admin.usecase';
 import { GetCounselRequestsAdminUseCase } from '@application/counsel-request/admin/get-counsel-requests.admin.usecase';
+import { GetLinkageInfoStatusAdminUseCase } from '@application/counsel-request/admin/get-linkage-info-status.admin.usecase';
+import { GetVoucherLinkageStatusAdminUseCase } from '@application/counsel-request/admin/get-voucher-linkage-status.admin.usecase';
 import { UpdateCounselRequestStatusAdminUseCase } from '@application/counsel-request/admin/update-status.admin.usecase';
 import { CreateVoucherLinkageAdminUseCase } from '@application/counsel-request/admin/create-voucher-linkage.admin.usecase';
 import { UpdateVoucherLinkageAdminUseCase } from '@application/counsel-request/admin/update-voucher-linkage.admin.usecase';
+import { LinkageInfoStatusQueryDto } from '@application/counsel-request/admin/dto/linkage-info-status-query.dto';
+import { VoucherLinkageStatusQueryDto } from '@application/counsel-request/admin/dto/voucher-linkage-status-query.dto';
 import { CurrentUser } from '@infrastructure/auth/decorators/current-user.decorator';
 import { Roles } from '@infrastructure/auth/decorators/roles.decorator';
 import {
@@ -54,6 +58,8 @@ export class AdminCounselRequestController {
     private readonly updateStatusUseCase: UpdateCounselRequestStatusAdminUseCase,
     private readonly createVoucherLinkageUseCase: CreateVoucherLinkageAdminUseCase,
     private readonly updateVoucherLinkageUseCase: UpdateVoucherLinkageAdminUseCase,
+    private readonly getLinkageInfoStatusUseCase: GetLinkageInfoStatusAdminUseCase,
+    private readonly getVoucherLinkageStatusUseCase: GetVoucherLinkageStatusAdminUseCase,
   ) {}
 
   /**
@@ -84,6 +90,40 @@ export class AdminCounselRequestController {
   @ApiResponse({ status: 200, description: '조회 성공' })
   async getCounselRequests(@Query() query: AdminCounselRequestQueryDto) {
     return this.getCounselRequestsUseCase.execute(query);
+  }
+
+  // ============================================
+  // 바우처 연계 현황 조회
+  // ============================================
+
+  /**
+   * 연계정보입력 현황 (기관별 집계)
+   */
+  @Get('voucher/linkage-info-status')
+  @AdminPermissions(ADMIN_PERMISSIONS.COUNSEL_REQUEST_READ)
+  @SkipAdminAudit()
+  @ApiOperation({
+    summary: '연계정보입력 현황 조회',
+    description: '기관별 바우처 대상 아동의 연계정보 제출률을 집계합니다.',
+  })
+  @ApiResponse({ status: 200, description: '조회 성공' })
+  async getLinkageInfoStatus(@Query() query: LinkageInfoStatusQueryDto) {
+    return this.getLinkageInfoStatusUseCase.execute(query);
+  }
+
+  /**
+   * 연계현황 (개별 아동)
+   */
+  @Get('voucher/linkage-status')
+  @AdminPermissions(ADMIN_PERMISSIONS.COUNSEL_REQUEST_READ)
+  @SkipAdminAudit()
+  @ApiOperation({
+    summary: '연계현황 조회',
+    description: '보호자 제출 정보 및 선택 기관 정보를 포함한 연계현황을 조회합니다.',
+  })
+  @ApiResponse({ status: 200, description: '조회 성공' })
+  async getVoucherLinkageStatus(@Query() query: VoucherLinkageStatusQueryDto) {
+    return this.getVoucherLinkageStatusUseCase.execute(query);
   }
 
   /**
