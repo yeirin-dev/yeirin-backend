@@ -116,11 +116,14 @@ export class OpenAIClient {
           messages,
           temperature: 0.7,
           max_tokens: 1000,
+          response_format: { type: 'json_object' },
         },
       );
 
-      const content = response.data.choices[0]?.message?.content;
-      if (content) {
+      const rawContent = response.data.choices[0]?.message?.content;
+      if (rawContent) {
+        // 마크다운 코드블록 제거 (```json ... ```)
+        const content = rawContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
         const parsed = JSON.parse(content) as Record<string, string>;
         institutions.forEach((inst, idx) => {
           const reason = parsed[String(idx + 1)];
