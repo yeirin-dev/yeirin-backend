@@ -127,8 +127,16 @@ export class OpenAIClient {
           result.set(inst.id, reason || `${inst.name}은(는) 같은 지역의 바우처 기관으로 추천됩니다.`);
         });
       }
-    } catch (error) {
-      this.logger.error('OpenAI 추천 사유 생성 실패, 기본 메시지 사용', error);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        this.logger.error(
+          `OpenAI 추천 사유 생성 실패 - status: ${error.response?.status}, message: ${error.message}, data: ${JSON.stringify(error.response?.data)}`,
+        );
+      } else {
+        this.logger.error(
+          `OpenAI 추천 사유 생성 실패 - ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
       for (const inst of institutions) {
         result.set(inst.id, `${inst.name}은(는) 같은 지역의 바우처 기관으로 추천됩니다.`);
       }
