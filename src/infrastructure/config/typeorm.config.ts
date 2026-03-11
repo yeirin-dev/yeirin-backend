@@ -14,6 +14,7 @@ import { EducationWelfareSchoolEntity } from '../persistence/typeorm/entity/educ
 import { PsychologicalStatusLogEntity } from '../persistence/typeorm/entity/psychological-status-log.entity';
 import { ReviewEntity } from '../persistence/typeorm/entity/review.entity';
 import { VoucherLinkageEntity } from '../persistence/typeorm/entity/voucher-linkage.entity';
+import { FastTrackReferralEntity } from '../persistence/typeorm/entity/fast-track-referral.entity';
 import { BImpactVoucherInstitutionEntity } from '../persistence/typeorm/entity/b-impact-voucher-institution.entity';
 import { CommonVoucherInstitutionEntity } from '../persistence/typeorm/entity/common-voucher-institution.entity';
 
@@ -54,6 +55,8 @@ export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOpt
       AssessmentSettingsEntity,
       // Voucher Linkage
       VoucherLinkageEntity,
+      // Fast-track Referral (긴급 상담의뢰)
+      FastTrackReferralEntity,
       // Voucher Institutions
       BImpactVoucherInstitutionEntity,
       CommonVoucherInstitutionEntity,

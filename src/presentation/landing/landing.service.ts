@@ -1,9 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
 import { EducationWelfareSchoolEntity } from '@infrastructure/persistence/typeorm/entity/education-welfare-school.entity';
+import {
+  FastTrackCounselingReferral,
+  Gender as DomainGender,
+  InstitutionType as DomainInstitutionType,
+  GuardianContactAvailability as DomainGuardianContactAvailability,
+  CrisisLevel as DomainCrisisLevel,
+  GuardianConsentStatus as DomainGuardianConsentStatus,
+} from '@domain/fast-track-referral/model/fast-track-referral';
+import { FastTrackReferralRepository } from '@domain/fast-track-referral/repository/fast-track-referral.repository';
 import {
   CategoryCountDto,
   FacilityType,
@@ -12,10 +22,15 @@ import {
   PartnerListResponseDto,
   PartnerQueryDto,
 } from './dto/partner.dto';
+import {
+  CreateFastTrackCounselingReferralDto,
+  FastTrackReferralResponseDto,
+} from './dto/create-fast-track-referral.dto';
 
 /**
  * Landing 페이지 서비스
  * - 파트너 기관 목록 조회 (인증 불필요)
+ * - 긴급 상담의뢰서 접수 (인증 불필요)
  */
 @Injectable()
 export class LandingService {
@@ -26,6 +41,8 @@ export class LandingService {
     private readonly communityChildCenterRepository: Repository<CommunityChildCenterEntity>,
     @InjectRepository(EducationWelfareSchoolEntity)
     private readonly educationWelfareSchoolRepository: Repository<EducationWelfareSchoolEntity>,
+    @Inject('FastTrackReferralRepository')
+    private readonly fastTrackReferralRepository: FastTrackReferralRepository,
   ) {}
 
   /**
@@ -149,6 +166,63 @@ export class LandingService {
     );
 
     return partners;
+  }
+
+  /**
+   * 긴급 상담의뢰서 접수
+   */
+  async createFastTrackReferral(
+    dto: CreateFastTrackCounselingReferralDto,
+  ): Promise<FastTrackReferralResponseDto> {
+    const referralResult = FastTrackCounselingReferral.create({
+      id: uuidv4(),
+      referralDate: new Date(dto.referralDate),
+      institutionName: dto.institutionName,
+      staffName: dto.staffName,
+      childName: dto.childBasicInfo.name,
+      childGender: dto.childBasicInfo.gender as unknown as DomainGender,
+      childAge: dto.childBasicInfo.age,
+      childGrade: dto.childBasicInfo.grade,
+      facilityAdmissionDate: dto.childBasicInfo.facilityAdmissionDate
+        ? new Date(dto.childBasicInfo.facilityAdmissionDate)
+        : undefined,
+      institutionType: dto.childBasicInfo.institutionType as unknown as DomainInstitutionType,
+      institutionTypeOther: dto.childBasicInfo.institutionTypeOther,
+      guardianContactAvailability:
+        dto.childBasicInfo
+          .guardianContactAvailability as unknown as DomainGuardianContactAvailability,
+      crisisOccurrenceDate: new Date(dto.crisisStatus.crisisOccurrenceDate),
+      crisisLevels: dto.crisisStatus.crisisLevels as unknown as DomainCrisisLevel[],
+      crisisLevelOther: dto.crisisStatus.crisisLevelOther,
+      hasPreExistingPsychiatricCondition:
+        dto.psychologicalInfo.hasPreExistingPsychiatricCondition,
+      isCurrentlyOnMedication: dto.psychologicalInfo.isCurrentlyOnMedication,
+      psychiatricDiagnosisName: dto.psychologicalInfo.psychiatricDiagnosisName,
+      medicationName: dto.psychologicalInfo.medicationName,
+      childCharacteristicsAndCounselingNotes:
+        dto.psychologicalInfo.childCharacteristicsAndCounselingNotes,
+      recentIncidentsAndBehavioralChanges:
+        dto.recentBehavior.recentIncidentsAndBehavioralChanges,
+      referralMotivation: dto.referralMotivation.referralMotivation,
+      counselingGoal: dto.referralMotivation.counselingGoal,
+      guardianConsentStatus:
+        dto.privacyConsent.guardianConsentStatus as unknown as DomainGuardianConsentStatus,
+      consentPersonName: dto.privacyConsent.consentPersonName,
+      relationship: dto.privacyConsent.relationship,
+      consentDate: new Date(dto.privacyConsent.consentDate),
+    });
+
+    if (referralResult.isFailure) {
+      throw new Error(referralResult.getError().message);
+    }
+
+    const saved = await this.fastTrackReferralRepository.save(referralResult.getValue());
+
+    return {
+      id: saved.id,
+      status: saved.status,
+      createdAt: saved.createdAt,
+    };
   }
 
   /**

@@ -1,7 +1,11 @@
-import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from '@infrastructure/auth/decorators/public.decorator';
 import { PartnerListResponseDto, PartnerQueryDto } from './dto/partner.dto';
+import {
+  CreateFastTrackCounselingReferralDto,
+  FastTrackReferralResponseDto,
+} from './dto/create-fast-track-referral.dto';
 import { LandingService } from './landing.service';
 
 @ApiTags('Landing')
@@ -39,5 +43,28 @@ export class LandingController {
   })
   async getDistricts(): Promise<string[]> {
     return await this.landingService.getDistricts();
+  }
+
+  @Public()
+  @Post('fast-track-referral')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: '긴급 상담의뢰서 접수',
+    description:
+      '긴급하게 연계를 희망하는 아동에 대한 상담의뢰서를 접수합니다. 인증이 필요하지 않습니다.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: '접수 성공',
+    type: FastTrackReferralResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '유효성 검증 실패',
+  })
+  async createFastTrackReferral(
+    @Body() dto: CreateFastTrackCounselingReferralDto,
+  ): Promise<FastTrackReferralResponseDto> {
+    return await this.landingService.createFastTrackReferral(dto);
   }
 }
