@@ -4,6 +4,7 @@ import {
   CounselRecordRepository,
   COUNSEL_RECORD_REPOSITORY,
 } from '@domain/counsel-record/repository/counsel-record.repository';
+import { RecordStatus } from '@domain/counsel-record/model/value-objects/record-status';
 
 @Injectable()
 export class GetChildCounselRecordsUseCase {
@@ -32,10 +33,12 @@ export class GetChildCounselRecordsUseCase {
 
     const records = await this.counselRecordRepository.findByChildId(childId);
 
-    // Only return SHARED records
-    const sharedRecords = records.filter((r) => r.status === 'SHARED');
+    // Return SUMMARIZED and SHARED records (AI summary completed)
+    const visibleRecords = records.filter(
+      (r) => r.status === RecordStatus.SUMMARIZED || r.status === RecordStatus.SHARED,
+    );
 
-    return sharedRecords.map((r) => ({
+    return visibleRecords.map((r) => ({
       id: r.id,
       childName: child.name.value,
       sessionNumber: r.sessionNumber,
