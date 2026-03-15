@@ -9,6 +9,7 @@ export interface CounselSessionRepository {
     endDate: Date,
   ): Promise<CounselSession[]>;
   findByVoucherLinkageId(voucherLinkageId: string): Promise<CounselSession[]>;
+  findByChildId(childId: string): Promise<CounselSession[]>;
   getNextSessionNumber(voucherLinkageId: string): Promise<number>;
   delete(id: string): Promise<void>;
 }

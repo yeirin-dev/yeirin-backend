@@ -47,6 +47,14 @@ export class CounselSessionRepositoryImpl implements CounselSessionRepository {
     return entities.map((e) => CounselSessionMapper.toDomain(e));
   }
 
+  async findByChildId(childId: string): Promise<CounselSession[]> {
+    const entities = await this.repository.find({
+      where: { childId },
+      order: { sessionNumber: 'ASC' },
+    });
+    return entities.map((e) => CounselSessionMapper.toDomain(e));
+  }
+
   async getNextSessionNumber(voucherLinkageId: string): Promise<number> {
     const result = await this.repository
       .createQueryBuilder('cs')

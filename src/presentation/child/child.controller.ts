@@ -33,6 +33,8 @@ import {
 import { UpdateChildDto } from '@application/child/dto/update-child.dto';
 import { VoucherEligibilityResponseDto } from '@application/child/dto/voucher-eligibility.dto';
 import { CheckVoucherEligibilityUseCase } from '@application/child/use-cases/check-voucher-eligibility/check-voucher-eligibility.use-case';
+import { GetChildCounselRecordsUseCase } from '@application/child/use-cases/get-child-counsel-records.usecase';
+import { GetChildCounselSessionsUseCase } from '@application/child/use-cases/get-child-counsel-sessions.usecase';
 import { RegisterChildUseCase } from '@application/child/use-cases/register-child/register-child.use-case';
 import {
   CurrentUser,
@@ -59,6 +61,8 @@ export class ChildController {
   constructor(
     private readonly registerChildUseCase: RegisterChildUseCase,
     private readonly checkVoucherEligibilityUseCase: CheckVoucherEligibilityUseCase,
+    private readonly getChildCounselSessionsUseCase: GetChildCounselSessionsUseCase,
+    private readonly getChildCounselRecordsUseCase: GetChildCounselRecordsUseCase,
     @Inject('ChildRepository')
     private readonly childRepository: ChildRepository,
     @Inject('CareFacilityRepository')
@@ -485,5 +489,31 @@ SMS에는 보호자 동의 페이지 URL이 포함됩니다.
     }
 
     return this.checkVoucherEligibilityUseCase.execute(id);
+  }
+
+  @Get(':id/counsel-sessions')
+  @ApiOperation({ summary: '아동 상담 세션 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '상담 세션 목록',
+  })
+  async getChildCounselSessions(
+    @CurrentUser() user: CurrentUserData,
+    @Param('id') id: string,
+  ) {
+    return this.getChildCounselSessionsUseCase.execute(id, user);
+  }
+
+  @Get(':id/counsel-records')
+  @ApiOperation({ summary: '아동 공유된 상담 기록 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '공유된 상담 기록 목록 (SHARED 상태만)',
+  })
+  async getChildCounselRecords(
+    @CurrentUser() user: CurrentUserData,
+    @Param('id') id: string,
+  ) {
+    return this.getChildCounselRecordsUseCase.execute(id, user);
   }
 }

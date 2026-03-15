@@ -56,4 +56,12 @@ export class CounselRecordRepositoryImpl implements CounselRecordRepository {
     });
     return entities.map((e) => CounselRecordMapper.toDomain(e));
   }
+
+  async findByChildId(childId: string): Promise<CounselRecord[]> {
+    const entities = await this.repository.find({
+      where: { childId },
+      order: { sessionNumber: 'ASC' },
+    });
+    return entities.map((e) => CounselRecordMapper.toDomain(e));
+  }
 }

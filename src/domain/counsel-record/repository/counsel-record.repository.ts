@@ -10,6 +10,7 @@ export interface CounselRecordRepository {
     limit: number,
   ): Promise<{ records: CounselRecord[]; total: number }>;
   findByVoucherLinkageId(voucherLinkageId: string): Promise<CounselRecord[]>;
+  findByChildId(childId: string): Promise<CounselRecord[]>;
 }
 
 export const COUNSEL_RECORD_REPOSITORY = 'CounselRecordRepository';
