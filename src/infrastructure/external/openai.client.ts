@@ -155,4 +155,107 @@ export class OpenAIClient {
 
     return result;
   }
+
+  /**
+   * 상담 기록 AI 요약 생성
+   */
+  async generateCounselingSummary(input: {
+    counselContent: string;
+    childObservation?: string;
+    counselorOpinion?: string;
+    childInfo: { name: string; age: number; gender: string; specialNeeds?: string };
+    sessionNumber: number;
+    sessionType: string;
+  }): Promise<{ summary: string; guardianSummary: string }> {
+    const fallback = {
+      summary: '상담 내용 요약이 자동 생성되지 못했습니다.',
+      guardianSummary: '상담 내용 요약이 자동 생성되지 못했습니다.',
+    };
+
+    if (!this.apiKey) {
+      this.logger.warn('OpenAI API key not configured - using fallback summary');
+      return fallback;
+    }
+
+    try {
+      const sessionTypeLabel =
+        input.sessionType === 'INITIAL'
+          ? '초기 상담'
+          : input.sessionType === 'FINAL'
+            ? '종결 상담'
+            : '일반 상담';
+
+      const genderLabel =
+        input.childInfo.gender === 'MALE'
+          ? '남'
+          : input.childInfo.gender === 'FEMALE'
+            ? '여'
+            : '기타';
+
+      const contentParts = [
+        `[상담 내용]\n${input.counselContent}`,
+        input.childObservation ? `[아동 관찰]\n${input.childObservation}` : null,
+        input.counselorOpinion ? `[상담사 소견]\n${input.counselorOpinion}` : null,
+      ]
+        .filter(Boolean)
+        .join('\n\n');
+
+      const messages: OpenAIChatMessage[] = [
+        {
+          role: 'system',
+          content: `당신은 아동 심리상담 전문가입니다. 상담 기록을 분석하여 두 가지 버전의 요약을 작성합니다.
+
+1. "summary" (전문가용 요약): 기관 종사자와 관리자를 위한 요약입니다. 임상적 표현을 사용하고, 아동의 심리적 상태, 상담 진행 상황, 주요 관찰 사항, 향후 개입 방향을 포함합니다. 3~5문장으로 작성하세요.
+
+2. "guardianSummary" (보호자용 요약): 보호자가 이해하기 쉬운 한국어로 작성합니다. 전문용어를 최소화하고, 아이의 현재 상태와 상담에서 어떤 활동을 했는지, 가정에서 도움이 될 수 있는 부분을 포함합니다. 3~5문장으로 작성하세요.
+
+응답은 반드시 JSON 형식으로 작성하세요: {"summary": "...", "guardianSummary": "..."}`,
+        },
+        {
+          role: 'user',
+          content: `아동: ${input.childInfo.name} (${input.childInfo.age}세, ${genderLabel})${input.childInfo.specialNeeds ? `, 특수 요구: ${input.childInfo.specialNeeds}` : ''}
+상담 유형: ${sessionTypeLabel} (${input.sessionNumber}회차)
+
+${contentParts}`,
+        },
+      ];
+
+      const response = await this.client.post<OpenAIChatCompletionResponse>(
+        '/chat/completions',
+        {
+          model: 'gpt-4o-mini',
+          messages,
+          temperature: 0.3,
+          max_tokens: 1500,
+          response_format: { type: 'json_object' },
+        },
+      );
+
+      const rawContent = response.data.choices[0]?.message?.content;
+      if (rawContent) {
+        const content = rawContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+        const parsed = JSON.parse(content) as {
+          summary?: string;
+          guardianSummary?: string;
+        };
+        return {
+          summary: parsed.summary || fallback.summary,
+          guardianSummary: parsed.guardianSummary || fallback.guardianSummary,
+        };
+      }
+
+      return fallback;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        this.logger.error(
+          `OpenAI 상담 요약 생성 실패 - status: ${error.response?.status}, message: ${error.message}`,
+        );
+      } else {
+        this.logger.error(
+          `OpenAI 상담 요약 생성 실패 - ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+      return fallback;
+    }
+  }
 }

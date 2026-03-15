@@ -7,7 +7,6 @@ import { AdminAuditLogModule } from './audit-log/admin-audit-log.module';
 import { AdminAuthModule } from './auth/admin-auth.module';
 import { AdminChildrenModule } from './children/admin-children.module';
 import { AdminConsentModule } from './consent/admin-consent.module';
-import { AdminCounselReportModule } from './counsel-report/admin-counsel-report.module';
 import { AdminCounselRequestModule } from './counsel-request/admin-counsel-request.module';
 import { AdminDashboardModule } from './dashboard/admin-dashboard.module';
 import { AdminInstitutionModule } from './institution/admin-institution.module';
@@ -45,7 +44,6 @@ import { AdminStatisticsModule } from './statistics/admin-statistics.module';
     AdminChildrenModule,
     AdminConsentModule,
     AdminCounselRequestModule,
-    AdminCounselReportModule,
     AdminReviewModule,
     AdminSessionModule,
     AdminRiskManagementModule,

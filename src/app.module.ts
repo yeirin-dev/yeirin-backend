@@ -18,7 +18,6 @@ import { CareFacilityModule } from '@presentation/care-facility/care-facility.mo
 import { ChildModule } from '@presentation/child/child.module';
 import { CommunityChildCenterModule } from '@presentation/community-child-center/community-child-center.module';
 import { ConsentModule } from '@presentation/consent/consent.module';
-import { CounselReportModule } from '@presentation/counsel-report/counsel-report.module';
 import { CounselRequestModule } from '@presentation/counsel-request/counsel-request.module';
 import { InstitutionDashboardModule } from '@presentation/institution-dashboard/institution-dashboard.module';
 import { LandingModule } from '@presentation/landing/landing.module';
@@ -54,7 +53,6 @@ import { WebhookModule } from '@presentation/webhook/webhook.module';
     ChildModule,
     CommunityChildCenterModule,
     CounselRequestModule,
-    CounselReportModule,
     MatchingModule,
     ReviewModule,
     SettingsModule,

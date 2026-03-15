@@ -7,7 +7,6 @@ import { ChildConsentEntity } from '../persistence/typeorm/entity/child-consent.
 import { ChildProfileEntity } from '../persistence/typeorm/entity/child-profile.entity';
 import { CommunityChildCenterEntity } from '../persistence/typeorm/entity/community-child-center.entity';
 import { ConsentHistoryEntity } from '../persistence/typeorm/entity/consent-history.entity';
-import { CounselReportEntity } from '../persistence/typeorm/entity/counsel-report.entity';
 import { CounselRequestRecommendationEntity } from '../persistence/typeorm/entity/counsel-request-recommendation.entity';
 import { CounselRequestEntity } from '../persistence/typeorm/entity/counsel-request.entity';
 import { EducationWelfareSchoolEntity } from '../persistence/typeorm/entity/education-welfare-school.entity';
@@ -17,6 +16,8 @@ import { VoucherLinkageEntity } from '../persistence/typeorm/entity/voucher-link
 import { FastTrackReferralEntity } from '../persistence/typeorm/entity/fast-track-referral.entity';
 import { BImpactVoucherInstitutionEntity } from '../persistence/typeorm/entity/b-impact-voucher-institution.entity';
 import { CommonVoucherInstitutionEntity } from '../persistence/typeorm/entity/common-voucher-institution.entity';
+import { CounselSessionEntity } from '../persistence/typeorm/entity/counsel-session.entity';
+import { CounselRecordEntity } from '../persistence/typeorm/entity/counsel-record.entity';
 
 export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => {
   const isDevelopment = configService.get<string>('NODE_ENV') !== 'production';
@@ -45,7 +46,8 @@ export const getTypeOrmConfig = (configService: ConfigService): TypeOrmModuleOpt
       // Counseling
       CounselRequestEntity,
       CounselRequestRecommendationEntity,
-      CounselReportEntity,
+      CounselSessionEntity,
+      CounselRecordEntity,
       // Feedback
       ReviewEntity,
       // Audit & Logging

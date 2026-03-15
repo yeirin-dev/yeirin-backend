@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuditLogEntity } from '@infrastructure/persistence/typeorm/entity/audit-log.entity';
-import { CounselReportEntity } from '@infrastructure/persistence/typeorm/entity/counsel-report.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { ReviewEntity } from '@infrastructure/persistence/typeorm/entity/review.entity';
 import { VoucherLinkageEntity } from '@infrastructure/persistence/typeorm/entity/voucher-linkage.entity';
@@ -22,9 +21,7 @@ export class GetCounselRequestDetailAdminUseCase {
   constructor(
     @InjectRepository(CounselRequestEntity)
     private readonly counselRequestRepository: Repository<CounselRequestEntity>,
-    @InjectRepository(CounselReportEntity)
-    private readonly counselReportRepository: Repository<CounselReportEntity>,
-    @InjectRepository(ReviewEntity)
+@InjectRepository(ReviewEntity)
     private readonly reviewRepository: Repository<ReviewEntity>,
     @InjectRepository(AuditLogEntity)
     private readonly auditLogRepository: Repository<AuditLogEntity>,
@@ -43,10 +40,8 @@ export class GetCounselRequestDetailAdminUseCase {
       throw new NotFoundException(`상담의뢰를 찾을 수 없습니다: ${id}`);
     }
 
-    // 상담보고서 수 조회
-    const reportCount = await this.counselReportRepository.count({
-      where: { counselRequestId: id },
-    });
+    // 상담보고서 수 (counsel_reports 테이블 제거됨, 추후 counsel_records로 대체)
+    const reportCount = 0;
 
     // 리뷰 평점 조회 (기관 ID로 조회)
     let reviewRating: number | undefined;

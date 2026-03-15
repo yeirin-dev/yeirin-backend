@@ -11,7 +11,6 @@ import { VOUCHER_LINKAGE_REPOSITORY } from '@domain/voucher-linkage/repository/v
 import { AuditLogEntity } from '@infrastructure/persistence/typeorm/entity/audit-log.entity';
 import { CareFacilityEntity } from '@infrastructure/persistence/typeorm/entity/care-facility.entity';
 import { CommunityChildCenterEntity } from '@infrastructure/persistence/typeorm/entity/community-child-center.entity';
-import { CounselReportEntity } from '@infrastructure/persistence/typeorm/entity/counsel-report.entity';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { BImpactVoucherInstitutionEntity } from '@infrastructure/persistence/typeorm/entity/b-impact-voucher-institution.entity';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
@@ -35,7 +34,6 @@ import { AdminCounselRequestController } from './admin-counsel-request.controlle
   imports: [
     TypeOrmModule.forFeature([
       CounselRequestEntity,
-      CounselReportEntity,
       ReviewEntity,
       AuditLogEntity,
       VoucherLinkageEntity,
