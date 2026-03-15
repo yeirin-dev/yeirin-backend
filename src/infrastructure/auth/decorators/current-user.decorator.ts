@@ -8,7 +8,7 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 export interface CurrentUserData {
   userId: string; // facilityId와 동일 (기존 API 호환)
   institutionId: string; // 시설 ID
-  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL';
+  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL' | 'B_IMPACT_INSTITUTION';
   facilityName: string;
   district: string;
   role: 'INSTITUTION';

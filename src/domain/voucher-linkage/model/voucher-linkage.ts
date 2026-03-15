@@ -7,8 +7,14 @@ export enum VoucherLinkageStatus {
   /** 연계대기 - 바우처 추천대상이나 아직 연계되지 않음 */
   PENDING = 'PENDING',
 
+  /** 기관 검토중 - B-IMPACT 기관에서 연계 요청을 검토 중 */
+  INSTITUTION_REVIEW = 'INSTITUTION_REVIEW',
+
   /** 연계완료 - 바우처 기관에 연계됨 */
   COMPLETED = 'COMPLETED',
+
+  /** 기관 거절 - B-IMPACT 기관에서 연계를 거절함 */
+  INSTITUTION_REJECTED = 'INSTITUTION_REJECTED',
 }
 
 export interface VoucherLinkageProps {
@@ -30,6 +36,9 @@ export interface VoucherLinkageProps {
   // 바우처 기관 선택 필드
   linkedVoucherInstitutionId?: string;
   linkedVoucherInstitutionType?: string;
+  // 기관 검토 필드
+  institutionReviewedAt?: Date;
+  institutionRejectionReason?: string;
   createdBy?: string;
   updatedBy?: string;
   createdAt: Date;
@@ -58,6 +67,8 @@ export class VoucherLinkage {
     private _linkageInfoSubmitted: boolean = false,
     private _linkedVoucherInstitutionId?: string,
     private _linkedVoucherInstitutionType?: string,
+    private _institutionReviewedAt?: Date,
+    private _institutionRejectionReason?: string,
     private _createdBy?: string,
     private _updatedBy?: string,
     private readonly _createdAt: Date = new Date(),
@@ -132,6 +143,14 @@ export class VoucherLinkage {
     return this._linkedVoucherInstitutionType;
   }
 
+  get institutionReviewedAt(): Date | undefined {
+    return this._institutionReviewedAt;
+  }
+
+  get institutionRejectionReason(): string | undefined {
+    return this._institutionRejectionReason;
+  }
+
   get createdBy(): string | undefined {
     return this._createdBy;
   }
@@ -189,6 +208,8 @@ export class VoucherLinkage {
         false, // linkageInfoSubmitted
         undefined, // linkedVoucherInstitutionId
         undefined, // linkedVoucherInstitutionType
+        undefined, // institutionReviewedAt
+        undefined, // institutionRejectionReason
         createdBy,
         undefined, // updatedBy
         new Date(),
@@ -218,6 +239,8 @@ export class VoucherLinkage {
       props.linkageInfoSubmitted ?? false,
       props.linkedVoucherInstitutionId,
       props.linkedVoucherInstitutionType,
+      props.institutionReviewedAt,
+      props.institutionRejectionReason,
       props.createdBy,
       props.updatedBy,
       props.createdAt,
@@ -348,6 +371,7 @@ export class VoucherLinkage {
 
   /**
    * 바우처 기관 선택
+   * B-IMPACT 기관 선택 시 자동으로 INSTITUTION_REVIEW 상태로 전환
    */
   selectVoucherInstitution(
     institutionId: string,
@@ -363,8 +387,71 @@ export class VoucherLinkage {
 
     this._linkedVoucherInstitutionId = institutionId;
     this._linkedVoucherInstitutionType = institutionType;
+
+    // B-IMPACT 기관 선택 시 기관 검토 상태로 전환
+    if (institutionType === 'B_IMPACT') {
+      this._status = VoucherLinkageStatus.INSTITUTION_REVIEW;
+    }
+
     this._updatedAt = new Date();
 
     return Result.ok(undefined);
+  }
+
+  /**
+   * 기관 검토 상태로 전환 (PENDING → INSTITUTION_REVIEW)
+   */
+  moveToInstitutionReview(): Result<void, DomainError> {
+    if (this._status !== VoucherLinkageStatus.PENDING) {
+      return Result.fail(new DomainError('연계대기 상태에서만 기관 검토로 전환할 수 있습니다'));
+    }
+
+    this._status = VoucherLinkageStatus.INSTITUTION_REVIEW;
+    this._updatedAt = new Date();
+
+    return Result.ok(undefined);
+  }
+
+  /**
+   * B-IMPACT 기관이 연계를 수락 (INSTITUTION_REVIEW → COMPLETED)
+   */
+  acceptByInstitution(): Result<void, DomainError> {
+    if (this._status !== VoucherLinkageStatus.INSTITUTION_REVIEW) {
+      return Result.fail(new DomainError('기관 검토중 상태에서만 수락할 수 있습니다'));
+    }
+
+    this._status = VoucherLinkageStatus.COMPLETED;
+    this._institutionReviewedAt = new Date();
+    this._linkedAt = new Date();
+    this._updatedAt = new Date();
+
+    return Result.ok(undefined);
+  }
+
+  /**
+   * B-IMPACT 기관이 연계를 거절 (INSTITUTION_REVIEW → INSTITUTION_REJECTED)
+   */
+  rejectByInstitution(reason: string): Result<void, DomainError> {
+    if (this._status !== VoucherLinkageStatus.INSTITUTION_REVIEW) {
+      return Result.fail(new DomainError('기관 검토중 상태에서만 거절할 수 있습니다'));
+    }
+
+    if (!reason || reason.trim().length === 0) {
+      return Result.fail(new DomainError('거절 사유는 필수입니다'));
+    }
+
+    this._status = VoucherLinkageStatus.INSTITUTION_REJECTED;
+    this._institutionReviewedAt = new Date();
+    this._institutionRejectionReason = reason;
+    this._updatedAt = new Date();
+
+    return Result.ok(undefined);
+  }
+
+  /**
+   * 기관 검토중 상태인지 확인
+   */
+  isInstitutionReview(): boolean {
+    return this._status === VoucherLinkageStatus.INSTITUTION_REVIEW;
   }
 }

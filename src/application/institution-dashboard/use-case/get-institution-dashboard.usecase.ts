@@ -9,7 +9,7 @@ import {
 
 interface GetDashboardParams {
   institutionId: string;
-  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL';
+  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL' | 'B_IMPACT_INSTITUTION';
 }
 
 /**

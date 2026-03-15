@@ -8,6 +8,7 @@ export enum FacilityType {
   CARE_FACILITY = 'CARE_FACILITY',
   COMMUNITY_CENTER = 'COMMUNITY_CENTER',
   EDUCATION_WELFARE_SCHOOL = 'EDUCATION_WELFARE_SCHOOL',
+  B_IMPACT_INSTITUTION = 'B_IMPACT_INSTITUTION',
 }
 
 /**
@@ -60,6 +61,7 @@ export const FacilityTypeDisplayName: Record<FacilityType, string> = {
   [FacilityType.CARE_FACILITY]: '양육시설/그룹홈',
   [FacilityType.COMMUNITY_CENTER]: '지역아동센터',
   [FacilityType.EDUCATION_WELFARE_SCHOOL]: '교육복지사협회',
+  [FacilityType.B_IMPACT_INSTITUTION]: 'B-IMPACT 기관',
 };
 
 /**

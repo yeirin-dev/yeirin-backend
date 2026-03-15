@@ -28,6 +28,7 @@ describe('SubmitLinkageInfoUseCase', () => {
       findByStatus: jest.fn(),
       findByCounselRequestIds: jest.fn(),
       deleteByCounselRequestId: jest.fn(),
+      findByLinkedVoucherInstitutionId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

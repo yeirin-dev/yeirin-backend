@@ -57,12 +57,37 @@ export class VoucherLinkageRepositoryImpl implements VoucherLinkageRepository {
     await this.repository.delete({ counselRequestId });
   }
 
+  async findByLinkedVoucherInstitutionId(
+    institutionId: string,
+    status?: VoucherLinkageStatus,
+  ): Promise<VoucherLinkage[]> {
+    const where: Record<string, unknown> = {
+      linkedVoucherInstitutionId: institutionId,
+      linkedVoucherInstitutionType: 'B_IMPACT',
+    };
+
+    if (status) {
+      where.status = this.toEntityStatus(status);
+    }
+
+    const entities = await this.repository.find({
+      where,
+      order: { createdAt: 'DESC' },
+    });
+
+    return entities.map((entity) => VoucherLinkageMapper.toDomain(entity));
+  }
+
   private toEntityStatus(domainStatus: VoucherLinkageStatus): EntityVoucherLinkageStatus {
     switch (domainStatus) {
       case VoucherLinkageStatus.PENDING:
         return EntityVoucherLinkageStatus.PENDING;
+      case VoucherLinkageStatus.INSTITUTION_REVIEW:
+        return EntityVoucherLinkageStatus.INSTITUTION_REVIEW;
       case VoucherLinkageStatus.COMPLETED:
         return EntityVoucherLinkageStatus.COMPLETED;
+      case VoucherLinkageStatus.INSTITUTION_REJECTED:
+        return EntityVoucherLinkageStatus.INSTITUTION_REJECTED;
       default:
         return EntityVoucherLinkageStatus.PENDING;
     }

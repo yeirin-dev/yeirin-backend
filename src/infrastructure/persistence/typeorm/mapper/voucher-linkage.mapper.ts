@@ -14,8 +14,12 @@ export class VoucherLinkageMapper {
     switch (entityStatus) {
       case EntityVoucherLinkageStatus.PENDING:
         return VoucherLinkageStatus.PENDING;
+      case EntityVoucherLinkageStatus.INSTITUTION_REVIEW:
+        return VoucherLinkageStatus.INSTITUTION_REVIEW;
       case EntityVoucherLinkageStatus.COMPLETED:
         return VoucherLinkageStatus.COMPLETED;
+      case EntityVoucherLinkageStatus.INSTITUTION_REJECTED:
+        return VoucherLinkageStatus.INSTITUTION_REJECTED;
       default:
         return VoucherLinkageStatus.PENDING;
     }
@@ -28,8 +32,12 @@ export class VoucherLinkageMapper {
     switch (domainStatus) {
       case VoucherLinkageStatus.PENDING:
         return EntityVoucherLinkageStatus.PENDING;
+      case VoucherLinkageStatus.INSTITUTION_REVIEW:
+        return EntityVoucherLinkageStatus.INSTITUTION_REVIEW;
       case VoucherLinkageStatus.COMPLETED:
         return EntityVoucherLinkageStatus.COMPLETED;
+      case VoucherLinkageStatus.INSTITUTION_REJECTED:
+        return EntityVoucherLinkageStatus.INSTITUTION_REJECTED;
       default:
         return EntityVoucherLinkageStatus.PENDING;
     }
@@ -56,6 +64,8 @@ export class VoucherLinkageMapper {
       linkageInfoSubmitted: entity.linkageInfoSubmitted,
       linkedVoucherInstitutionId: entity.linkedVoucherInstitutionId,
       linkedVoucherInstitutionType: entity.linkedVoucherInstitutionType,
+      institutionReviewedAt: entity.institutionReviewedAt,
+      institutionRejectionReason: entity.institutionRejectionReason,
       createdBy: entity.createdBy,
       updatedBy: entity.updatedBy,
       createdAt: entity.createdAt,
@@ -84,6 +94,8 @@ export class VoucherLinkageMapper {
     entity.linkageInfoSubmitted = domain.linkageInfoSubmitted;
     entity.linkedVoucherInstitutionId = domain.linkedVoucherInstitutionId;
     entity.linkedVoucherInstitutionType = domain.linkedVoucherInstitutionType;
+    entity.institutionReviewedAt = domain.institutionReviewedAt;
+    entity.institutionRejectionReason = domain.institutionRejectionReason;
     entity.createdBy = domain.createdBy;
     entity.updatedBy = domain.updatedBy;
     entity.createdAt = domain.createdAt;

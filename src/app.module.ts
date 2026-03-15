@@ -12,6 +12,7 @@ import { RequestIdMiddleware } from '@infrastructure/common/middleware/request-i
 import { getTypeOrmConfig } from '@infrastructure/config/typeorm.config';
 import { LoggingInterceptor } from '@infrastructure/logging/logging.interceptor';
 import { AdminApiModule } from '@presentation/admin-api/admin-api.module';
+import { BImpactInstitutionModule } from '@presentation/b-impact-institution/b-impact-institution.module';
 import { AuthModule } from '@presentation/auth/auth.module';
 import { CareFacilityModule } from '@presentation/care-facility/care-facility.module';
 import { ChildModule } from '@presentation/child/child.module';
@@ -63,6 +64,8 @@ import { WebhookModule } from '@presentation/webhook/webhook.module';
     ConsentModule,
     // Landing Page API Module (Public)
     LandingModule,
+    // B-IMPACT Institution Console Module
+    BImpactInstitutionModule,
     // Admin API Module
     AdminApiModule,
   ],

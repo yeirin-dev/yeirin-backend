@@ -126,6 +126,18 @@ export class VoucherLinkageEntity {
   linkedVoucherInstitutionType?: string;
 
   /**
+   * 기관 검토 완료일 (B-IMPACT 기관 수락/거절 시)
+   */
+  @Column({ type: 'timestamp', nullable: true, name: 'institution_reviewed_at' })
+  institutionReviewedAt?: Date;
+
+  /**
+   * 기관 거절 사유 (B-IMPACT 기관 거절 시)
+   */
+  @Column({ type: 'text', nullable: true, name: 'institution_rejection_reason' })
+  institutionRejectionReason?: string;
+
+  /**
    * 생성자 (관리자 ID)
    */
   @Column({ type: 'uuid', nullable: true, name: 'created_by' })

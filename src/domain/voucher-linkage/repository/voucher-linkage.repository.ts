@@ -39,6 +39,14 @@ export interface VoucherLinkageRepository {
    * 상담의뢰지 ID로 삭제
    */
   deleteByCounselRequestId(counselRequestId: string): Promise<void>;
+
+  /**
+   * 연계된 바우처 기관 ID로 조회 (B-IMPACT 기관용)
+   */
+  findByLinkedVoucherInstitutionId(
+    institutionId: string,
+    status?: VoucherLinkageStatus,
+  ): Promise<VoucherLinkage[]>;
 }
 
 /**

@@ -44,6 +44,11 @@ export class InstitutionDashboardController {
       throw new ForbiddenException('시설 로그인이 필요합니다.');
     }
 
+    // B-IMPACT 기관은 별도 대시보드를 사용하므로 이 엔드포인트를 사용하지 않음
+    if (user.facilityType === 'B_IMPACT_INSTITUTION') {
+      throw new ForbiddenException('B-IMPACT 기관은 별도 대시보드를 이용해주세요.');
+    }
+
     return this.getInstitutionDashboardUseCase.execute({
       institutionId: user.institutionId,
       facilityType: user.facilityType,

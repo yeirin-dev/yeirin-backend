@@ -101,6 +101,20 @@ export class BImpactVoucherInstitutionEntity {
   @Column({ type: 'text', nullable: true })
   pricingDescription: string | null;
 
+  // ──────────────── 인증 ────────────────
+
+  /** 비밀번호 (bcrypt 해시) */
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  password: string;
+
+  /** 비밀번호 변경 여부 (첫 로그인 시 변경 필요) */
+  @Column({ type: 'boolean', default: false })
+  isPasswordChanged: boolean;
+
+  /** 활성 여부 */
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
+
   // ──────────────── 메타 ────────────────
 
   @CreateDateColumn()

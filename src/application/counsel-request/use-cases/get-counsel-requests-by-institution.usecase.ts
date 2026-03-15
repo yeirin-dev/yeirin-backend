@@ -26,7 +26,7 @@ export class GetCounselRequestsByInstitutionUseCase {
 
   async execute(
     institutionId: string,
-    facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL',
+    facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL' | 'B_IMPACT_INSTITUTION',
     page: number = 1,
     limit: number = 50,
     status?: CounselRequestStatus,

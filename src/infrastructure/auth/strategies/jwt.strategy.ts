@@ -9,7 +9,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
  */
 export interface InstitutionJwtPayload {
   sub: string; // facility id
-  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL';
+  facilityType: 'CARE_FACILITY' | 'COMMUNITY_CENTER' | 'EDUCATION_WELFARE_SCHOOL' | 'B_IMPACT_INSTITUTION';
   facilityName: string;
   district: string;
   role: 'INSTITUTION';

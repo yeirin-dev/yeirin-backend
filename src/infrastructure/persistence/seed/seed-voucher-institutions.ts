@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as dotenv from 'dotenv';
+import * as bcrypt from 'bcrypt';
 import { DataSource } from 'typeorm';
 import { bImpactVoucherInstitutionsData } from './data/b-impact-voucher-institutions.data';
 import { commonVoucherInstitutionsData } from './data/common-voucher-institutions.data';
@@ -34,8 +35,17 @@ async function seedVoucherInstitutions() {
   // =====================================================
   console.log('\n🏥 B-IMPACT 바우처 기관 생성 중...');
 
+  // B-IMPACT 기관에 인증 필드 추가 (비밀번호 '1234')
+  const hashedPassword = await bcrypt.hash('1234', 10);
+  const bImpactDataWithAuth = bImpactVoucherInstitutionsData.map((inst: Record<string, unknown>) => ({
+    ...inst,
+    password: hashedPassword,
+    isPasswordChanged: false,
+    isActive: true,
+  }));
+
   const bImpactRepo = dataSource.getRepository('BImpactVoucherInstitutionEntity');
-  const savedBImpact = await bImpactRepo.save(bImpactVoucherInstitutionsData);
+  const savedBImpact = await bImpactRepo.save(bImpactDataWithAuth);
   console.log(`✅ ${savedBImpact.length}개 B-IMPACT 바우처 기관 생성 완료`);
 
   const bImpactDistrictStats = savedBImpact.reduce(

@@ -21,7 +21,9 @@
     "seed": "ts-node -r tsconfig-paths/register src/infrastructure/persistence/seed/seed.ts",
     "seed:voucher": "ts-node -r tsconfig-paths/register src/infrastructure/persistence/seed/seed-voucher-institutions.ts",
     "backfill:voucher": "ts-node -r tsconfig-paths/register src/scripts/backfill-voucher-eligibility.ts",
-    "backfill:voucher:dry": "ts-node -r tsconfig-paths/register src/scripts/backfill-voucher-eligibility.ts --dry-run"
+    "backfill:voucher:dry": "ts-node -r tsconfig-paths/register src/scripts/backfill-voucher-eligibility.ts --dry-run",
+    "migrate:b-impact-auth": "ts-node -r tsconfig-paths/register src/scripts/migrate-b-impact-auth.ts",
+    "migrate:b-impact-auth:dry": "ts-node -r tsconfig-paths/register src/scripts/migrate-b-impact-auth.ts --dry-run"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.946.0",
