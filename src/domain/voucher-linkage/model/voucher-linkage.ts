@@ -413,11 +413,14 @@ export class VoucherLinkage {
   }
 
   /**
-   * B-IMPACT 기관이 연계를 수락 (INSTITUTION_REVIEW → COMPLETED)
+   * B-IMPACT 기관이 연계를 수락 (PENDING/INSTITUTION_REVIEW → COMPLETED)
    */
   acceptByInstitution(): Result<void, DomainError> {
-    if (this._status !== VoucherLinkageStatus.INSTITUTION_REVIEW) {
-      return Result.fail(new DomainError('기관 검토중 상태에서만 수락할 수 있습니다'));
+    if (
+      this._status !== VoucherLinkageStatus.PENDING &&
+      this._status !== VoucherLinkageStatus.INSTITUTION_REVIEW
+    ) {
+      return Result.fail(new DomainError('대기중 또는 기관 검토중 상태에서만 수락할 수 있습니다'));
     }
 
     this._status = VoucherLinkageStatus.COMPLETED;
@@ -429,11 +432,14 @@ export class VoucherLinkage {
   }
 
   /**
-   * B-IMPACT 기관이 연계를 거절 (INSTITUTION_REVIEW → INSTITUTION_REJECTED)
+   * B-IMPACT 기관이 연계를 거절 (PENDING/INSTITUTION_REVIEW → INSTITUTION_REJECTED)
    */
   rejectByInstitution(reason: string): Result<void, DomainError> {
-    if (this._status !== VoucherLinkageStatus.INSTITUTION_REVIEW) {
-      return Result.fail(new DomainError('기관 검토중 상태에서만 거절할 수 있습니다'));
+    if (
+      this._status !== VoucherLinkageStatus.PENDING &&
+      this._status !== VoucherLinkageStatus.INSTITUTION_REVIEW
+    ) {
+      return Result.fail(new DomainError('대기중 또는 기관 검토중 상태에서만 거절할 수 있습니다'));
     }
 
     if (!reason || reason.trim().length === 0) {
