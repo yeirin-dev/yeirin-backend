@@ -76,6 +76,7 @@ export class FastTrackReferralEntity {
   @Column({
     type: 'enum',
     enum: FastTrackGuardianContactAvailability,
+    enumName: 'ft_guardian_contact_availability_enum',
     name: 'guardian_contact_availability',
   })
   guardianContactAvailability: FastTrackGuardianContactAvailability;
@@ -140,6 +141,7 @@ export class FastTrackReferralEntity {
   @Column({
     type: 'enum',
     enum: FastTrackGuardianConsentStatus,
+    enumName: 'ft_guardian_consent_status_enum',
     name: 'guardian_consent_status',
   })
   guardianConsentStatus: FastTrackGuardianConsentStatus;
