@@ -1,21 +1,59 @@
+import { IsString, IsOptional, IsBoolean, IsArray } from 'class-validator';
 import { RecordStatus } from '@domain/counsel-record/model/value-objects/record-status';
 
 export class CreateCounselRecordDto {
+  @IsString()
   counselSessionId: string;
+
+  @IsString()
   counselContent: string;
+
+  @IsOptional()
+  @IsString()
   childObservation?: string;
+
+  @IsOptional()
+  @IsString()
   counselorOpinion?: string;
+
+  @IsOptional()
+  @IsString()
   nextSessionPlan?: string;
+
+  @IsOptional()
+  @IsBoolean()
   additionalCounselingNeeded?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   attachmentUrls?: string[];
 }
 
 export class UpdateCounselRecordDto {
+  @IsOptional()
+  @IsString()
   counselContent?: string;
+
+  @IsOptional()
+  @IsString()
   childObservation?: string;
+
+  @IsOptional()
+  @IsString()
   counselorOpinion?: string;
+
+  @IsOptional()
+  @IsString()
   nextSessionPlan?: string;
+
+  @IsOptional()
+  @IsBoolean()
   additionalCounselingNeeded?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   attachmentUrls?: string[];
 }
 
