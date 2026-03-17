@@ -45,6 +45,10 @@ export class BImpactVoucherInstitutionEntity {
   @Column({ type: 'varchar', array: true, default: '{}' })
   voucherPrograms: string[];
 
+  /** 지역사회서비스 투자사업 카테고리 (아동청소년 심리치유서비스, 아동정서발달 지원서비스 등) */
+  @Column({ type: 'varchar', array: true, default: '{}' })
+  investmentProjectCategories: string[];
+
   /** 품질인증 여부 */
   @Column({ type: 'boolean', nullable: true })
   qualityCertified: boolean | null;
