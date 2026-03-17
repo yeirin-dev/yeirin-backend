@@ -16,6 +16,7 @@ export class CounselRecordMapper {
       childObservation: entity.childObservation,
       counselorOpinion: entity.counselorOpinion,
       nextSessionPlan: entity.nextSessionPlan,
+      feedbackToGuardian: entity.feedbackToGuardian,
       additionalCounselingNeeded: entity.additionalCounselingNeeded,
       attachmentUrls: entity.attachmentUrls,
       status: entity.status,
@@ -43,6 +44,7 @@ export class CounselRecordMapper {
     entity.childObservation = domain.childObservation;
     entity.counselorOpinion = domain.counselorOpinion;
     entity.nextSessionPlan = domain.nextSessionPlan;
+    entity.feedbackToGuardian = domain.feedbackToGuardian;
     entity.additionalCounselingNeeded = domain.additionalCounselingNeeded;
     entity.attachmentUrls = domain.attachmentUrls;
     entity.status = domain.status;

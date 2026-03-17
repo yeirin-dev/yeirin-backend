@@ -55,6 +55,9 @@ export class CounselRecordEntity {
   @Column('text', { nullable: true, name: 'next_session_plan' })
   nextSessionPlan?: string;
 
+  @Column('text', { nullable: true, name: 'feedback_to_guardian' })
+  feedbackToGuardian?: string;
+
   @Column('boolean', { default: false, name: 'additional_counseling_needed' })
   additionalCounselingNeeded: boolean;
 

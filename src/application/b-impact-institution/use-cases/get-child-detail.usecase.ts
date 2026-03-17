@@ -92,6 +92,7 @@ export class GetChildDetailUseCase {
         childObservation: r.childObservation,
         counselorOpinion: r.counselorOpinion,
         nextSessionPlan: r.nextSessionPlan,
+        feedbackToGuardian: r.feedbackToGuardian,
         additionalCounselingNeeded: r.additionalCounselingNeeded,
         attachmentUrls: r.attachmentUrls,
         status: r.status,

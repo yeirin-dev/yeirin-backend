@@ -14,6 +14,7 @@ export interface CounselRecordProps {
   childObservation?: string;
   counselorOpinion?: string;
   nextSessionPlan?: string;
+  feedbackToGuardian?: string;
   additionalCounselingNeeded: boolean;
   attachmentUrls: string[];
   status: RecordStatus;
@@ -40,6 +41,7 @@ export class CounselRecord {
     private _childObservation: string | undefined,
     private _counselorOpinion: string | undefined,
     private _nextSessionPlan: string | undefined,
+    private _feedbackToGuardian: string | undefined,
     private _additionalCounselingNeeded: boolean,
     private _attachmentUrls: string[],
     private _status: RecordStatus,
@@ -104,6 +106,10 @@ export class CounselRecord {
     return this._nextSessionPlan;
   }
 
+  get feedbackToGuardian(): string | undefined {
+    return this._feedbackToGuardian;
+  }
+
   get additionalCounselingNeeded(): boolean {
     return this._additionalCounselingNeeded;
   }
@@ -161,6 +167,7 @@ export class CounselRecord {
     childObservation?: string;
     counselorOpinion?: string;
     nextSessionPlan?: string;
+    feedbackToGuardian?: string;
     additionalCounselingNeeded?: boolean;
     attachmentUrls?: string[];
   }): Result<CounselRecord, DomainError> {
@@ -188,6 +195,7 @@ export class CounselRecord {
         props.childObservation,
         props.counselorOpinion,
         props.nextSessionPlan,
+        props.feedbackToGuardian,
         props.additionalCounselingNeeded ?? false,
         props.attachmentUrls ?? [],
         RecordStatus.DRAFT,
@@ -216,6 +224,7 @@ export class CounselRecord {
       props.childObservation,
       props.counselorOpinion,
       props.nextSessionPlan,
+      props.feedbackToGuardian,
       props.additionalCounselingNeeded,
       props.attachmentUrls,
       props.status,
@@ -238,6 +247,7 @@ export class CounselRecord {
     childObservation?: string;
     counselorOpinion?: string;
     nextSessionPlan?: string;
+    feedbackToGuardian?: string;
     additionalCounselingNeeded?: boolean;
     attachmentUrls?: string[];
   }): Result<void, DomainError> {
@@ -254,6 +264,8 @@ export class CounselRecord {
       this._counselorOpinion = updates.counselorOpinion;
     if (updates.nextSessionPlan !== undefined)
       this._nextSessionPlan = updates.nextSessionPlan;
+    if (updates.feedbackToGuardian !== undefined)
+      this._feedbackToGuardian = updates.feedbackToGuardian;
     if (updates.additionalCounselingNeeded !== undefined)
       this._additionalCounselingNeeded = updates.additionalCounselingNeeded;
     if (updates.attachmentUrls !== undefined) this._attachmentUrls = updates.attachmentUrls;

@@ -48,6 +48,7 @@ export class GetChildCounselRecordsUseCase {
           : String(r.recordDate),
       status: r.status,
       aiSummaryForGuardian: r.aiSummaryForGuardian || '',
+      feedbackToGuardian: r.feedbackToGuardian || '',
       sharedAt: r.sharedAt?.toISOString() || '',
       createdAt: r.createdAt.toISOString(),
     }));

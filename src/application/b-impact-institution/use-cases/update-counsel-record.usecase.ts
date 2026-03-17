@@ -34,6 +34,7 @@ export class UpdateCounselRecordUseCase {
       childObservation: dto.childObservation,
       counselorOpinion: dto.counselorOpinion,
       nextSessionPlan: dto.nextSessionPlan,
+      feedbackToGuardian: dto.feedbackToGuardian,
       additionalCounselingNeeded: dto.additionalCounselingNeeded,
       attachmentUrls: dto.attachmentUrls,
     });
@@ -62,6 +63,7 @@ export class UpdateCounselRecordUseCase {
       childObservation: saved.childObservation,
       counselorOpinion: saved.counselorOpinion,
       nextSessionPlan: saved.nextSessionPlan,
+      feedbackToGuardian: saved.feedbackToGuardian,
       additionalCounselingNeeded: saved.additionalCounselingNeeded,
       attachmentUrls: saved.attachmentUrls,
       status: saved.status,

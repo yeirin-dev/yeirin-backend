@@ -62,4 +62,9 @@ export class CounselSessionResponseDto {
   hasRecord: boolean;
   createdAt: string;
   updatedAt: string;
+  facilityContactInfo?: {
+    facilityName: string;
+    careType: string;
+    contacts: Array<{ label: string; name?: string; phone: string }>;
+  };
 }

@@ -21,6 +21,10 @@ export class CreateCounselRecordDto {
   nextSessionPlan?: string;
 
   @IsOptional()
+  @IsString()
+  feedbackToGuardian?: string;
+
+  @IsOptional()
   @IsBoolean()
   additionalCounselingNeeded?: boolean;
 
@@ -48,6 +52,10 @@ export class UpdateCounselRecordDto {
   nextSessionPlan?: string;
 
   @IsOptional()
+  @IsString()
+  feedbackToGuardian?: string;
+
+  @IsOptional()
   @IsBoolean()
   additionalCounselingNeeded?: boolean;
 
@@ -71,6 +79,7 @@ export class CounselRecordResponseDto {
   childObservation?: string;
   counselorOpinion?: string;
   nextSessionPlan?: string;
+  feedbackToGuardian?: string;
   additionalCounselingNeeded: boolean;
   attachmentUrls: string[];
   status: RecordStatus;

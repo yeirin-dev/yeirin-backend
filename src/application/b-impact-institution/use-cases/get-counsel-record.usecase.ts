@@ -47,6 +47,7 @@ export class GetCounselRecordUseCase {
       childObservation: record.childObservation,
       counselorOpinion: record.counselorOpinion,
       nextSessionPlan: record.nextSessionPlan,
+      feedbackToGuardian: record.feedbackToGuardian,
       additionalCounselingNeeded: record.additionalCounselingNeeded,
       attachmentUrls: record.attachmentUrls,
       status: record.status,

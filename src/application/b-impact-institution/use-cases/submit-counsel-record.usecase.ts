@@ -97,6 +97,7 @@ export class SubmitCounselRecordUseCase {
       childObservation: saved.childObservation,
       counselorOpinion: saved.counselorOpinion,
       nextSessionPlan: saved.nextSessionPlan,
+      feedbackToGuardian: saved.feedbackToGuardian,
       additionalCounselingNeeded: saved.additionalCounselingNeeded,
       attachmentUrls: saved.attachmentUrls,
       status: saved.status,
