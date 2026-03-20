@@ -35,7 +35,7 @@ export class GetChildDetailUseCase {
 
     const counselRequest = await this.counselRequestRepository.findOne({
       where: { id: linkage.counselRequestId },
-      relations: ['child'],
+      relations: ['child', 'child.communityChildCenter', 'child.careFacility'],
     });
 
     if (!counselRequest) {
@@ -106,8 +106,17 @@ export class GetChildDetailUseCase {
       })),
       careType: counselRequest.careType || '',
       centerName: counselRequest.centerName || '',
+      centerPhone:
+        counselRequest.formData?.institutionInfo?.phoneNumber ||
+        counselRequest.child?.communityChildCenter?.phoneNumber ||
+        counselRequest.child?.careFacility?.phoneNumber ||
+        '',
       requestDate: counselRequest.requestDate?.toISOString?.() || counselRequest.createdAt?.toISOString?.() || '',
       specialNeeds: counselRequest.child?.specialNeeds || undefined,
+      guardianName: counselRequest.formData?.guardianInfo?.name || undefined,
+      guardianPhone: counselRequest.formData?.guardianInfo?.phoneNumber || undefined,
+      guardianRelation: counselRequest.formData?.guardianInfo?.relationToChild || undefined,
+      integratedReportUrl: counselRequest.integratedReportS3Key || undefined,
     };
   }
 }

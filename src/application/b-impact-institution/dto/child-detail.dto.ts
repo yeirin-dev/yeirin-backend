@@ -13,6 +13,11 @@ export class ChildDetailResponseDto {
   records: CounselRecordResponseDto[];
   careType: string;
   centerName: string;
+  centerPhone: string;
   requestDate: string;
   specialNeeds?: string;
+  guardianName?: string;
+  guardianPhone?: string;
+  guardianRelation?: string;
+  integratedReportUrl?: string;
 }

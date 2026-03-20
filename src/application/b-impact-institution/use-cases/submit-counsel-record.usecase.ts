@@ -59,6 +59,8 @@ export class SubmitCounselRecordUseCase {
           counselContent: record.counselContent,
           childObservation: record.childObservation,
           counselorOpinion: record.counselorOpinion,
+          nextSessionPlan: record.nextSessionPlan,
+          feedbackToGuardian: record.feedbackToGuardian,
           childInfo: {
             name: childName,
             age: childAge,

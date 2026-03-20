@@ -18,6 +18,7 @@ export interface LinkedChildItem {
   counselRequestId: string;
   careType: string;
   centerName: string;
+  centerPhone: string;
   requestDate: string;
   // AI 추천 정보
   recommendationScore?: number;
@@ -54,10 +55,12 @@ export class GetLinkedChildrenUseCase {
     // 2. 상담의뢰지 ID 목록 추출
     const counselRequestIds = linkages.map((l) => l.counselRequestId);
 
-    // 3. 상담의뢰지 + 아동 정보 조회
+    // 3. 상담의뢰지 + 아동 정보 조회 (연계 기관 연락처를 위해 센터 조인)
     const counselRequests = await this.counselRequestRepository
       .createQueryBuilder('cr')
       .leftJoinAndSelect('cr.child', 'child')
+      .leftJoinAndSelect('child.communityChildCenter', 'center')
+      .leftJoinAndSelect('child.careFacility', 'facility')
       .whereInIds(counselRequestIds)
       .getMany();
 
@@ -81,6 +84,13 @@ export class GetLinkedChildrenUseCase {
       const childAge = counselRequest?.formData?.basicInfo?.childInfo?.age || 0;
       const childGender = counselRequest?.formData?.basicInfo?.childInfo?.gender || '알 수 없음';
 
+      // 의뢰 기관 연락처: formData.institutionInfo > 센터 엔티티 순으로 조회
+      const centerPhone =
+        counselRequest?.formData?.institutionInfo?.phoneNumber ||
+        counselRequest?.child?.communityChildCenter?.phoneNumber ||
+        counselRequest?.child?.careFacility?.phoneNumber ||
+        '';
+
       return {
         linkageId: linkage.id,
         status: linkage.status,
@@ -91,6 +101,7 @@ export class GetLinkedChildrenUseCase {
         counselRequestId: linkage.counselRequestId,
         careType: counselRequest?.careType || '',
         centerName: counselRequest?.centerName || '',
+        centerPhone,
         requestDate: counselRequest?.requestDate?.toISOString?.() || counselRequest?.createdAt?.toISOString?.() || '',
         recommendationScore: recommendation ? Number(recommendation.score) : undefined,
         recommendationReason: recommendation?.reason,

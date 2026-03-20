@@ -163,6 +163,8 @@ export class OpenAIClient {
     counselContent: string;
     childObservation?: string;
     counselorOpinion?: string;
+    nextSessionPlan?: string;
+    feedbackToGuardian?: string;
     childInfo: { name: string; age: number; gender: string; specialNeeds?: string };
     sessionNumber: number;
     sessionType: string;
@@ -196,6 +198,8 @@ export class OpenAIClient {
         `[상담 내용]\n${input.counselContent}`,
         input.childObservation ? `[아동 관찰]\n${input.childObservation}` : null,
         input.counselorOpinion ? `[상담사 소견]\n${input.counselorOpinion}` : null,
+        input.nextSessionPlan ? `[다음 상담 계획]\n${input.nextSessionPlan}` : null,
+        input.feedbackToGuardian ? `[주양육자에게 전하는 피드백]\n${input.feedbackToGuardian}` : null,
       ]
         .filter(Boolean)
         .join('\n\n');
@@ -203,22 +207,16 @@ export class OpenAIClient {
       const messages: OpenAIChatMessage[] = [
         {
           role: 'system',
-          content: `당신은 아동 심리상담 전문가입니다. 상담 기록을 분석하여 두 가지 버전의 요약을 작성합니다.
+          content: `당신은 아동 심리상담 전문가입니다. 상담 기록(상담내용, 상담사 소견, 다음 상담 계획)과 주양육자에게 전하는 피드백을 통합하여 하나의 요약문을 작성합니다.
 
-1. "summary" (전문가용 요약): 기관 종사자와 관리자를 위한 요약입니다. 임상적 표현을 사용하고, 아동의 심리적 상태, 상담 진행 상황, 주요 관찰 사항, 향후 개입 방향을 포함합니다. 3~5문장으로 작성하세요.
+"summary" (통합 요약): 상담 내용과 주양육자 피드백을 합쳐서 3~5줄로 작성합니다.
+- 이번 상담에서 다룬 핵심 내용과 아동의 상태를 간결하게 요약
+- 상담사의 주요 소견과 향후 계획을 포함
+- 보호자가 가정에서 참고할 수 있는 핵심 피드백을 포함
+- 전문성을 유지하되 보호자도 이해할 수 있는 수준의 한국어로 작성
+- 반드시 3~5줄(문장)로 작성
 
-2. "guardianSummary" (보호자용 요약): 보호자가 이해하기 쉬운 한국어로, 전문성을 유지하되 차분하고 따뜻한 어조로 작성합니다.
-   다음 구성요소를 모두 포함하여 상세하게 작성하세요:
-   - 이번 상담의 목적과 배경 (1~2문장)
-   - 상담에서 아이가 보인 모습과 정서적 반응 (2~3문장)
-   - 상담사가 진행한 주요 활동과 개입 내용 (2~3문장)
-   - 아이의 현재 심리적·정서적 상태에 대한 평가 (2~3문장)
-   - 가정에서 실천할 수 있는 구체적인 양육 방법과 활동 (2~3문장)
-   - 향후 상담 방향과 기대되는 변화 (1~2문장)
-   전문용어를 최소화하되 근거 있는 설명을 제공하고, 보호자가 안심할 수 있도록 작성합니다.
-   총 10~15문장으로 작성하세요.
-
-응답은 반드시 JSON 형식으로 작성하세요: {"summary": "...", "guardianSummary": "..."}`,
+응답은 반드시 JSON 형식으로 작성하세요: {"summary": "..."}`,
         },
         {
           role: 'user',
@@ -235,7 +233,7 @@ ${contentParts}`,
           model: 'gpt-4o-mini',
           messages,
           temperature: 0.3,
-          max_tokens: 3000,
+          max_tokens: 1500,
           response_format: { type: 'json_object' },
         },
       );
@@ -245,11 +243,11 @@ ${contentParts}`,
         const content = rawContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
         const parsed = JSON.parse(content) as {
           summary?: string;
-          guardianSummary?: string;
         };
+        const unifiedSummary = parsed.summary || fallback.summary;
         return {
-          summary: parsed.summary || fallback.summary,
-          guardianSummary: parsed.guardianSummary || fallback.guardianSummary,
+          summary: unifiedSummary,
+          guardianSummary: unifiedSummary,
         };
       }
 

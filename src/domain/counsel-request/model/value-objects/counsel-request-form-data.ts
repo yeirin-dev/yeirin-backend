@@ -213,6 +213,31 @@ export interface ConversationAnalysis {
 }
 
 /**
+ * 보호자 정보 (사회서비스 이용 추천서용)
+ */
+export interface GuardianInfo {
+  name: string;
+  phoneNumber: string;
+  homePhone?: string;
+  address: string;
+  addressDetail?: string;
+  relationToChild: string;
+}
+
+/**
+ * 기관/작성자 정보 (사회서비스 이용 추천서용)
+ */
+export interface InstitutionInfo {
+  institutionName: string;
+  phoneNumber: string;
+  address: string;
+  addressDetail?: string;
+  writerPosition: string;
+  writerName: string;
+  relationToChild: string;
+}
+
+/**
  * 상담의뢰지 전체 양식 데이터 (JSONB)
  */
 export interface CounselRequestFormData {
@@ -222,4 +247,7 @@ export interface CounselRequestFormData {
   requestMotivation: RequestMotivation;
   testResults: TestResults;
   consent: ConsentStatus;
+  // 사회서비스 이용 추천서 (Government Doc) 전용 - Optional
+  guardianInfo?: GuardianInfo;
+  institutionInfo?: InstitutionInfo;
 }
