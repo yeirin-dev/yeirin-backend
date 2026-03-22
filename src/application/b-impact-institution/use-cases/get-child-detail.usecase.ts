@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { COUNSEL_SESSION_REPOSITORY, CounselSessionRepository } from '@domain/counsel-session/repository/counsel-session.repository';
@@ -6,10 +6,13 @@ import { COUNSEL_RECORD_REPOSITORY, CounselRecordRepository } from '@domain/coun
 import { VOUCHER_LINKAGE_REPOSITORY, VoucherLinkageRepository } from '@domain/voucher-linkage/repository/voucher-linkage.repository';
 import { CounselRequestEntity } from '@infrastructure/persistence/typeorm/entity/counsel-request.entity';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
+import { S3Service } from '@infrastructure/storage/s3.service';
 import { ChildDetailResponseDto } from '../dto/child-detail.dto';
 
 @Injectable()
 export class GetChildDetailUseCase {
+  private readonly logger = new Logger(GetChildDetailUseCase.name);
+
   constructor(
     @Inject(VOUCHER_LINKAGE_REPOSITORY)
     private readonly voucherLinkageRepository: VoucherLinkageRepository,
@@ -21,6 +24,7 @@ export class GetChildDetailUseCase {
     private readonly counselRequestRepository: Repository<CounselRequestEntity>,
     @InjectRepository(ChildProfileEntity)
     private readonly childProfileRepository: Repository<ChildProfileEntity>,
+    private readonly s3Service: S3Service,
   ) {}
 
   async execute(linkageId: string, institutionId: string): Promise<ChildDetailResponseDto> {
@@ -50,6 +54,19 @@ export class GetChildDetailUseCase {
     const records = await this.counselRecordRepository.findByVoucherLinkageId(linkageId);
 
     const sessionIds = new Set(records.map((r) => r.counselSessionId));
+
+    // 통합보고서 Presigned URL 생성
+    let integratedReportUrl: string | undefined;
+    if (counselRequest.integratedReportS3Key && counselRequest.integratedReportStatus === 'completed') {
+      try {
+        integratedReportUrl = await this.s3Service.getPresignedUrl(
+          counselRequest.integratedReportS3Key,
+          3600,
+        );
+      } catch (error) {
+        this.logger.warn(`통합보고서 Presigned URL 생성 실패: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
 
     return {
       linkageId: linkage.id,
@@ -116,7 +133,7 @@ export class GetChildDetailUseCase {
       guardianName: counselRequest.formData?.guardianInfo?.name || undefined,
       guardianPhone: counselRequest.formData?.guardianInfo?.phoneNumber || undefined,
       guardianRelation: counselRequest.formData?.guardianInfo?.relationToChild || undefined,
-      integratedReportUrl: counselRequest.integratedReportS3Key || undefined,
+      integratedReportUrl,
     };
   }
 }

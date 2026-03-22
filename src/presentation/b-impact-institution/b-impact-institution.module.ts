@@ -30,11 +30,13 @@ import { CounselRecordEntity } from '@infrastructure/persistence/typeorm/entity/
 import { CounselRecordRepositoryImpl } from '@infrastructure/persistence/typeorm/repository/counsel-record.repository.impl';
 import { ChildProfileEntity } from '@infrastructure/persistence/typeorm/entity/child-profile.entity';
 import { OpenAIClient } from '@infrastructure/external/openai.client';
+import { UploadModule } from '@presentation/upload/upload.module';
 import { BImpactInstitutionController } from './b-impact-institution.controller';
 
 @Module({
   imports: [
     ConfigModule,
+    UploadModule, // S3Service 사용 (통합보고서 Presigned URL)
     TypeOrmModule.forFeature([
       VoucherLinkageEntity,
       CounselRequestEntity,
