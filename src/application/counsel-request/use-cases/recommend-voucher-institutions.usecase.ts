@@ -123,21 +123,9 @@ export class RecommendVoucherInstitutionsUseCase {
       );
     }
 
-    // 7. B-IMPACT 기관이 1개라도 있으면 B-IMPACT만, 없으면 일반기관만
-    let bImpactInstitutions: BImpactVoucherInstitutionEntity[];
-    let commonInstitutions: CommonVoucherInstitutionEntity[];
-
-    if (filteredBImpact.length > 0) {
-      // 적합한 B-IMPACT 기관 존재 → B-IMPACT만 추천
-      bImpactInstitutions = filteredBImpact.length <= 2
-        ? filteredBImpact
-        : filteredBImpact.slice(0, 3);
-      commonInstitutions = [];
-    } else {
-      // 적합한 B-IMPACT 기관 없음 → 일반기관만 추천
-      bImpactInstitutions = [];
-      commonInstitutions = filteredCommon.slice(0, 3);
-    }
+    // 7. B-IMPACT 기관과 일반기관 모두 추천 (각각 최대 3개)
+    const bImpactInstitutions = filteredBImpact.slice(0, 3);
+    const commonInstitutions = filteredCommon.slice(0, 3);
 
     // 8. OpenAI 추천 사유 생성
     const allInstitutions = [
