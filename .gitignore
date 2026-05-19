@@ -41,3 +41,6 @@ lerna-debug.log*
 
 # Docker
 docker-compose.override.yml
+.next/
+.serena/
+.yarn/
